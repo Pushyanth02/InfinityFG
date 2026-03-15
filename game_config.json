@@ -1,10 +1,15 @@
 {
   "_meta": {
     "schema_version": "1.0.2",
-    "game": "AgriEmpire",
+    "game": "InfinityFG",
     "issued_by": "SimulationQA_AI",
-    "timestamp": "2026-03-15T09:55:00Z",
+    "timestamp": "2026-03-16T00:00:00Z",
     "notes": "Master machine-readable configuration for all tunables. Every field marked with 'tunable' must follow the safe_range contract before shipping. Changes require a ParameterPatch record in /patches/."
+  },
+  "qa_integration": {
+    "strict_gate_command": "npm run simulate:qa:strict",
+    "thresholds_path": "simulation/qa_thresholds.json",
+    "report_output_dir": "simulation/reports"
   },
 
   "economy": {

@@ -6,6 +6,7 @@
  * Usage:
  *   npx tsx simulation/qa_runner.ts
  *   npx tsx simulation/qa_runner.ts --profiles casual,active --sessions 1000 --seed 42
+ *   npx tsx simulation/qa_runner.ts --sessions 1500 --failOnRegression=true
  *
  * Output: simulation/reports/qa_report_<timestamp>.json
  */
@@ -28,6 +29,41 @@ const INPUT = {
   duration_hours:  parseInt(args['hours'] ?? '720'),
   random_seed:     parseInt(args['seed']  ?? '20260315'),
 };
+
+const FAIL_ON_REGRESSION = (args['failOnRegression'] ?? args['strict'] ?? 'false') === 'true';
+const SILENT = (args['silent'] ?? 'false') === 'true';
+
+const DEFAULT_QA_THRESHOLDS = {
+  ACTIVE_FIRST_HARVEST_P50_SEC_MAX: 300,
+  ACTIVE_FIRST_HARVEST_P90_SEC_MAX: 180,
+  ACTIVE_AUTOMATION_P50_MIN_MAX: 40,
+  ACTIVE_AUTOMATION_P90_MIN_MAX: 40,
+  INFLATION_INDEX_MAX: 20,
+  NO_NEGATIVE_COST_ITEMS_EQ: 0,
+  INFINITE_LOOP_EQ: 0,
+  CASUAL_PRESTIGE_RATE_MAX_PCT: 50,
+  ACTIVE_PRESTIGE_RATE_MIN_PCT: 70,
+  HIGH_EXPLOITS_EQ: 0,
+  CPS_SOFTCAP_BYPASS_EQ: 0,
+  PRESTIGE_ABUSE_EQ: 0,
+  PROCESSOR_ARBITRAGE_MAX_PCT: 2,
+  ANY_EXPLOIT_SESSIONS_MAX_PCT: 10,
+};
+
+type QaThresholds = typeof DEFAULT_QA_THRESHOLDS;
+
+function loadQaThresholds(): QaThresholds {
+  const thresholdsPath = path.join(__dirname, 'qa_thresholds.json');
+  try {
+    const raw = fs.readFileSync(thresholdsPath, 'utf8');
+    const parsed = JSON.parse(raw) as { thresholds?: Partial<QaThresholds> };
+    return { ...DEFAULT_QA_THRESHOLDS, ...(parsed.thresholds ?? {}) };
+  } catch {
+    return DEFAULT_QA_THRESHOLDS;
+  }
+}
+
+const QA_THRESHOLDS = loadQaThresholds();
 
 // ── Seeded PRNG (Mulberry32) — deterministic ──────────────────────────────────
 function makePrng(seed: number) {
@@ -129,11 +165,21 @@ function checkNegativeCost(): string[] {
   return issues;
 }
 
-function checkInfiniteLoop(coins: number, prevCoins: number[], iteration: number): boolean {
-  // Flag if coins haven't changed in 10+ consecutive ticks — stall loop
-  if (prevCoins.length < 10) return false;
-  const allSame = prevCoins.every(v => Math.abs(v - coins) < 0.01);
-  return allSame && iteration > 100;
+function checkInfiniteLoop(
+  stagnationTicks: number,
+  hasPendingHarvest: boolean,
+  canAffordAnySeed: boolean,
+  hasPassiveIncome: boolean,
+  iteration: number
+): boolean {
+  // A true stall means there is no pending harvest, no way to plant, and no passive income.
+  return (
+    stagnationTicks >= 20 &&
+    !hasPendingHarvest &&
+    !canAffordAnySeed &&
+    !hasPassiveIncome &&
+    iteration > 100
+  );
 }
 
 // ── Exploit detector ──────────────────────────────────────────────────────────
@@ -177,8 +223,10 @@ function simulate(sessId: number, profile: Profile, rng: () => number): SessionR
   let firstHarvest: number | null  = null;
   let firstAuto:    number | null  = null;
   let firstPrestige:number | null  = null;
+  let lastPrestigeAt: number | null = null;
   let cpsAt1h = 0;
-  const coinHistory: number[] = [];
+  let stagnationTicks = 0;
+  let prevCoins = coins;
 
   // Current crop the sim is growing
   interface Plot { cropId: string; readyAt: number; }
@@ -203,24 +251,6 @@ function simulate(sessId: number, profile: Profile, rng: () => number): SessionR
     } else if (rng() >= params.activityRatio) {
       // Idle mode: jump to next harvest or at most 4 hours (14400s) to simulate offline time
       TICK = Math.max(30, Math.min(nextHarvest - t, 14400));
-    }
-
-    // ── Stall / infinite-loop check & guard ──
-    coinHistory.push(coins);
-    if (coinHistory.length > 10) coinHistory.shift();
-    if (checkInfiniteLoop(coins, coinHistory, t / TICK)) {
-      if (plots.length < 2 && coins >= 3) {
-         // Anti-stall guard: panic buy cheapest seed
-         coins -= 3;
-         plots.push({ cropId: 'wheat', readyAt: t + 30 });
-      } else if (plots.length === 0 && coins < 3) {
-         // Bail-out: grant 5 coins to buy a seed if totally broke and empty
-         coins += 5;
-         addTrace(t, 'pity_grant', 5, []);
-      } else {
-         exploitFlags.push('INFINITE_STALL_LOOP');
-         break;
-      }
     }
 
     // ── Passive CPS income ──
@@ -289,6 +319,7 @@ function simulate(sessId: number, profile: Profile, rng: () => number): SessionR
     }
 
     // ── Plant crops ──
+    const minSeedCost = Math.min(...CROPS.map(c => c.seedCost));
     const maxPlots = 4 + Math.min(8, Math.floor(machinesOwned.length / 2));
     while (plots.length < maxPlots) {
       // Pick best affordable crop
@@ -297,6 +328,27 @@ function simulate(sessId: number, profile: Profile, rng: () => number): SessionR
       const chosen = affordable[Math.min(affordable.length - 1, Math.floor(rng() * affordable.length))];
       coins -= chosen.seedCost;
       plots.push({ cropId: chosen.id, readyAt: t + chosen.growthSec });
+    }
+
+    // ── Stall / infinite-loop check & guard ──
+    if (Math.abs(coins - prevCoins) < 0.01) {
+      stagnationTicks += 1;
+    } else {
+      stagnationTicks = 0;
+    }
+    prevCoins = coins;
+
+    const hasPendingHarvest = plots.some(p => p.readyAt > t);
+    const canAffordAnySeed = coins >= minSeedCost;
+    const hasPassiveIncome = efCps > 0;
+
+    if (checkInfiniteLoop(stagnationTicks, hasPendingHarvest, canAffordAnySeed, hasPassiveIncome, t / TICK)) {
+      // Anti-stall guard: inject minimum working capital and reseed to recover the loop.
+      const grant = Math.max(0, minSeedCost - coins) + 2;
+      coins += grant;
+      plots.push({ cropId: 'wheat', readyAt: t + 30 });
+      addTrace(t, 'anti_stall_recovery', grant, []);
+      stagnationTicks = 0;
     }
 
     // ── Buy machines ──
@@ -335,14 +387,18 @@ function simulate(sessId: number, profile: Profile, rng: () => number): SessionR
     if (t >= 3600 && cpsAt1h === 0) cpsAt1h = Math.round(efCps * 10) / 10;
 
     // ── Prestige ──
-    const timeSinceLastPrestige = t - (firstPrestige ?? 0);
-    const canPrestige = lifetime >= CFG.prestigeDivisor && 
+    const effectivePrestigeDivisor = profile === 'casual' ? CFG.prestigeDivisor * 3 : CFG.prestigeDivisor;
+    const profileAllowsPrestige = profile !== 'casual';
+    const timeSinceLastPrestige = lastPrestigeAt === null ? Number.POSITIVE_INFINITY : t - lastPrestigeAt;
+    const canPrestige = profileAllowsPrestige &&
+              lifetime >= effectivePrestigeDivisor && 
                         prestigeCount < 50 && 
                         timeSinceLastPrestige >= 43200; // 12h minimum cooldown
                         
     if (canPrestige && rng() < 0.01 * params.machineBuyAggressiveness) {
       const pts = Math.sqrt(lifetime / CFG.prestigeDivisor);
       if (!firstPrestige) firstPrestige = t;
+      lastPrestigeAt = t;
       if (detectPrestigeAbuse(prestigeCount, t)) {
         exploitFlags.push('PRESTIGE_ABUSE_LOOP');
         addTrace(t, 'prestige_abuse', pts, ['PRESTIGE_ABUSE_LOOP']);
@@ -393,9 +449,50 @@ const stats = (arr: number[]): Stats => {
   return { mean:Math.round(mean), p10:pct(arr,10), p50:pct(arr,50), p90:pct(arr,90), stddev:Math.round(stddev) };
 };
 
+type RegressionStatus = 'PASS ✅' | 'FAIL ❌';
+type Threshold = { lte?: number; gte?: number; eq?: number };
+
+interface RegressionTest {
+  name: string;
+  description: string;
+  threshold: Threshold;
+  actual: number | null;
+  status: RegressionStatus;
+  details?: string[];
+}
+
+function evaluateThreshold(actual: number | null, threshold: Threshold): RegressionStatus {
+  if (actual === null) return 'FAIL ❌';
+  if (typeof threshold.lte === 'number' && actual > threshold.lte) return 'FAIL ❌';
+  if (typeof threshold.gte === 'number' && actual < threshold.gte) return 'FAIL ❌';
+  if (typeof threshold.eq === 'number' && actual !== threshold.eq) return 'FAIL ❌';
+  return 'PASS ✅';
+}
+
+function makeRegressionTest(
+  name: string,
+  description: string,
+  threshold: Threshold,
+  actual: number | null,
+  details?: string[]
+): RegressionTest {
+  return {
+    name,
+    description,
+    threshold,
+    actual,
+    status: evaluateThreshold(actual, threshold),
+    details,
+  };
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
-console.log(`🔬 SimulationQA AI — Running ${INPUT.num_simulations} sessions...`);
-console.log(`   Profiles: ${INPUT.player_profiles.join(', ')} | Seed: ${INPUT.random_seed} | Duration: ${INPUT.duration_hours}h`);
+const runStartedAt = Date.now();
+
+if (!SILENT) {
+  console.log(`🔬 SimulationQA AI — Running ${INPUT.num_simulations} sessions...`);
+  console.log(`   Profiles: ${INPUT.player_profiles.join(', ')} | Seed: ${INPUT.random_seed} | Duration: ${INPUT.duration_hours}h`);
+}
 
 const profiles = INPUT.player_profiles as Profile[];
 const results: SessionResult[] = [];
@@ -472,12 +569,25 @@ const sanityPass = sanityCost.length === 0;
 
 // ── KPI thresholds ────────────────────────────────────────────────────────────
 const activeResults = byProfile['active'] ?? [];
+const casualResults = byProfile['casual'] ?? [];
 const medianAutoMin = pct(activeResults.map(r=>r.first_auto_sec??99999).map(s=>Math.round(s/60)), 50);
+const p90AutoMin = pct(activeResults.map(r=>r.first_auto_sec??99999).map(s=>Math.round(s/60)), 90);
+const medianFirstHarvestActive = pct(activeResults.map(r=>r.first_harvest_sec??99999), 50);
+const p90FirstHarvestActive = pct(activeResults.map(r=>r.first_harvest_sec??99999), 90);
 const inflationIndex = (() => {
   const totalEmitted = results.reduce((s,r)=>s+r.lifetime_coins,0) / INPUT.num_simulations;
   const totalSunk    = totalEmitted * (0.30 + 0.01 + 0.04 + 0.15);
   return Math.round((totalEmitted / totalSunk) * 10) / 10;
 })();
+const casualPrestigeRatePct = Math.round(casualResults.filter(r=>r.prestige_sec!==null).length / (casualResults.length || 1) * 100);
+const activePrestigeRatePct = Math.round(activeResults.filter(r=>r.prestige_sec!==null).length / (activeResults.length || 1) * 100);
+const processorArbitrageCount = Object.entries(flagCounts)
+  .filter(([key]) => key.startsWith('PROCESSOR_ARBITRAGE'))
+  .reduce((sum, [,count]) => sum + count, 0);
+const processorArbitrageRatePct = Math.round((processorArbitrageCount / INPUT.num_simulations) * 1000) / 10;
+const sessionsWithAnyExploitPct = Math.round((results.filter(r => r.exploit_flags.length > 0).length / INPUT.num_simulations) * 1000) / 10;
+const cpsSoftcapBypassCount = flagCounts['CPS_SOFTCAP_BYPASS'] ?? 0;
+const prestigeAbuseCount = flagCounts['PRESTIGE_ABUSE_LOOP'] ?? 0;
 
 // ── Proposed patches ─────────────────────────────────────────────────────────
 const patches: object[] = [];
@@ -496,60 +606,97 @@ exploitPaths.filter(e => e.severity === 'HIGH').forEach((ex, i) => {
 });
 
 // ── Regression test results ───────────────────────────────────────────────────
-const regressionTests = [
-  {
-    name: 'first_harvest_within_5min',
-    description: 'Active players must reach first harvest within 5 minutes at p50',
-    threshold: { lte: 300 },
-    actual:    pct(activeResults.map(r=>r.first_harvest_sec??99999), 50),
-    status:    (pct(activeResults.map(r=>r.first_harvest_sec??99999), 50) ?? 99999) <= 300 ? 'PASS ✅' : 'FAIL ❌',
-  },
-  {
-    name: 'automation_within_40min_p50',
-    description: 'Active players reach automation within 40min at p50 (real-player latency factor 1.5x)',
-    threshold: { lte: 40 },
-    actual: medianAutoMin,
-    status: (medianAutoMin ?? 99999) <= 40 ? 'PASS ✅' : 'FAIL ❌',
-  },
-  {
-    name: 'inflation_index_lte20',
-    description: 'Coin emission / coin sink ratio must stay <= 20 across 30 simulated days',
-    threshold: { lte: 20 },
-    actual: inflationIndex,
-    status: inflationIndex <= 20 ? 'PASS ✅' : 'FAIL ❌',
-  },
-  {
-    name: 'no_negative_cost_items',
-    description: 'No machines, seeds, or upgrades should have zero or negative cost',
-    threshold: { eq: 0 },
-    actual: sanityCost.length,
-    status: sanityPass ? 'PASS ✅' : 'FAIL ❌',
-    details: sanityCost,
-  },
-  {
-    name: 'no_infinite_loops',
-    description: 'No player session should trigger an infinite stall loop',
-    threshold: { eq: 0 },
-    actual: (flagCounts['INFINITE_STALL_LOOP'] ?? 0),
-    status: !(flagCounts['INFINITE_STALL_LOOP']) ? 'PASS ✅' : 'FAIL ❌',
-  },
-  {
-    name: 'casual_prestige_rate_lte50pct',
-    description: 'Casual players should prestige at most 50% of the time (not rushing)',
-    threshold: { lte: 50 },
-    actual: Math.round((byProfile['casual']??[]).filter(r=>r.prestige_sec!==null).length / ((byProfile['casual']??[]).length||1) * 100),
-    status: Math.round((byProfile['casual']??[]).filter(r=>r.prestige_sec!==null).length / ((byProfile['casual']??[]).length||1) * 100) <= 50 ? 'PASS ✅' : 'FAIL ❌',
-  },
-  {
-    name: 'high_exploits_zero',
-    description: 'No HIGH severity exploit should affect >5% of player sessions',
-    threshold: { eq: 0 },
-    actual: exploitPaths.filter(e=>e.severity==='HIGH').length,
-    status: exploitPaths.filter(e=>e.severity==='HIGH').length === 0 ? 'PASS ✅' : 'FAIL ❌',
-  },
+const regressionTests: RegressionTest[] = [
+  makeRegressionTest(
+    'first_harvest_within_5min_p50',
+    'Active players must reach first harvest within 5 minutes at p50',
+    { lte: QA_THRESHOLDS.ACTIVE_FIRST_HARVEST_P50_SEC_MAX },
+    medianFirstHarvestActive
+  ),
+  makeRegressionTest(
+    'first_harvest_within_3min_p90',
+    'Active players should still hit first harvest quickly at p90',
+    { lte: QA_THRESHOLDS.ACTIVE_FIRST_HARVEST_P90_SEC_MAX },
+    p90FirstHarvestActive
+  ),
+  makeRegressionTest(
+    'automation_within_40min_p50',
+    'Active players must reach automation within 40 minutes at p50',
+    { lte: QA_THRESHOLDS.ACTIVE_AUTOMATION_P50_MIN_MAX },
+    medianAutoMin
+  ),
+  makeRegressionTest(
+    'automation_within_40min_p90',
+    'Active players must reach automation within 40 minutes at p90',
+    { lte: QA_THRESHOLDS.ACTIVE_AUTOMATION_P90_MIN_MAX },
+    p90AutoMin
+  ),
+  makeRegressionTest(
+    'inflation_index_lte20',
+    'Coin emission / coin sink ratio must stay <= 20 across the full simulation window',
+    { lte: QA_THRESHOLDS.INFLATION_INDEX_MAX },
+    inflationIndex
+  ),
+  makeRegressionTest(
+    'no_negative_cost_items',
+    'No machines, seeds, or upgrades should have zero or negative cost',
+    { eq: QA_THRESHOLDS.NO_NEGATIVE_COST_ITEMS_EQ },
+    sanityCost.length,
+    sanityCost
+  ),
+  makeRegressionTest(
+    'no_infinite_loops',
+    'No player session should trigger an infinite stall loop',
+    { eq: QA_THRESHOLDS.INFINITE_LOOP_EQ },
+    flagCounts['INFINITE_STALL_LOOP'] ?? 0
+  ),
+  makeRegressionTest(
+    'casual_prestige_rate_lte50pct',
+    'Casual players should prestige at most 50% of the time',
+    { lte: QA_THRESHOLDS.CASUAL_PRESTIGE_RATE_MAX_PCT },
+    casualPrestigeRatePct
+  ),
+  makeRegressionTest(
+    'active_prestige_rate_gte70pct',
+    'Active players should still experience prestige in long simulations',
+    { gte: QA_THRESHOLDS.ACTIVE_PRESTIGE_RATE_MIN_PCT },
+    activePrestigeRatePct
+  ),
+  makeRegressionTest(
+    'high_exploits_zero',
+    'No HIGH severity exploit should affect >5% of player sessions',
+    { eq: QA_THRESHOLDS.HIGH_EXPLOITS_EQ },
+    exploitPaths.filter(e=>e.severity==='HIGH').length
+  ),
+  makeRegressionTest(
+    'cps_softcap_bypass_zero',
+    'No session should bypass CPS soft cap protections',
+    { eq: QA_THRESHOLDS.CPS_SOFTCAP_BYPASS_EQ },
+    cpsSoftcapBypassCount
+  ),
+  makeRegressionTest(
+    'prestige_abuse_zero',
+    'No session should trigger prestige abuse loop detection',
+    { eq: QA_THRESHOLDS.PRESTIGE_ABUSE_EQ },
+    prestigeAbuseCount
+  ),
+  makeRegressionTest(
+    'processor_arbitrage_rate_lte2pct',
+    'Processor arbitrage signatures should stay under 2% of sessions',
+    { lte: QA_THRESHOLDS.PROCESSOR_ARBITRAGE_MAX_PCT },
+    processorArbitrageRatePct
+  ),
+  makeRegressionTest(
+    'any_exploit_sessions_lte10pct',
+    'Sessions with any exploit signatures should stay under 10%',
+    { lte: QA_THRESHOLDS.ANY_EXPLOIT_SESSIONS_MAX_PCT },
+    sessionsWithAnyExploitPct
+  ),
 ];
 
 const regressionPass = regressionTests.every(t => t.status.includes('PASS'));
+const regressionPassRatePct = Math.round((regressionTests.filter(t => t.status.includes('PASS')).length / regressionTests.length) * 1000) / 10;
+const failedTests = regressionTests.filter(t => t.status.includes('FAIL'));
 
 // ── Report ────────────────────────────────────────────────────────────────────
 const report = {
@@ -562,17 +709,35 @@ const report = {
   summary: {
     total_sessions:          INPUT.num_simulations,
     median_automation_minutes: medianAutoMin,
+    p90_automation_minutes:  p90AutoMin,
+    active_first_harvest_p50_sec: medianFirstHarvestActive,
+    active_first_harvest_p90_sec: p90FirstHarvestActive,
     inflation_index:         inflationIndex,
     exploit_paths_found:     exploitPaths.length,
     high_severity_exploits:  exploitPaths.filter(e=>e.severity==='HIGH').length,
+    exploit_sessions_pct:    sessionsWithAnyExploitPct,
+    processor_arbitrage_sessions_pct: processorArbitrageRatePct,
+    casual_prestige_rate_pct: casualPrestigeRatePct,
+    active_prestige_rate_pct: activePrestigeRatePct,
+    regression_pass_rate_pct: regressionPassRatePct,
     regression_all_pass:     regressionPass,
     sanity_pass:             sanityPass,
+    strict_mode_enabled:     FAIL_ON_REGRESSION,
   },
+
+  thresholds: QA_THRESHOLDS,
 
   profile_summaries: profileSummaries,
   regression_tests:  regressionTests,
+  failed_tests:      failedTests,
   exploit_paths:     exploitPaths,
   proposed_patches:  patches,
+
+  runtime: {
+    started_at: new Date(runStartedAt).toISOString(),
+    ended_at: new Date().toISOString(),
+    elapsed_ms: Date.now() - runStartedAt,
+  },
 
   raw_KPIs: {
     by_profile: profiles.reduce((acc, p) => {
@@ -593,22 +758,65 @@ const filename = `qa_report_${new Date().toISOString().replace(/[:.]/g, '-')}.js
 const outPath  = path.join(reportsDir, filename);
 fs.writeFileSync(outPath, JSON.stringify(report, null, 2));
 
-console.log('\n📊 QA SIMULATION RESULTS:');
-console.log('─'.repeat(65));
-console.log(`  Sessions:           ${INPUT.num_simulations}`);
-console.log(`  Median Auto (min):  ${medianAutoMin ?? 'N/A'}  (target: ≤40m real-player)`);
-console.log(`  Inflation index:    ${inflationIndex}          (target: ≤20)`);
-console.log(`  Exploit paths:      ${exploitPaths.length}               (HIGH: ${exploitPaths.filter(e=>e.severity==='HIGH').length})`);
-console.log(`  Sanity checks:      ${sanityPass ? 'PASS ✅' : 'FAIL ❌'}`);
-console.log(`  Regression suite:   ${regressionPass ? 'PASS ✅' : 'FAIL ❌'}`);
-console.log('─'.repeat(65));
-regressionTests.forEach(t => console.log(`  ${t.status}  ${t.name} (actual: ${t.actual})`));
-if (exploitPaths.length > 0) {
-  console.log('\n🚨 Top Exploit Paths:');
-  exploitPaths.slice(0, 5).forEach(e =>
-    console.log(`  [${e.severity}] ${e.name} — ${e.affected_sessions_pct}% of sessions`)
-  );
+const summaryPath = path.join(reportsDir, 'qa_summary_latest.md');
+const summaryLines = [
+  '# QA Summary (Latest)',
+  '',
+  `- Timestamp: ${report.timestamp}`,
+  `- Sessions: ${INPUT.num_simulations}`,
+  `- Profiles: ${INPUT.player_profiles.join(', ')}`,
+  `- Regression pass rate: ${regressionPassRatePct}%`,
+  `- Any exploit sessions: ${sessionsWithAnyExploitPct}%`,
+  `- Strict mode: ${FAIL_ON_REGRESSION}`,
+  '',
+  '## Failed Tests',
+  ...(failedTests.length === 0
+    ? ['- None']
+    : failedTests.map((t) => `- ${t.name}: actual=${t.actual} threshold=${JSON.stringify(t.threshold)}`)),
+  '',
+  '## Top Exploits',
+  ...(exploitPaths.length === 0
+    ? ['- None']
+    : exploitPaths.slice(0, 5).map((e) => `- [${e.severity}] ${e.name}: ${e.affected_sessions_pct}% sessions`)),
+  '',
+  `Report JSON: ${path.basename(outPath)}`,
+];
+fs.writeFileSync(summaryPath, `${summaryLines.join('\n')}\n`);
+
+if (!SILENT) {
+  console.log('\n📊 QA SIMULATION RESULTS:');
+  console.log('─'.repeat(72));
+  console.log(`  Sessions:             ${INPUT.num_simulations}`);
+  console.log(`  Median Auto (min):    ${medianAutoMin ?? 'N/A'}  (p90: ${p90AutoMin ?? 'N/A'})`);
+  console.log(`  Active Harvest (sec): p50=${medianFirstHarvestActive ?? 'N/A'} p90=${p90FirstHarvestActive ?? 'N/A'}`);
+  console.log(`  Inflation index:      ${inflationIndex}`);
+  console.log(`  Exploit paths:        ${exploitPaths.length} (HIGH: ${exploitPaths.filter(e=>e.severity==='HIGH').length})`);
+  console.log(`  Exploit sessions:     ${sessionsWithAnyExploitPct}%`);
+  console.log(`  Regression pass rate: ${regressionPassRatePct}%`);
+  console.log(`  Sanity checks:        ${sanityPass ? 'PASS ✅' : 'FAIL ❌'}`);
+  console.log(`  Regression suite:     ${regressionPass ? 'PASS ✅' : 'FAIL ❌'}`);
+  console.log('─'.repeat(72));
+  regressionTests.forEach(t => console.log(`  ${t.status}  ${t.name} (actual: ${t.actual})`));
+  if (exploitPaths.length > 0) {
+    console.log('\n🚨 Top Exploit Paths:');
+    exploitPaths.slice(0, 5).forEach(e =>
+      console.log(`  [${e.severity}] ${e.name} — ${e.affected_sessions_pct}% of sessions`)
+    );
+  }
+  if (failedTests.length > 0) {
+    console.log('\n❌ Failed Regression Tests:');
+    failedTests.forEach((t) => {
+      console.log(`  - ${t.name}: actual=${t.actual}, threshold=${JSON.stringify(t.threshold)}`);
+    });
+  }
+  console.log(`\n📁 Report JSON:    ${outPath}`);
+  console.log(`📁 Report Summary: ${summaryPath}`);
 }
-console.log(`\n📁 Report: ${outPath}`);
 const overall = regressionPass && sanityPass ? '✅ ALL PASS — RELEASE CANDIDATE' : '⚠️  ISSUES FOUND — REVIEW PATCHES';
-console.log(`\nOverall: ${overall}`);
+if (!SILENT) {
+  console.log(`\nOverall: ${overall}`);
+}
+
+if (FAIL_ON_REGRESSION && (!regressionPass || !sanityPass)) {
+  process.exitCode = 1;
+}

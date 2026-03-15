@@ -3,7 +3,9 @@ import type { StateCreator } from 'zustand';
 import type { GameState, AutomationSlice } from '../../types/game';
 import { AUGMENTED_MACHINES } from '../../data/machine_upgrades';
 import { WORKERS } from '../../data/world';
+import { getVillageFolkById } from '../../data/villageFolk';
 import { getMachineCost, getUpgradeCost, getWorkerCost } from '../../engine/mechanics';
+import { evaluateRequirement } from '../../services/unlockService';
 
 export const createAutomationSlice: StateCreator<
   GameState,
@@ -68,12 +70,35 @@ export const createAutomationSlice: StateCreator<
   },
 
   buyWorker: (workerId) => {
+    const folk = getVillageFolkById(workerId);
     const def = WORKERS.find(w => w.id === workerId);
-    if (!def) return;
+    if (!def && !folk) return;
 
     const { workers, coins } = get();
     const currentCount = workers[workerId] || 0;
-    const cost = getWorkerCost(def.hire_cost, currentCount);
+
+    if (folk) {
+      const isUnlocked = evaluateRequirement(folk.unlockRequirement, {
+        currentChapterId: get().currentChapterId,
+        chapterProgress: get().chapterProgress,
+        lifetimeCoins: get().lifetimeCoins,
+        unlockedSkills: get().unlockedSkills,
+        unlockedRegions: get().unlockedRegions,
+        machines: get().machines,
+        workers: get().workers,
+        harvestTracking: get().harvestTracking,
+        bossDamageTracking: get().bossDamageTracking,
+        regionReputation: get().regionReputation,
+        craftingTracking: get().craftingTracking,
+      });
+      if (!isUnlocked) return;
+
+      if (!folk.repeatable && currentCount > 0) return;
+    }
+
+    const cost = folk
+      ? Math.floor(folk.hireCost * Math.pow(2.2, currentCount))
+      : getWorkerCost(def!.hire_cost, currentCount);
     if (coins < cost) return;
 
     set((state) => ({
@@ -83,5 +108,8 @@ export const createAutomationSlice: StateCreator<
         [workerId]: currentCount + 1
       }
     }));
+
+    // Also create an instance so role/assignment mechanics are active.
+    get().createWorkerInstance(workerId);
   }
 });

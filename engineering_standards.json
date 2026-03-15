@@ -1,8 +1,8 @@
 {
   "schema": "agriempire-engineering-standards/v1",
   "issued_by": "antigravity",
-  "timestamp": "2026-03-15T08:23:07Z",
-  "game": "AgriEmpire",
+  "timestamp": "2026-03-16T00:00:00Z",
+  "game": "InfinityFG",
   "notes": "This document governs how all engineering decisions, outputs, and parameter changes must be structured. Treat this as a contract between Antigravity AI and the product team.",
 
   "standards": {
@@ -92,6 +92,19 @@
       "enforcement": "Code review gate: any new GemShop item must be listed in allowed_gem_purchases. Automated scan for 'coins += gem' patterns.",
       "loc_key": "std.S7.description",
       "default_en": "No pay-to-win. Gems are for cosmetics and convenience only."
+    },
+
+    "S8_strict_qa_release_gate": {
+      "description": "Every release candidate must pass strict regression simulation with npm run simulate:qa:strict before merge to protected branches.",
+      "required_command": "npm run simulate:qa:strict",
+      "required_exit_code": 0,
+      "required_artifacts": [
+        "simulation/reports/qa_report_<timestamp>.json",
+        "simulation/reports/qa_summary_latest.md"
+      ],
+      "enforcement": "CI required-check gate on protected branches.",
+      "loc_key": "std.S8.description",
+      "default_en": "Strict QA simulation must pass before release merge."
     }
   },
 

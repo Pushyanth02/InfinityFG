@@ -10,6 +10,12 @@ export interface WorkerDef {
   hire_cost: number;
   efficiency_bonus: number;
   description: string;
+  assignableTo?: Array<'global_aura' | 'machine' | 'region' | 'plot'>;
+  assignmentBonus?: {
+    machineSpeed?: number;
+    maintenanceReduction?: number;
+    workerBonusBoost?: number;
+  };
 }
 
 export interface RegionDef {
@@ -25,5 +31,33 @@ export interface RegionDef {
 export const WORKERS: WorkerDef[] = workersData as WorkerDef[];
 export const REGIONS: RegionDef[] = regionsData as RegionDef[];
 
+export const WORKER_ROLE_MATRIX: Record<string, {
+  assignableTo: Array<'global_aura' | 'machine' | 'region' | 'plot'>;
+  assignmentBonus: {
+    machineSpeed?: number;
+    maintenanceReduction?: number;
+    workerBonusBoost?: number;
+  };
+}> = {
+  harvester: {
+    assignableTo: ['global_aura', 'machine'],
+    assignmentBonus: { machineSpeed: 0.2 },
+  },
+  mechanic: {
+    assignableTo: ['global_aura', 'machine'],
+    assignmentBonus: { maintenanceReduction: 0.25 },
+  },
+  manager: {
+    assignableTo: ['global_aura'],
+    assignmentBonus: { workerBonusBoost: 0.1 },
+  },
+};
+
 export const getWorker = (id: string) => WORKERS.find(w => w.id === id);
 export const getRegion = (id: string) => REGIONS.find(r => r.id === id);
+
+export const getWorkerRoleConfig = (role: string) =>
+  WORKER_ROLE_MATRIX[role.toLowerCase()] ?? {
+    assignableTo: ['global_aura'] as const,
+    assignmentBonus: {},
+  };

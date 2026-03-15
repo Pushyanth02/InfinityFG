@@ -6,7 +6,11 @@ import { createFarmSlice } from './slices/farmSlice';
 import { createAutomationSlice } from './slices/automationSlice';
 import { createMetaSlice } from './slices/metaSlice';
 import { createStorySlice } from './slices/storySlice';
+import { createTrackingSlice } from './slices/trackingSlice';
+import { createWorkerAssignmentSlice } from './slices/workerAssignmentSlice';
+import { createCraftingSlice } from './slices/craftingSlice';
 import { calculatePlotGrowth, calculateMachineProduction } from '../engine/mechanics';
+import { marketService } from '../services/marketService';
 
 export const useGameStore = create<GameState>()(
   persist(
@@ -16,11 +20,22 @@ export const useGameStore = create<GameState>()(
       ...createAutomationSlice(set, get, ...args),
       ...createMetaSlice(set, get, ...args),
       ...createStorySlice(set, get, ...args),
+      ...createTrackingSlice(set, get, ...args),
+      ...createWorkerAssignmentSlice(set, get, ...args),
+      ...createCraftingSlice(set, get, ...args),
 
       lastTick: Date.now(),
 
       tick: (timestamp: number) => {
-        const { lastTick, plots, machines, workers, unlockedSkills } = get();
+        const {
+          lastTick,
+          plots,
+          machines,
+          workers,
+          unlockedSkills,
+          getGlobalAuraBonus,
+          getMachineBonuses,
+        } = get();
         const delta = (timestamp - lastTick) / 1000;
 
         // 1. Calculate Growth
@@ -37,7 +52,22 @@ export const useGameStore = create<GameState>()(
 
         // 2. Calculate Automation Production
         const { prestigePoints } = get();
-        const coinGain = calculateMachineProduction(machines, workers, delta, unlockedSkills, prestigePoints);
+        const coinGain = calculateMachineProduction(
+          machines,
+          workers,
+          delta,
+          unlockedSkills,
+          prestigePoints,
+          {
+            getGlobalAuraBonus,
+            getMachineBonuses,
+          }
+        );
+
+        // Update market prices at most once per minute.
+        if (marketService.getTimeSinceUpdate() >= 60_000) {
+          marketService.updatePrices();
+        }
 
         set((state) => ({
           lastTick: timestamp,
@@ -48,6 +78,7 @@ export const useGameStore = create<GameState>()(
 
         // 3. Check quest progress on every tick (for earn/deploy quests)
         get().checkQuestProgress();
+        get().processCraftingQueue(timestamp);
       }
     }),
     {

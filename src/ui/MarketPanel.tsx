@@ -1,11 +1,19 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { fmt } from '../store/gameStore';
 import { CROPS } from '../data/crops';
 
 const weatherEmojis = ['☀️', '🌤️', '⛅', '🌧️', '🌈'];
 
 const MarketPanel: React.FC = () => {
-  const weatherIdx = Math.floor(Date.now() / 60000) % weatherEmojis.length;
+  const [weatherIdx, setWeatherIdx] = useState(0);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setWeatherIdx((prev) => (prev + 1) % weatherEmojis.length);
+    }, 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
+
   const weatherEmoji = weatherEmojis[weatherIdx];
 
   return (

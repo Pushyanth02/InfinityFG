@@ -1,8 +1,14 @@
 import { CROPS } from '../data/crops';
 import { AUGMENTED_MACHINES } from '../data/machine_upgrades';
 import { WORKERS } from '../data/world';
-import { SKILL_TREE } from '../data/skills';
+import { SKILL_TREE, getTotalSkillBonus } from '../data/skills';
 import type { PlayerMachine } from '../types/base';
+import {
+  calculateProductionMultiplier,
+  DEFAULT_TUNABLES,
+  type ProductionTunables,
+} from './productionEngine';
+import type { MachineWorkerBonus } from '../types/worker';
 
 /**
  * Calculates a total multiplier from a set of unlocked skills for a specific bonus type.
@@ -60,18 +66,32 @@ export const calculateMachineProduction = (
   workers: Record<string, number>,
   delta: number,
   unlockedSkills: string[] = [],
-  prestigePoints: number = 0
+  prestigePoints: number = 0,
+  options?: {
+    getGlobalAuraBonus?: () => number;
+    getMachineBonuses?: (machineId: string) => MachineWorkerBonus;
+    regionMultiplier?: number;
+    weatherMultiplier?: number;
+    equipmentMultiplier?: number;
+    tunables?: ProductionTunables;
+  }
 ): number => {
   let coinGain = 0;
-  
-  const workerBonus = 1 + Object.entries(workers).reduce((acc, [id, count]) => {
+
+  const fallbackAura = Object.entries(workers).reduce((acc, [id, count]) => {
     const wDef = WORKERS.find(w => w.id === id);
     return acc + (wDef ? wDef.efficiency_bonus * count : 0);
   }, 0);
+  const globalAuraBonus = options?.getGlobalAuraBonus?.() ?? fallbackAura;
 
-  const machineSpeedBonus = getSkillMultiplier(unlockedSkills, 'machine_speed');
   const sellMultiplier = getSkillMultiplier(unlockedSkills, 'sell_multiplier');
-  const prestigeBonus = 1 + (prestigePoints || 0) * 0.1;
+  const machineSpeedSkill = getTotalSkillBonus(unlockedSkills, 'machine_speed');
+  const machineYieldSkill = getTotalSkillBonus(unlockedSkills, 'machine_yield');
+
+  const regionMultiplier = options?.regionMultiplier ?? 1;
+  const weatherMultiplier = options?.weatherMultiplier ?? 1;
+  const equipmentMultiplier = options?.equipmentMultiplier ?? 1;
+  const tunables = options?.tunables ?? DEFAULT_TUNABLES;
 
   // Optimize: Pre-map definitions for O(1) lookup
   const machineDefs = new Map(AUGMENTED_MACHINES.map(m => [m.id, m]));
@@ -79,19 +99,36 @@ export const calculateMachineProduction = (
   machines.forEach(pm => {
     const def = machineDefs.get(pm.machineId);
     if (def && !pm.isBroken) {
-      // Base production rate from definition
-      let cps = (def.productionRate.cropsPerMin / 60) * machineSpeedBonus;
-      
-      // Apply Speed Upgrade: Each level adds 10% speed
-      cps *= (1 + pm.level.speed * 0.1);
-      
-      // Base value per crop: based on tier
-      let seedValue = 10 * Math.pow(1.5, def.tier) * sellMultiplier * prestigeBonus;
-      
-      // Apply Yield Upgrade: Each level adds 15% yield
-      seedValue *= (1 + pm.level.yield * 0.15);
-      
-      coinGain += cps * pm.count * delta * seedValue * workerBonus;
+      // Base production rate from definition and direct machine upgrades.
+      const baseCps = (def.productionRate.cropsPerMin / 60) * (1 + pm.level.speed * 0.1);
+
+      // Base value per crop before dynamic multipliers.
+      const baseSeedValue = 10 * Math.pow(1.5, def.tier);
+      const yieldUpgradeBonus = pm.level.yield * 0.15;
+
+      // Prefer assignment bonus by instance ID, fallback to machine type ID.
+      const assignmentBonusByInstance = options?.getMachineBonuses?.(pm.id);
+      const assignmentBonusByType = options?.getMachineBonuses?.(pm.machineId);
+      const assignmentBonus = assignmentBonusByInstance ?? assignmentBonusByType;
+
+      const machineSpeedAssignment = assignmentBonus?.speedMultiplier ?? 0;
+      const machineYieldAssignment = assignmentBonus?.yieldMultiplier ?? 0;
+
+      const coinsPerSecondPerMachine = calculateProductionMultiplier(
+        {
+          baseValue: baseCps * baseSeedValue * sellMultiplier,
+          globalAuraBonus,
+          assignmentBonus: machineSpeedAssignment + machineYieldAssignment,
+          skillBonuses: [machineSpeedSkill, machineYieldSkill, yieldUpgradeBonus],
+          prestigePoints,
+          regionMultiplier,
+          weatherMultiplier,
+          equipmentMultiplier,
+        },
+        tunables
+      );
+
+      coinGain += coinsPerSecondPerMachine * pm.count * delta;
     }
   });
 

@@ -1,8 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useGameStore, fmt } from '../store/gameStore';
 import { CHAPTERS } from '../data/chapters';
 import { CROP_WEAPONS } from '../data/cropWeapons';
 import { CROPS } from '../data/crops';
+import { getVisibility } from '../services/unlockService';
+import { marketService, type MarketPrice } from '../services/marketService';
 // Use the JSON achievement shape from narrative_content.json
 import narrativeData from '../data_exports/narrative_content.json';
 
@@ -40,12 +42,66 @@ const StoryBookPanel: React.FC = () => {
     ownedWeapons, equippedWeaponId,
     buyWeapon, equipWeapon,
     coins, unlockedCrops,
+    lifetimeCoins,
+    unlockedSkills,
+    unlockedRegions,
+    machines,
+    workers,
+    harvestTracking,
+    bossDamageTracking,
+    regionReputation,
+    craftingTracking,
+    unlockedFeatures,
+    pendingUnlocks,
+    futureUnlocksPreview,
   } = useGameStore();
+
+  const [marketPrices, setMarketPrices] = useState<MarketPrice[]>(() => marketService.getAllPrices());
+  const [weatherIdx, setWeatherIdx] = useState(0);
 
   const chapter = CHAPTERS.find(c => c.id === currentChapterId) ?? CHAPTERS[0];
   const progress = chapterProgress[chapter.id] ?? { bossHp: chapter.boss.maxHp, questsComplete: [], isDefeated: false };
   const bossHpPct = Math.max(0, (progress.bossHp / chapter.boss.maxHp) * 100);
-  const weatherIdx = useMemo(() => Math.floor(Date.now() / 60000) % weatherEmojis.length, []);
+
+  const unlockState = useMemo(() => ({
+    currentChapterId,
+    chapterProgress,
+    lifetimeCoins,
+    unlockedSkills,
+    unlockedRegions,
+    machines,
+    workers,
+    harvestTracking,
+    bossDamageTracking,
+    regionReputation,
+    craftingTracking,
+  }), [
+    currentChapterId,
+    chapterProgress,
+    lifetimeCoins,
+    unlockedSkills,
+    unlockedRegions,
+    machines,
+    workers,
+    harvestTracking,
+    bossDamageTracking,
+    regionReputation,
+    craftingTracking,
+  ]);
+
+  useEffect(() => {
+    const refreshPrices = () => setMarketPrices(marketService.getAllPrices());
+    refreshPrices();
+    const timer = window.setInterval(refreshPrices, 15_000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setWeatherIdx((prev) => (prev + 1) % weatherEmojis.length);
+    }, 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   return (
     <div className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: 0, maxWidth: 960, margin: '0 auto' }}>
@@ -168,6 +224,34 @@ const StoryBookPanel: React.FC = () => {
               );
             })}
           </div>
+
+          {/* Deterministic progression map */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 'var(--space-sm)' }}>
+            <div className="glass-panel" style={{ padding: 'var(--space-sm)' }}>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: '0.82rem', color: 'var(--green-dark)', marginBottom: 6 }}>Unlocked</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                {unlockedFeatures.slice(0, 8).map((id) => (
+                  <div key={id} className="panel-subtitle">✅ {id}</div>
+                ))}
+              </div>
+            </div>
+            <div className="glass-panel" style={{ padding: 'var(--space-sm)' }}>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: '0.82rem', color: 'var(--amber)', marginBottom: 6 }}>Available Now</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                {pendingUnlocks.slice(0, 8).map((entry) => (
+                  <div key={entry.id} className="panel-subtitle">🟡 {entry.id} {entry.cost ? `(${fmt(entry.cost)} 🪙)` : ''}</div>
+                ))}
+              </div>
+            </div>
+            <div className="glass-panel" style={{ padding: 'var(--space-sm)' }}>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: 6 }}>Future (Locked)</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                {futureUnlocksPreview.slice(0, 8).map((entry) => (
+                  <div key={entry.id} className="panel-subtitle">🔒 {entry.id} — {entry.unlockCondition}</div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
@@ -251,7 +335,16 @@ const StoryBookPanel: React.FC = () => {
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 'var(--space-sm)' }}>
             {CROPS.slice(0, 40).map(crop => {
-              const unlocked = unlockedCrops.includes(crop.id);
+              const visibility = getVisibility(
+                {
+                  requirement: {
+                    all: [{ type: 'chapter_started', chapter: Math.max(1, crop.unlockTier) }],
+                  },
+                  visibility: 'teased',
+                },
+                unlockState
+              );
+              const unlocked = unlockedCrops.includes(crop.id) || visibility === 'unlocked';
               return (
                 <div key={crop.id} className="glass-panel" style={{ padding: 'var(--space-sm)', display: 'flex', flexDirection: 'column', gap: 5, opacity: unlocked ? 1 : 0.4, filter: unlocked ? 'none' : 'grayscale(1)', transition: 'all 0.2s' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -296,7 +389,16 @@ const StoryBookPanel: React.FC = () => {
               <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.85rem', color: 'var(--brown-mid)', whiteSpace: 'nowrap' }}>🌽 Today's Produce Prices</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)' }}>
-              {CROPS.slice(0, 12).map(crop => (
+              {marketPrices.slice(0, 12).map(price => {
+                const crop = CROPS.find((c) => c.id === price.cropId);
+                if (!crop) return null;
+                const trendLabel =
+                  price.trend === 'rising'
+                    ? 'Rising 📈'
+                    : price.trend === 'falling'
+                    ? 'Falling 📉'
+                    : 'Steady ➖';
+                return (
                 <div key={crop.id} className="glass-panel" style={{ padding: 'var(--space-sm) var(--space-md)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <span style={{ fontSize: '1.4rem' }}>{crop.emoji}</span>
@@ -306,11 +408,11 @@ const StoryBookPanel: React.FC = () => {
                     </div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.72rem', color: 'var(--green-dark)', background: 'var(--green-pale)', border: '1.5px solid rgba(74,124,89,0.3)', borderRadius: 'var(--radius-xl)', padding: '2px 8px' }}>High ✅</span>
-                    <div style={{ fontFamily: 'var(--font-main)', fontWeight: 800, fontSize: '0.85rem', color: 'var(--amber)' }}>×1.24</div>
+                    <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.72rem', color: 'var(--green-dark)', background: 'var(--green-pale)', border: '1.5px solid rgba(74,124,89,0.3)', borderRadius: 'var(--radius-xl)', padding: '2px 8px' }}>{trendLabel}</span>
+                    <div style={{ fontFamily: 'var(--font-main)', fontWeight: 800, fontSize: '0.85rem', color: 'var(--amber)' }}>×{price.currentMultiplier.toFixed(2)}</div>
                   </div>
                 </div>
-              ))}
+              )})}
             </div>
           </div>
 

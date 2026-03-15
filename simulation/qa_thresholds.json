@@ -1,0 +1,22 @@
+{
+  "schema": "infinityfg-qa-thresholds/v1",
+  "issued_by": "system",
+  "timestamp": "2026-03-16T00:00:00Z",
+  "notes": "Centralized thresholds consumed by simulation/qa_runner.ts. Adjust carefully and keep values within tested ranges.",
+  "thresholds": {
+    "ACTIVE_FIRST_HARVEST_P50_SEC_MAX": 300,
+    "ACTIVE_FIRST_HARVEST_P90_SEC_MAX": 180,
+    "ACTIVE_AUTOMATION_P50_MIN_MAX": 40,
+    "ACTIVE_AUTOMATION_P90_MIN_MAX": 40,
+    "INFLATION_INDEX_MAX": 20,
+    "NO_NEGATIVE_COST_ITEMS_EQ": 0,
+    "INFINITE_LOOP_EQ": 0,
+    "CASUAL_PRESTIGE_RATE_MAX_PCT": 50,
+    "ACTIVE_PRESTIGE_RATE_MIN_PCT": 70,
+    "HIGH_EXPLOITS_EQ": 0,
+    "CPS_SOFTCAP_BYPASS_EQ": 0,
+    "PRESTIGE_ABUSE_EQ": 0,
+    "PROCESSOR_ARBITRAGE_MAX_PCT": 2,
+    "ANY_EXPLOIT_SESSIONS_MAX_PCT": 10
+  }
+}

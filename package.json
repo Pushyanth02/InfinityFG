@@ -1,14 +1,24 @@
 {
-  "name": "nomad-plasma",
+  "name": "infinityfg",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "InfinityFG farming automation and progression simulator",
   "type": "module",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "build:pipeline": "npx tsx scripts/orchestrator.ts"
+    "build:pipeline": "npx tsx scripts/orchestrator.ts",
+    "simulate:qa": "npx tsx simulation/qa_runner.ts",
+    "simulate:qa:strict": "npx tsx simulation/qa_runner.ts --failOnRegression=true",
+    "simulate:progression": "npx tsx simulation/progression_sim.ts",
+    "simulate:balance": "npx tsx simulation/balance_sim.ts",
+    "simulate:roi": "npx tsx simulation/machine_roi_sim.ts",
+    "validate:system": "npm run lint && npm run build && npm run simulate:qa:strict"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.2.1",

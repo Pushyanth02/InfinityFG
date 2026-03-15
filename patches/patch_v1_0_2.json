@@ -1,0 +1,40 @@
+{
+  "patch_id": "v1.0.2",
+  "issued_by": "GitHub Copilot",
+  "timestamp": "2026-03-16T00:00:00Z",
+  "reason": "System-wide config refresh: identity alignment, centralized QA thresholds, strict release gate, CI quality workflow.",
+  "changes": [
+    {
+      "path": "package.json.name",
+      "old_value": "nomad-plasma",
+      "new_value": "infinityfg"
+    },
+    {
+      "path": "package.json.version",
+      "old_value": "0.0.0",
+      "new_value": "1.0.0"
+    },
+    {
+      "path": "simulation/qa_thresholds.json",
+      "old_value": null,
+      "new_value": "added"
+    },
+    {
+      "path": "simulation/qa_runner.ts",
+      "old_value": "embedded thresholds only",
+      "new_value": "loads thresholds from simulation/qa_thresholds.json with fallback"
+    },
+    {
+      "path": ".github/workflows/system-quality.yml",
+      "old_value": null,
+      "new_value": "added"
+    }
+  ],
+  "rollback_conditions": [
+    "If strict QA runtime exceeds CI timeout budget",
+    "If QA threshold externalization causes drift from expected balancing policy",
+    "If protected-branch merges are blocked by flaky simulation behavior"
+  ],
+  "sim_report_ref": "simulation/reports/qa_report_2026-03-15T23-08-46-525Z.json",
+  "approved_by": "PENDING_MANUAL_REVIEW"
+}

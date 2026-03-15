@@ -2,6 +2,7 @@ import React from 'react';
 import { useGameStore, fmt } from '../store/gameStore';
 import { AUGMENTED_MACHINES } from '../data/machine_upgrades';
 import type { UpgradeBranch } from '../data/machine_upgrades';
+import { STORY_RECIPES } from '../data/recipes';
 
 /* ── Cozy branch metadata ──────────────────────────────────
    Maps each upgrade branch to a friendly name, emoji, color,
@@ -54,7 +55,16 @@ const cozyName: Record<string, string> = {
 const getFriendlyName = (name: string) => cozyName[helperId(name)] ?? name;
 
 const UpgradePanel: React.FC = () => {
-  const { coins, machines, buyMachineUpgrade } = useGameStore();
+  const {
+    coins,
+    machines,
+    buyMachineUpgrade,
+    startCrafting,
+    canCraftRecipe,
+    craftQueue,
+    craftedInventory,
+    claimCrafted,
+  } = useGameStore();
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)', maxWidth: 960, margin: '0 auto' }} className="animate-in">
@@ -87,6 +97,42 @@ const UpgradePanel: React.FC = () => {
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xl)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 'var(--space-sm)' }}>
+          {STORY_RECIPES.map((recipe) => {
+            const craftState = canCraftRecipe(recipe.recipe_id);
+            const inQueue = craftQueue.some((q) => q.recipeId === recipe.recipe_id);
+            const readyCount = craftedInventory[recipe.output.item] ?? 0;
+
+            return (
+              <div key={recipe.recipe_id} className="glass-panel" style={{ padding: 'var(--space-sm)', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: '0.84rem', color: 'var(--brown-dark)' }}>{recipe.name}</div>
+                <div className="panel-subtitle">{recipe.type.toUpperCase()} · {recipe.craftStation} · {Math.floor(recipe.craftTime_s / 60)}m</div>
+                <div style={{ fontFamily: 'var(--font-sans)', fontSize: '0.6rem', color: 'var(--text-secondary)' }}>
+                  Needs: {recipe.components.map((c) => `${c.qty}x ${c.item}`).join(', ')}
+                </div>
+                {!craftState.ok && <div className="panel-subtitle">🔒 {craftState.reason}</div>}
+                <button
+                  onClick={() => startCrafting(recipe.recipe_id)}
+                  disabled={!craftState.ok || inQueue || coins < recipe.costCoins}
+                  className={`btn-base ${craftState.ok ? 'btn-primary' : 'btn-ghost'}`}
+                  style={{ fontSize: '0.72rem', padding: '6px 10px', opacity: craftState.ok ? 1 : 0.55 }}
+                >
+                  {inQueue ? 'Crafting...' : `Craft Now (${fmt(recipe.costCoins)} 🪙)`}
+                </button>
+                {readyCount > 0 && (
+                  <button
+                    onClick={() => claimCrafted(recipe.output.item)}
+                    className="btn-base btn-amber"
+                    style={{ fontSize: '0.72rem', padding: '6px 10px' }}
+                  >
+                    {recipe.type === 'weapon' ? 'Use Weapon' : 'Deploy Module'} ({readyCount})
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
         {machines.map((pm) => {
           const def = AUGMENTED_MACHINES.find(m => m.id === pm.machineId);
           if (!def) return null;

@@ -1,11 +1,14 @@
 // ============================================================
 // COZY GARDEN — Story Slice
 // Manages chapter progress, boss HP, quest completion, weapon ownership.
+// Story Book is the single source of truth for all unlocks.
 // ============================================================
 import type { StateCreator } from 'zustand';
 import type { GameState } from '../../types/game';
 import { CHAPTERS } from '../../data/chapters';
 import { getWeapon } from '../../data/cropWeapons';
+import { eventBus } from '../../services/eventBus';
+import { VILLAGE_FOLK } from '../../data/villageFolk';
 
 export interface ChapterProgressEntry {
   bossHp: number;        // remaining HP (decremented on harvest)
@@ -17,6 +20,9 @@ export interface StorySlice {
   // ── Chapter state ─────────────────────────────────
   currentChapterId: string;
   chapterProgress: Record<string, ChapterProgressEntry>;
+  unlockedFeatures: string[];
+  pendingUnlocks: Array<{ id: string; reqs: string[]; cost?: number }>;
+  futureUnlocksPreview: Array<{ id: string; unlockCondition: string }>;
 
   // ── Weapon state ──────────────────────────────────
   ownedWeapons: string[];
@@ -28,6 +34,7 @@ export interface StorySlice {
   buyWeapon: (weaponId: string) => void;
   equipWeapon: (weaponId: string | null) => void;
   advanceChapter: () => void;
+  refreshProgressionBuckets: () => void;
 }
 
 // Initialise progress entries for all chapters
@@ -51,6 +58,16 @@ export const createStorySlice: StateCreator<
 > = (set, get) => ({
   currentChapterId: 'ch_01',
   chapterProgress: initialProgress(),
+  unlockedFeatures: ['chapter_ch_01'],
+  pendingUnlocks: VILLAGE_FOLK.filter((w) => w.tier <= 1).map((w) => ({
+    id: w.worker_id,
+    reqs: [`Reach Chapter ${w.tier}`],
+    cost: w.hireCost,
+  })),
+  futureUnlocksPreview: VILLAGE_FOLK.filter((w) => w.tier > 1).map((w) => ({
+    id: w.worker_id,
+    unlockCondition: `Reach Chapter ${w.tier}`,
+  })),
   ownedWeapons: [],
   equippedWeaponId: null,
 
@@ -99,6 +116,13 @@ export const createStorySlice: StateCreator<
 
     // Auto-advance chapter on defeat
     if (isDefeated) {
+      // Emit boss defeated event
+      eventBus.emit('BOSS_DEFEATED', {
+        bossId: boss.id,
+        bossName: boss.name,
+        reward: boss.defeatReward.coinsBonus,
+      });
+
       get().advanceChapter();
     }
   },
@@ -134,7 +158,20 @@ export const createStorySlice: StateCreator<
           met = total >= quest.objective.amount;
           break;
         }
-        // 'harvest' is handled externally via harvestCrop hook
+        case 'harvest': {
+          // Use tracking slice for harvest quests
+          const harvestTracking = get().harvestTracking ?? {};
+          if (quest.objective.targetId) {
+            // Specific crop harvest tracking
+            const harvested = harvestTracking[quest.objective.targetId] ?? 0;
+            met = harvested >= quest.objective.amount;
+          } else {
+            // Total harvest tracking
+            const totalHarvested = Object.values(harvestTracking).reduce((s, n) => s + n, 0);
+            met = totalHarvested >= quest.objective.amount;
+          }
+          break;
+        }
         default:
           break;
       }
@@ -160,6 +197,20 @@ export const createStorySlice: StateCreator<
         },
       },
     }));
+
+    // Emit quest completed events
+    for (const questId of newlyComplete) {
+      const quest = chapter.quests.find(q => q.id === questId);
+      if (quest) {
+        eventBus.emit('QUEST_COMPLETED', {
+          questId,
+          title: quest.title,
+          reward: quest.reward.coins,
+        });
+      }
+    }
+
+    get().refreshProgressionBuckets();
   },
 
   // ── buyWeapon ─────────────────────────────────────────────
@@ -184,15 +235,98 @@ export const createStorySlice: StateCreator<
   advanceChapter: () => {
     const { currentChapterId } = get();
     const currentIdx = CHAPTERS.findIndex(c => c.id === currentChapterId);
+    const currentChapter = CHAPTERS[currentIdx];
+
     if (currentIdx === -1 || currentIdx >= CHAPTERS.length - 1) return;
 
     const nextChapter = CHAPTERS[currentIdx + 1];
+
+    // Emit chapter completed event
+    eventBus.emit('CHAPTER_COMPLETED', {
+      chapterId: currentChapterId,
+      chapterNumber: currentChapter?.number ?? currentIdx + 1,
+      bossName: currentChapter?.boss.name ?? 'Unknown Boss',
+    });
+
     // Unlock the next region
     set(state => ({
       currentChapterId: nextChapter.id,
       unlockedRegions: state.unlockedRegions.includes(nextChapter.regionId)
         ? state.unlockedRegions
         : [...state.unlockedRegions, nextChapter.regionId],
+      chapterTokens: state.chapterTokens.includes(`${nextChapter.regionId}_token`)
+        ? state.chapterTokens
+        : [...state.chapterTokens, `${nextChapter.regionId}_token`],
     }));
+
+    // Emit region unlocked event
+    eventBus.emit('REGION_UNLOCKED', {
+      regionId: nextChapter.regionId,
+      regionName: nextChapter.title,
+    });
+
+    // Emit chapter started event
+    eventBus.emit('CHAPTER_STARTED', {
+      chapterId: nextChapter.id,
+      chapterNumber: nextChapter.number,
+      title: nextChapter.title,
+    });
+
+    get().refreshProgressionBuckets();
+  },
+
+  // ── refreshProgressionBuckets ───────────────────────────
+  refreshProgressionBuckets: () => {
+    const state = get();
+    const chapter = CHAPTERS.find((c) => c.id === state.currentChapterId) ?? CHAPTERS[0];
+    const previousPending = new Set(state.pendingUnlocks.map((p) => p.id));
+
+    const unlockedFeatures = [
+      `chapter_${chapter.id}`,
+      ...state.unlockedSkills,
+      ...state.unlockedRegions,
+      ...state.ownedWeapons,
+    ];
+
+    const pendingUnlocks: Array<{ id: string; reqs: string[]; cost?: number }> = [];
+    const futureUnlocksPreview: Array<{ id: string; unlockCondition: string }> = [];
+
+    for (const worker of VILLAGE_FOLK) {
+      if (state.workers[worker.worker_id]) {
+        unlockedFeatures.push(worker.worker_id);
+        continue;
+      }
+
+      if (chapter.number >= worker.tier) {
+        pendingUnlocks.push({
+          id: worker.worker_id,
+          reqs: [`Reach Chapter ${worker.tier}`],
+          cost: worker.hireCost,
+        });
+      } else {
+        futureUnlocksPreview.push({
+          id: worker.worker_id,
+          unlockCondition: `Reach Chapter ${worker.tier}`,
+        });
+      }
+    }
+
+    set({
+      unlockedFeatures: Array.from(new Set(unlockedFeatures)),
+      pendingUnlocks,
+      futureUnlocksPreview,
+    });
+
+    for (const entry of pendingUnlocks) {
+      if (!previousPending.has(entry.id)) {
+        const worker = VILLAGE_FOLK.find((w) => w.worker_id === entry.id);
+        if (worker) {
+          eventBus.emit('WORKER_UNLOCKED', {
+            workerId: worker.worker_id,
+            workerName: worker.name,
+          });
+        }
+      }
+    }
   },
 });

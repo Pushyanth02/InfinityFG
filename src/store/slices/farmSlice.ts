@@ -2,6 +2,8 @@ import type { StateCreator } from 'zustand';
 import type { GameState, FarmSlice } from '../../types/game';
 import { CROPS } from '../../data/crops';
 import { getPlotCost, getSkillMultiplier } from '../../engine/mechanics';
+import { eventBus } from '../../services/eventBus';
+import { marketService } from '../../services/marketService';
 
 export const createFarmSlice: StateCreator<
   GameState,
@@ -44,7 +46,10 @@ export const createFarmSlice: StateCreator<
 
     const sellMultiplier = getSkillMultiplier(unlockedSkills, 'sell_multiplier');
     const manualYieldBonus = getSkillMultiplier(unlockedSkills, 'manual_yield');
-    const totalReward = crop.baseValue * sellMultiplier * manualYieldBonus;
+    const marketPrice = marketService.getSellPrice(crop.id, crop.baseValue);
+    const analystBonus = 1 + get().getAnalystBonus();
+    const harvestAmount = crop.yield ?? 1;
+    const totalReward = marketPrice * harvestAmount * sellMultiplier * manualYieldBonus * analystBonus;
 
     const harvestedCropId = plot.cropId;
 
@@ -60,8 +65,25 @@ export const createFarmSlice: StateCreator<
       } : p)
     }));
 
+    // 📊 Track harvest for unlock conditions and milestones
+    const { currentRegion } = get();
+    get().trackHarvest(harvestedCropId, harvestAmount, currentRegion);
+
+    eventBus.emit('CROP_HARVESTED', {
+      plotId,
+      cropId: harvestedCropId,
+      amount: harvestAmount,
+      coins: totalReward,
+    }, 'player');
+
+    eventBus.emit('CROP_SOLD', {
+      cropId: harvestedCropId,
+      amount: harvestAmount,
+      coins: totalReward,
+    }, 'player');
+
     // 🗡️ Deal damage to the current chapter boss
-    get().damageChapterBoss(harvestedCropId, crop.yield ?? 1);
+    get().damageChapterBoss(harvestedCropId, harvestAmount);
     // ✅ Re-check narrative quest progress
     get().checkQuestProgress();
   },
