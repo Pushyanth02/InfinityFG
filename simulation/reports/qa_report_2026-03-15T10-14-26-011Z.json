@@ -1,0 +1,268 @@
+{
+  "schema": "agriempire-qa-report/v1",
+  "issued_by": "SimulationQA_AI",
+  "timestamp": "2026-03-15T10:14:26.011Z",
+  "input": {
+    "num_simulations": 1000,
+    "player_profiles": [
+      "casual",
+      "active",
+      "whale_sim"
+    ],
+    "duration_hours": 720,
+    "random_seed": 20260315
+  },
+  "notes": "Deterministic simulation using Mulberry32 PRNG. Reproduce any session with --seed <seed> --sessions 1 and sessionSeed = seed + sessId * 31337.",
+  "summary": {
+    "total_sessions": 1000,
+    "median_automation_minutes": 15,
+    "inflation_index": 2,
+    "exploit_paths_found": 1,
+    "high_severity_exploits": 1,
+    "regression_all_pass": false,
+    "sanity_pass": true
+  },
+  "profile_summaries": [
+    {
+      "profile": "casual",
+      "count": 334,
+      "first_harvest": {
+        "mean": 78,
+        "p10": 35,
+        "p50": 65,
+        "p90": 125,
+        "stddev": 38,
+        "pct_reached": 100
+      },
+      "first_auto": {
+        "mean": 40,
+        "p10": 17,
+        "p50": 35,
+        "p90": 70,
+        "stddev": 22,
+        "unit": "minutes",
+        "pct_reached": 100
+      },
+      "prestige": {
+        "mean": 17,
+        "p10": 13,
+        "p50": 16,
+        "p90": 24,
+        "stddev": 5,
+        "unit": "hours",
+        "pct_reached": 100
+      },
+      "cps_at_1h": {
+        "mean": 5,
+        "p10": 1,
+        "p50": 5,
+        "p90": 12,
+        "stddev": 4
+      },
+      "avg_lifetime_coins": 19652519,
+      "avg_machines": 0.5,
+      "avg_resets": 18
+    },
+    {
+      "profile": "active",
+      "count": 333,
+      "first_harvest": {
+        "mean": 53,
+        "p10": 35,
+        "p50": 35,
+        "p90": 90,
+        "stddev": 22,
+        "pct_reached": 100
+      },
+      "first_auto": {
+        "mean": 18,
+        "p10": 9,
+        "p50": 15,
+        "p90": 29,
+        "stddev": 10,
+        "unit": "minutes",
+        "pct_reached": 100
+      },
+      "prestige": {
+        "mean": 14,
+        "p10": 12,
+        "p50": 14,
+        "p90": 17,
+        "stddev": 2,
+        "unit": "hours",
+        "pct_reached": 100
+      },
+      "cps_at_1h": {
+        "mean": 11,
+        "p10": 11,
+        "p50": 12,
+        "p90": 12,
+        "stddev": 2
+      },
+      "avg_lifetime_coins": 1108267849,
+      "avg_machines": 8,
+      "avg_resets": 50
+    },
+    {
+      "profile": "whale_sim",
+      "count": 333,
+      "first_harvest": {
+        "mean": 42,
+        "p10": 35,
+        "p50": 35,
+        "p90": 65,
+        "stddev": 14,
+        "pct_reached": 100
+      },
+      "first_auto": {
+        "mean": 13,
+        "p10": 7,
+        "p50": 11,
+        "p90": 22,
+        "stddev": 7,
+        "unit": "minutes",
+        "pct_reached": 100
+      },
+      "prestige": {
+        "mean": 13,
+        "p10": 12,
+        "p50": 13,
+        "p90": 14,
+        "stddev": 1,
+        "unit": "hours",
+        "pct_reached": 100
+      },
+      "cps_at_1h": {
+        "mean": 12,
+        "p10": 12,
+        "p50": 12,
+        "p90": 12,
+        "stddev": 1
+      },
+      "avg_lifetime_coins": 1314970136,
+      "avg_machines": 8,
+      "avg_resets": 49.9
+    }
+  ],
+  "regression_tests": [
+    {
+      "name": "first_harvest_within_5min",
+      "description": "Active players must reach first harvest within 5 minutes at p50",
+      "threshold": {
+        "lte": 300
+      },
+      "actual": 35,
+      "status": "PASS ✅"
+    },
+    {
+      "name": "automation_within_40min_p50",
+      "description": "Active players reach automation within 40min at p50 (real-player latency factor 1.5x)",
+      "threshold": {
+        "lte": 40
+      },
+      "actual": 15,
+      "status": "PASS ✅"
+    },
+    {
+      "name": "inflation_index_lte20",
+      "description": "Coin emission / coin sink ratio must stay <= 20 across 30 simulated days",
+      "threshold": {
+        "lte": 20
+      },
+      "actual": 2,
+      "status": "PASS ✅"
+    },
+    {
+      "name": "no_negative_cost_items",
+      "description": "No machines, seeds, or upgrades should have zero or negative cost",
+      "threshold": {
+        "eq": 0
+      },
+      "actual": 0,
+      "status": "PASS ✅",
+      "details": []
+    },
+    {
+      "name": "no_infinite_loops",
+      "description": "No player session should trigger an infinite stall loop",
+      "threshold": {
+        "eq": 0
+      },
+      "actual": 316,
+      "status": "FAIL ❌"
+    },
+    {
+      "name": "casual_prestige_rate_lte50pct",
+      "description": "Casual players should prestige at most 50% of the time (not rushing)",
+      "threshold": {
+        "lte": 50
+      },
+      "actual": 100,
+      "status": "FAIL ❌"
+    },
+    {
+      "name": "high_exploits_zero",
+      "description": "No HIGH severity exploit should affect >5% of player sessions",
+      "threshold": {
+        "eq": 0
+      },
+      "actual": 1,
+      "status": "FAIL ❌"
+    }
+  ],
+  "exploit_paths": [
+    {
+      "rank": 1,
+      "name": "INFINITE_STALL_LOOP",
+      "frequency": 316,
+      "affected_sessions_pct": 31.6,
+      "trace": [],
+      "severity": "HIGH",
+      "proposed_fix": "Guards already present; investigate seed reproducibility with --seed flag."
+    }
+  ],
+  "proposed_patches": [
+    {
+      "patch_id": "auto_v1773569666010_0",
+      "issued_by": "SimulationQA_AI",
+      "timestamp": "2026-03-15T10:14:26.010Z",
+      "reason": "Auto-generated patch for HIGH severity exploit: INFINITE_STALL_LOOP",
+      "changes": [
+        {
+          "path": "economy.auto",
+          "old_value": "current",
+          "new_value": "see proposed_fix"
+        }
+      ],
+      "proposed_fix": "Guards already present; investigate seed reproducibility with --seed flag.",
+      "rollback_conditions": [
+        "If KPI regression detected on next simulation run",
+        "If D1 retention drops >10%"
+      ],
+      "sim_report_ref": "simulation/reports/qa_report_<this_run>",
+      "approved_by": "PENDING_MANUAL_REVIEW"
+    }
+  ],
+  "raw_KPIs": {
+    "by_profile": {
+      "casual": {
+        "pct_reached_automation": 100,
+        "median_auto_min": 35,
+        "avg_cps_1h": 5,
+        "avg_lifetime_coins": 19652519
+      },
+      "active": {
+        "pct_reached_automation": 100,
+        "median_auto_min": 15,
+        "avg_cps_1h": 11,
+        "avg_lifetime_coins": 1108267849
+      },
+      "whale_sim": {
+        "pct_reached_automation": 100,
+        "median_auto_min": 11,
+        "avg_cps_1h": 12,
+        "avg_lifetime_coins": 1314970136
+      }
+    }
+  }
+}

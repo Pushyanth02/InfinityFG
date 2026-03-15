@@ -1,0 +1,2985 @@
+{
+  "schema": "agriempire-crop-catalog/v1",
+  "issued_by": "antigravity",
+  "timestamp": "2026-03-15T10:24:57.638Z",
+  "input": {
+    "num_crops": 60,
+    "target_growth_buckets": [
+      {
+        "name": "early",
+        "min_s": 10,
+        "max_s": 90
+      },
+      {
+        "name": "mid",
+        "min_s": 90,
+        "max_s": 600
+      },
+      {
+        "name": "late",
+        "min_s": 600,
+        "max_s": 7200
+      }
+    ]
+  },
+  "notes": "Procedurally generated crop catalog. base_value = round(growthSec^0.9 × rarityMult / (yield×0.5)). All crops validated for no negative arbitrage.",
+  "kpis": {
+    "total_crops": 60,
+    "bucket_distribution": {
+      "early": 23,
+      "mid": 25,
+      "late": 12
+    },
+    "rarity_distribution": {
+      "common": 12,
+      "uncommon": 18,
+      "rare": 10,
+      "epic": 10,
+      "legendary": 10
+    },
+    "avg_coins_per_minute_by_bucket": {
+      "early": 105.52,
+      "mid": 254.38,
+      "late": 693.17
+    },
+    "arbitrage_violations": 0,
+    "arbitrage_check_result": "PASS ✅",
+    "synergy_tags_used": [
+      "grain",
+      "vegetable",
+      "fruit",
+      "legume",
+      "tuber",
+      "herb",
+      "flower",
+      "tropical",
+      "mushroom",
+      "exotic",
+      "industrial"
+    ],
+    "soil_types_covered": [
+      "meadow",
+      "highlands",
+      "riverlands",
+      "tropical",
+      "desert",
+      "coastal"
+    ]
+  },
+  "crops": [
+    {
+      "crop_id": "crop_001",
+      "name": "Wheat",
+      "emoji": "🌾",
+      "growth_time": 30,
+      "yield": 4,
+      "base_value": 11,
+      "value_per_minute": 88,
+      "seed_cost": 6,
+      "soil_type": "meadow",
+      "rarity": "common",
+      "growth_bucket": "early",
+      "weather_affinity": [
+        "sunny",
+        "rainstorm"
+      ],
+      "machine_synergy": [
+        "grain_mill",
+        "auto_harvester"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → flour → bread → artisan loaf"
+        ],
+        "multipliers": [
+          2.3,
+          2.3,
+          2.3
+        ],
+        "stage4_value": 134
+      },
+      "unlock_tier": 1,
+      "unlock_region": "meadow",
+      "description": "The backbone of any farm. Grows fast, sells reliably.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Wheat",
+          "Carrot"
+        ],
+        "trait_inherited": "grain synergy + sunny affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 88,
+        "coins_per_minute_idle": 52.8,
+        "processing_value_stage1": 25,
+        "processing_value_stage4": 134,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_002",
+      "name": "Corn",
+      "emoji": "🌽",
+      "growth_time": 45,
+      "yield": 3,
+      "base_value": 21,
+      "value_per_minute": 84,
+      "seed_cost": 11,
+      "soil_type": "meadow",
+      "rarity": "common",
+      "growth_bucket": "early",
+      "weather_affinity": [
+        "sunny"
+      ],
+      "machine_synergy": [
+        "grain_mill",
+        "auto_harvester"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → flour → bread → artisan loaf"
+        ],
+        "multipliers": [
+          2.3,
+          2.3,
+          2.3
+        ],
+        "stage4_value": 256
+      },
+      "unlock_tier": 1,
+      "unlock_region": "meadow",
+      "description": "Warm-weather staple with consistent yields.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Wheat",
+          "Tomato"
+        ],
+        "trait_inherited": "grain synergy + sunny affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 84,
+        "coins_per_minute_idle": 50.4,
+        "processing_value_stage1": 48,
+        "processing_value_stage4": 256,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_003",
+      "name": "Potato",
+      "emoji": "🥔",
+      "growth_time": 60,
+      "yield": 5,
+      "base_value": 16,
+      "value_per_minute": 80,
+      "seed_cost": 8,
+      "soil_type": "highlands",
+      "rarity": "common",
+      "growth_bucket": "early",
+      "weather_affinity": [
+        "rainstorm"
+      ],
+      "machine_synergy": [
+        "auto_harvester",
+        "processing_unit"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → processed → chips → luxury snack"
+        ],
+        "multipliers": [
+          2,
+          2.3,
+          2
+        ],
+        "stage4_value": 195
+      },
+      "unlock_tier": 1,
+      "unlock_region": "meadow",
+      "description": "Rugged and reliable — it grows almost anywhere.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Wheat",
+          "Lettuce"
+        ],
+        "trait_inherited": "tuber synergy + rainstorm affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 80,
+        "coins_per_minute_idle": 48,
+        "processing_value_stage1": 37,
+        "processing_value_stage4": 195,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_004",
+      "name": "Carrot",
+      "emoji": "🥕",
+      "growth_time": 40,
+      "yield": 4,
+      "base_value": 14,
+      "value_per_minute": 84,
+      "seed_cost": 7,
+      "soil_type": "meadow",
+      "rarity": "common",
+      "growth_bucket": "early",
+      "weather_affinity": [
+        "sunny",
+        "rainstorm"
+      ],
+      "machine_synergy": [
+        "auto_planter",
+        "drip_irrigation"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → preserved → pickled → gourmet jar"
+        ],
+        "multipliers": [
+          2,
+          2,
+          2.3
+        ],
+        "stage4_value": 170
+      },
+      "unlock_tier": 1,
+      "unlock_region": "meadow",
+      "description": "A crunchy favourite. Perfect for market days.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Corn",
+          "Radish"
+        ],
+        "trait_inherited": "vegetable synergy + sunny affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 84,
+        "coins_per_minute_idle": 50.4,
+        "processing_value_stage1": 32,
+        "processing_value_stage4": 170,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_005",
+      "name": "Tomato",
+      "emoji": "🍅",
+      "growth_time": 50,
+      "yield": 3,
+      "base_value": 23,
+      "value_per_minute": 82.8,
+      "seed_cost": 12,
+      "soil_type": "riverlands",
+      "rarity": "common",
+      "growth_bucket": "early",
+      "weather_affinity": [
+        "sunny"
+      ],
+      "machine_synergy": [
+        "auto_planter",
+        "drip_irrigation"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → preserved → pickled → gourmet jar"
+        ],
+        "multipliers": [
+          2,
+          2,
+          2.3
+        ],
+        "stage4_value": 280
+      },
+      "unlock_tier": 1,
+      "unlock_region": "meadow",
+      "description": "Sun-kissed and plump, ready for the saucemaker.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Potato",
+          "Pea"
+        ],
+        "trait_inherited": "vegetable synergy + sunny affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 82.8,
+        "coins_per_minute_idle": 49.68,
+        "processing_value_stage1": 53,
+        "processing_value_stage4": 280,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_006",
+      "name": "Lettuce",
+      "emoji": "🥬",
+      "growth_time": 20,
+      "yield": 3,
+      "base_value": 10,
+      "value_per_minute": 90,
+      "seed_cost": 5,
+      "soil_type": "meadow",
+      "rarity": "common",
+      "growth_bucket": "early",
+      "weather_affinity": [
+        "rainstorm"
+      ],
+      "machine_synergy": [
+        "auto_planter",
+        "drip_irrigation"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → preserved → pickled → gourmet jar"
+        ],
+        "multipliers": [
+          2,
+          2,
+          2.3
+        ],
+        "stage4_value": 122
+      },
+      "unlock_tier": 1,
+      "unlock_region": "meadow",
+      "description": "Fast-growing leafy green. The salad king.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Carrot",
+          "Bean"
+        ],
+        "trait_inherited": "vegetable synergy + rainstorm affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 90,
+        "coins_per_minute_idle": 54,
+        "processing_value_stage1": 23,
+        "processing_value_stage4": 122,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_007",
+      "name": "Radish",
+      "emoji": "🌰",
+      "growth_time": 10,
+      "yield": 2,
+      "base_value": 8,
+      "value_per_minute": 96,
+      "seed_cost": 4,
+      "soil_type": "highlands",
+      "rarity": "common",
+      "growth_bucket": "early",
+      "weather_affinity": [
+        "rainstorm"
+      ],
+      "machine_synergy": [
+        "auto_planter",
+        "drip_irrigation"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → preserved → pickled → gourmet jar"
+        ],
+        "multipliers": [
+          2,
+          2,
+          2.3
+        ],
+        "stage4_value": 97
+      },
+      "unlock_tier": 1,
+      "unlock_region": "meadow",
+      "description": "The fastest crop on the farm. Quick coins, quick satisfaction.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Tomato",
+          "Cabbage"
+        ],
+        "trait_inherited": "vegetable synergy + rainstorm affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 96,
+        "coins_per_minute_idle": 57.6,
+        "processing_value_stage1": 18,
+        "processing_value_stage4": 97,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_008",
+      "name": "Pea",
+      "emoji": "🫛",
+      "growth_time": 35,
+      "yield": 4,
+      "base_value": 12,
+      "value_per_minute": 82.29,
+      "seed_cost": 6,
+      "soil_type": "meadow",
+      "rarity": "common",
+      "growth_bucket": "early",
+      "weather_affinity": [
+        "sunny",
+        "rainstorm"
+      ],
+      "machine_synergy": [
+        "seed_sorter",
+        "grain_mill"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → dried → paste → premium paste"
+        ],
+        "multipliers": [
+          1.8,
+          2,
+          2.3
+        ],
+        "stage4_value": 146
+      },
+      "unlock_tier": 1,
+      "unlock_region": "meadow",
+      "description": "Tiny pods, big harvests. Great for seed cycling.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Lettuce",
+          "Spinach"
+        ],
+        "trait_inherited": "legume synergy + sunny affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 82.29,
+        "coins_per_minute_idle": 49.37,
+        "processing_value_stage1": 28,
+        "processing_value_stage4": 146,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_009",
+      "name": "Bean",
+      "emoji": "🫘",
+      "growth_time": 55,
+      "yield": 5,
+      "base_value": 15,
+      "value_per_minute": 81.82,
+      "seed_cost": 8,
+      "soil_type": "riverlands",
+      "rarity": "common",
+      "growth_bucket": "early",
+      "weather_affinity": [
+        "rainstorm"
+      ],
+      "machine_synergy": [
+        "seed_sorter",
+        "grain_mill"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → dried → paste → premium paste"
+        ],
+        "multipliers": [
+          1.8,
+          2,
+          2.3
+        ],
+        "stage4_value": 183
+      },
+      "unlock_tier": 1,
+      "unlock_region": "meadow",
+      "description": "A protein powerhouse. Beans go into everything.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Radish",
+          "Garlic"
+        ],
+        "trait_inherited": "legume synergy + rainstorm affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 81.82,
+        "coins_per_minute_idle": 49.09,
+        "processing_value_stage1": 35,
+        "processing_value_stage4": 183,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_010",
+      "name": "Cabbage",
+      "emoji": "🥦",
+      "growth_time": 70,
+      "yield": 4,
+      "base_value": 23,
+      "value_per_minute": 78.86,
+      "seed_cost": 12,
+      "soil_type": "highlands",
+      "rarity": "common",
+      "growth_bucket": "early",
+      "weather_affinity": [
+        "rainstorm"
+      ],
+      "machine_synergy": [
+        "auto_planter",
+        "drip_irrigation"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → preserved → pickled → gourmet jar"
+        ],
+        "multipliers": [
+          2,
+          2,
+          2.3
+        ],
+        "stage4_value": 280
+      },
+      "unlock_tier": 1,
+      "unlock_region": "meadow",
+      "description": "Dense and dependable. Favoured in cold highland plots.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Pea",
+          "Soybean"
+        ],
+        "trait_inherited": "vegetable synergy + rainstorm affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 78.86,
+        "coins_per_minute_idle": 47.32,
+        "processing_value_stage1": 53,
+        "processing_value_stage4": 280,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_011",
+      "name": "Spinach",
+      "emoji": "🍃",
+      "growth_time": 25,
+      "yield": 3,
+      "base_value": 12,
+      "value_per_minute": 86.4,
+      "seed_cost": 6,
+      "soil_type": "meadow",
+      "rarity": "common",
+      "growth_bucket": "early",
+      "weather_affinity": [
+        "rainstorm"
+      ],
+      "machine_synergy": [
+        "auto_planter",
+        "drip_irrigation"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → preserved → pickled → gourmet jar"
+        ],
+        "multipliers": [
+          2,
+          2,
+          2.3
+        ],
+        "stage4_value": 146
+      },
+      "unlock_tier": 1,
+      "unlock_region": "meadow",
+      "description": "Iron-rich and fast-growing. Farmers love the turnaround.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Bean",
+          "Sunflower"
+        ],
+        "trait_inherited": "vegetable synergy + rainstorm affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 86.4,
+        "coins_per_minute_idle": 51.84,
+        "processing_value_stage1": 28,
+        "processing_value_stage4": 146,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_012",
+      "name": "Garlic",
+      "emoji": "🧄",
+      "growth_time": 80,
+      "yield": 3,
+      "base_value": 34,
+      "value_per_minute": 76.5,
+      "seed_cost": 17,
+      "soil_type": "highlands",
+      "rarity": "common",
+      "growth_bucket": "early",
+      "weather_affinity": [
+        "sunny"
+      ],
+      "machine_synergy": [
+        "drip_irrigation",
+        "roaster"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → dried herb → extract → essence"
+        ],
+        "multipliers": [
+          2.5,
+          2.5,
+          2.5
+        ],
+        "stage4_value": 414
+      },
+      "unlock_tier": 1,
+      "unlock_region": "meadow",
+      "description": "Pungent perfection. Doubles as pest control.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Cabbage",
+          "Pumpkin"
+        ],
+        "trait_inherited": "herb synergy + sunny affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 76.5,
+        "coins_per_minute_idle": 45.9,
+        "processing_value_stage1": 78,
+        "processing_value_stage4": 414,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_013",
+      "name": "Soybean",
+      "emoji": "🌱",
+      "growth_time": 65,
+      "yield": 5,
+      "base_value": 27,
+      "value_per_minute": 124.62,
+      "seed_cost": 14,
+      "soil_type": "meadow",
+      "rarity": "uncommon",
+      "growth_bucket": "early",
+      "weather_affinity": [
+        "rainstorm",
+        "fertile"
+      ],
+      "machine_synergy": [
+        "seed_sorter",
+        "grain_mill"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → dried → paste → premium paste"
+        ],
+        "multipliers": [
+          1.8,
+          2,
+          2.3
+        ],
+        "stage4_value": 329
+      },
+      "unlock_tier": 2,
+      "unlock_region": "meadow",
+      "description": "The plant that feeds the world — and your machines.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Spinach",
+          "Ginger"
+        ],
+        "trait_inherited": "legume synergy + rainstorm affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 124.62,
+        "coins_per_minute_idle": 74.77,
+        "processing_value_stage1": 62,
+        "processing_value_stage4": 329,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_014",
+      "name": "Sunflower",
+      "emoji": "🌻",
+      "growth_time": 70,
+      "yield": 4,
+      "base_value": 37,
+      "value_per_minute": 126.86,
+      "seed_cost": 19,
+      "soil_type": "meadow",
+      "rarity": "uncommon",
+      "growth_bucket": "early",
+      "weather_affinity": [
+        "sunny",
+        "fertile"
+      ],
+      "machine_synergy": [
+        "drip_irrigation",
+        "cold_storage"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → petals → perfume → luxury perfume"
+        ],
+        "multipliers": [
+          3,
+          2.3,
+          2.3
+        ],
+        "stage4_value": 450
+      },
+      "unlock_tier": 2,
+      "unlock_region": "meadow",
+      "description": "Tall, golden, photosynthetically aggressive.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Garlic",
+          "Pepper"
+        ],
+        "trait_inherited": "flower synergy + sunny affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 126.86,
+        "coins_per_minute_idle": 76.12,
+        "processing_value_stage1": 85,
+        "processing_value_stage4": 450,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_015",
+      "name": "Pumpkin",
+      "emoji": "🎃",
+      "growth_time": 85,
+      "yield": 4,
+      "base_value": 44,
+      "value_per_minute": 124.24,
+      "seed_cost": 22,
+      "soil_type": "highlands",
+      "rarity": "uncommon",
+      "growth_bucket": "early",
+      "weather_affinity": [
+        "fertile"
+      ],
+      "machine_synergy": [
+        "auto_planter",
+        "drip_irrigation"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → preserved → pickled → gourmet jar"
+        ],
+        "multipliers": [
+          2,
+          2,
+          2.3
+        ],
+        "stage4_value": 535
+      },
+      "unlock_tier": 2,
+      "unlock_region": "highlands",
+      "description": "Seasonal superstar. Farmers swear by autumn harvests.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Soybean",
+          "Onion"
+        ],
+        "trait_inherited": "vegetable synergy + fertile affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 124.24,
+        "coins_per_minute_idle": 74.54,
+        "processing_value_stage1": 101,
+        "processing_value_stage4": 535,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_016",
+      "name": "Ginger",
+      "emoji": "🫚",
+      "growth_time": 90,
+      "yield": 3,
+      "base_value": 61,
+      "value_per_minute": 122,
+      "seed_cost": 31,
+      "soil_type": "riverlands",
+      "rarity": "uncommon",
+      "growth_bucket": "mid",
+      "weather_affinity": [
+        "rainstorm",
+        "fertile"
+      ],
+      "machine_synergy": [
+        "drip_irrigation",
+        "roaster"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → dried herb → extract → essence"
+        ],
+        "multipliers": [
+          2.5,
+          2.5,
+          2.5
+        ],
+        "stage4_value": 742
+      },
+      "unlock_tier": 2,
+      "unlock_region": "riverlands",
+      "description": "A fiery root. Prized in markets and medicine halls.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Sunflower",
+          "Basil"
+        ],
+        "trait_inherited": "herb synergy + rainstorm affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 122,
+        "coins_per_minute_idle": 73.2,
+        "processing_value_stage1": 140,
+        "processing_value_stage4": 742,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_017",
+      "name": "Pepper",
+      "emoji": "🌶",
+      "growth_time": 75,
+      "yield": 3,
+      "base_value": 52,
+      "value_per_minute": 124.8,
+      "seed_cost": 26,
+      "soil_type": "meadow",
+      "rarity": "uncommon",
+      "growth_bucket": "early",
+      "weather_affinity": [
+        "sunny",
+        "fertile"
+      ],
+      "machine_synergy": [
+        "auto_planter",
+        "drip_irrigation"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → preserved → pickled → gourmet jar"
+        ],
+        "multipliers": [
+          2,
+          2,
+          2.3
+        ],
+        "stage4_value": 633
+      },
+      "unlock_tier": 2,
+      "unlock_region": "meadow",
+      "description": "Bold heat in small packages. The spice trade starts here.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Pumpkin",
+          "Mint"
+        ],
+        "trait_inherited": "vegetable synergy + sunny affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 124.8,
+        "coins_per_minute_idle": 74.88,
+        "processing_value_stage1": 120,
+        "processing_value_stage4": 633,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_018",
+      "name": "Onion",
+      "emoji": "🧅",
+      "growth_time": 60,
+      "yield": 4,
+      "base_value": 32,
+      "value_per_minute": 128,
+      "seed_cost": 16,
+      "soil_type": "highlands",
+      "rarity": "uncommon",
+      "growth_bucket": "early",
+      "weather_affinity": [
+        "rainstorm"
+      ],
+      "machine_synergy": [
+        "auto_planter",
+        "drip_irrigation"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → preserved → pickled → gourmet jar"
+        ],
+        "multipliers": [
+          2,
+          2,
+          2.3
+        ],
+        "stage4_value": 389
+      },
+      "unlock_tier": 2,
+      "unlock_region": "highlands",
+      "description": "Brings tears in the field, cheers at the market.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Ginger",
+          "Chamomile"
+        ],
+        "trait_inherited": "vegetable synergy + rainstorm affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 128,
+        "coins_per_minute_idle": 76.8,
+        "processing_value_stage1": 74,
+        "processing_value_stage4": 389,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_019",
+      "name": "Basil",
+      "emoji": "🌿",
+      "growth_time": 35,
+      "yield": 3,
+      "base_value": 26,
+      "value_per_minute": 133.71,
+      "seed_cost": 13,
+      "soil_type": "riverlands",
+      "rarity": "uncommon",
+      "growth_bucket": "early",
+      "weather_affinity": [
+        "sunny",
+        "fertile"
+      ],
+      "machine_synergy": [
+        "drip_irrigation",
+        "roaster"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → dried herb → extract → essence"
+        ],
+        "multipliers": [
+          2.5,
+          2.5,
+          2.5
+        ],
+        "stage4_value": 316
+      },
+      "unlock_tier": 2,
+      "unlock_region": "riverlands",
+      "description": "Fragrant gold. Worth triple the coin when extracted.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Pepper",
+          "Kale"
+        ],
+        "trait_inherited": "herb synergy + sunny affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 133.71,
+        "coins_per_minute_idle": 80.23,
+        "processing_value_stage1": 60,
+        "processing_value_stage4": 316,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_020",
+      "name": "Mint",
+      "emoji": "🍀",
+      "growth_time": 30,
+      "yield": 4,
+      "base_value": 17,
+      "value_per_minute": 136,
+      "seed_cost": 9,
+      "soil_type": "riverlands",
+      "rarity": "uncommon",
+      "growth_bucket": "early",
+      "weather_affinity": [
+        "rainstorm"
+      ],
+      "machine_synergy": [
+        "drip_irrigation",
+        "roaster"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → dried herb → extract → essence"
+        ],
+        "multipliers": [
+          2.5,
+          2.5,
+          2.5
+        ],
+        "stage4_value": 207
+      },
+      "unlock_tier": 2,
+      "unlock_region": "riverlands",
+      "description": "Cool and fast-spreading. Essential for the extract line.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Onion",
+          "Lentil"
+        ],
+        "trait_inherited": "herb synergy + rainstorm affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 136,
+        "coins_per_minute_idle": 81.6,
+        "processing_value_stage1": 39,
+        "processing_value_stage4": 207,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_021",
+      "name": "Chamomile",
+      "emoji": "🌼",
+      "growth_time": 55,
+      "yield": 3,
+      "base_value": 39,
+      "value_per_minute": 127.64,
+      "seed_cost": 20,
+      "soil_type": "meadow",
+      "rarity": "uncommon",
+      "growth_bucket": "early",
+      "weather_affinity": [
+        "sunny"
+      ],
+      "machine_synergy": [
+        "drip_irrigation",
+        "cold_storage"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → petals → perfume → luxury perfume"
+        ],
+        "multipliers": [
+          3,
+          2.3,
+          2.3
+        ],
+        "stage4_value": 475
+      },
+      "unlock_tier": 2,
+      "unlock_region": "meadow",
+      "description": "Calming and profitable. Florists and apothecaries compete.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Basil",
+          "Fennel"
+        ],
+        "trait_inherited": "flower synergy + sunny affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 127.64,
+        "coins_per_minute_idle": 76.58,
+        "processing_value_stage1": 90,
+        "processing_value_stage4": 475,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_022",
+      "name": "Kale",
+      "emoji": "🥬",
+      "growth_time": 45,
+      "yield": 5,
+      "base_value": 20,
+      "value_per_minute": 133.33,
+      "seed_cost": 10,
+      "soil_type": "highlands",
+      "rarity": "uncommon",
+      "growth_bucket": "early",
+      "weather_affinity": [
+        "rainstorm",
+        "fertile"
+      ],
+      "machine_synergy": [
+        "auto_planter",
+        "drip_irrigation"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → preserved → pickled → gourmet jar"
+        ],
+        "multipliers": [
+          2,
+          2,
+          2.3
+        ],
+        "stage4_value": 243
+      },
+      "unlock_tier": 2,
+      "unlock_region": "highlands",
+      "description": "The superfood of choice. Cold-hardy and nutrient-dense.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Mint",
+          "Rice"
+        ],
+        "trait_inherited": "vegetable synergy + rainstorm affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 133.33,
+        "coins_per_minute_idle": 80,
+        "processing_value_stage1": 46,
+        "processing_value_stage4": 243,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_023",
+      "name": "Lentil",
+      "emoji": "🫘",
+      "growth_time": 50,
+      "yield": 4,
+      "base_value": 27,
+      "value_per_minute": 129.6,
+      "seed_cost": 14,
+      "soil_type": "meadow",
+      "rarity": "uncommon",
+      "growth_bucket": "early",
+      "weather_affinity": [
+        "sunny"
+      ],
+      "machine_synergy": [
+        "seed_sorter",
+        "grain_mill"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → dried → paste → premium paste"
+        ],
+        "multipliers": [
+          1.8,
+          2,
+          2.3
+        ],
+        "stage4_value": 329
+      },
+      "unlock_tier": 2,
+      "unlock_region": "meadow",
+      "description": "Ancient and humble. Lentils power civilisations.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Chamomile",
+          "Sugarcane"
+        ],
+        "trait_inherited": "legume synergy + sunny affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 129.6,
+        "coins_per_minute_idle": 77.76,
+        "processing_value_stage1": 62,
+        "processing_value_stage4": 329,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_024",
+      "name": "Fennel",
+      "emoji": "🌾",
+      "growth_time": 65,
+      "yield": 3,
+      "base_value": 46,
+      "value_per_minute": 127.38,
+      "seed_cost": 23,
+      "soil_type": "riverlands",
+      "rarity": "uncommon",
+      "growth_bucket": "early",
+      "weather_affinity": [
+        "sunny",
+        "fertile"
+      ],
+      "machine_synergy": [
+        "drip_irrigation",
+        "roaster"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → dried herb → extract → essence"
+        ],
+        "multipliers": [
+          2.5,
+          2.5,
+          2.5
+        ],
+        "stage4_value": 560
+      },
+      "unlock_tier": 2,
+      "unlock_region": "riverlands",
+      "description": "Anise-sweet and elegant. Cooks pay premium.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Kale",
+          "Oats"
+        ],
+        "trait_inherited": "herb synergy + sunny affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 127.38,
+        "coins_per_minute_idle": 76.43,
+        "processing_value_stage1": 106,
+        "processing_value_stage4": 560,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_025",
+      "name": "Rice",
+      "emoji": "🌾",
+      "growth_time": 90,
+      "yield": 6,
+      "base_value": 31,
+      "value_per_minute": 124,
+      "seed_cost": 16,
+      "soil_type": "riverlands",
+      "rarity": "uncommon",
+      "growth_bucket": "mid",
+      "weather_affinity": [
+        "rainstorm",
+        "fertile"
+      ],
+      "machine_synergy": [
+        "grain_mill",
+        "auto_harvester"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → flour → bread → artisan loaf"
+        ],
+        "multipliers": [
+          2.3,
+          2.3,
+          2.3
+        ],
+        "stage4_value": 377
+      },
+      "unlock_tier": 2,
+      "unlock_region": "riverlands",
+      "description": "Wetland wonder. Feeds half the world's appetite.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Lentil",
+          "Buckwheat"
+        ],
+        "trait_inherited": "grain synergy + rainstorm affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 124,
+        "coins_per_minute_idle": 74.4,
+        "processing_value_stage1": 71,
+        "processing_value_stage4": 377,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_026",
+      "name": "Sugarcane",
+      "emoji": "🎋",
+      "growth_time": 120,
+      "yield": 5,
+      "base_value": 48,
+      "value_per_minute": 120,
+      "seed_cost": 24,
+      "soil_type": "tropical",
+      "rarity": "uncommon",
+      "growth_bucket": "mid",
+      "weather_affinity": [
+        "sunny",
+        "fertile"
+      ],
+      "machine_synergy": [
+        "mega_harvester",
+        "ai_farm_mgr",
+        "processing_unit"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → bio-fuel → refined bio-fuel → energy cell"
+        ],
+        "multipliers": [
+          2.3,
+          2.3,
+          2.5
+        ],
+        "stage4_value": 584
+      },
+      "unlock_tier": 2,
+      "unlock_region": "tropical",
+      "description": "Sweet gold. Refined into sugar, ethanol, and profit.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Fennel",
+          "Barley"
+        ],
+        "trait_inherited": "industrial synergy + sunny affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 120,
+        "coins_per_minute_idle": 72,
+        "processing_value_stage1": 110,
+        "processing_value_stage4": 584,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_027",
+      "name": "Oats",
+      "emoji": "🌾",
+      "growth_time": 100,
+      "yield": 5,
+      "base_value": 40,
+      "value_per_minute": 120,
+      "seed_cost": 20,
+      "soil_type": "highlands",
+      "rarity": "uncommon",
+      "growth_bucket": "mid",
+      "weather_affinity": [
+        "rainstorm"
+      ],
+      "machine_synergy": [
+        "grain_mill",
+        "auto_harvester"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → flour → bread → artisan loaf"
+        ],
+        "multipliers": [
+          2.3,
+          2.3,
+          2.3
+        ],
+        "stage4_value": 487
+      },
+      "unlock_tier": 2,
+      "unlock_region": "highlands",
+      "description": "Hardy highland grain. Cold-weather masterpiece.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Rice",
+          "Lavender"
+        ],
+        "trait_inherited": "grain synergy + rainstorm affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 120,
+        "coins_per_minute_idle": 72,
+        "processing_value_stage1": 92,
+        "processing_value_stage4": 487,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_028",
+      "name": "Buckwheat",
+      "emoji": "🌸",
+      "growth_time": 110,
+      "yield": 4,
+      "base_value": 55,
+      "value_per_minute": 120,
+      "seed_cost": 28,
+      "soil_type": "highlands",
+      "rarity": "uncommon",
+      "growth_bucket": "mid",
+      "weather_affinity": [
+        "sunny"
+      ],
+      "machine_synergy": [
+        "grain_mill",
+        "auto_harvester"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → flour → bread → artisan loaf"
+        ],
+        "multipliers": [
+          2.3,
+          2.3,
+          2.3
+        ],
+        "stage4_value": 669
+      },
+      "unlock_tier": 2,
+      "unlock_region": "highlands",
+      "description": "Gluten-free and fast. High upland crop demand.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Sugarcane",
+          "Grape"
+        ],
+        "trait_inherited": "grain synergy + sunny affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 120,
+        "coins_per_minute_idle": 72,
+        "processing_value_stage1": 126,
+        "processing_value_stage4": 669,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_029",
+      "name": "Barley",
+      "emoji": "🌾",
+      "growth_time": 130,
+      "yield": 5,
+      "base_value": 51,
+      "value_per_minute": 117.69,
+      "seed_cost": 26,
+      "soil_type": "meadow",
+      "rarity": "uncommon",
+      "growth_bucket": "mid",
+      "weather_affinity": [
+        "sunny",
+        "rainstorm"
+      ],
+      "machine_synergy": [
+        "grain_mill",
+        "auto_harvester"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → flour → bread → artisan loaf"
+        ],
+        "multipliers": [
+          2.3,
+          2.3,
+          2.3
+        ],
+        "stage4_value": 621
+      },
+      "unlock_tier": 2,
+      "unlock_region": "meadow",
+      "description": "The brewer's darling. Barley leads all fermentation chains.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Oats",
+          "Strawberry"
+        ],
+        "trait_inherited": "grain synergy + sunny affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 117.69,
+        "coins_per_minute_idle": 70.61,
+        "processing_value_stage1": 117,
+        "processing_value_stage4": 621,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_030",
+      "name": "Lavender",
+      "emoji": "💜",
+      "growth_time": 150,
+      "yield": 3,
+      "base_value": 97,
+      "value_per_minute": 116.4,
+      "seed_cost": 49,
+      "soil_type": "highlands",
+      "rarity": "uncommon",
+      "growth_bucket": "mid",
+      "weather_affinity": [
+        "sunny",
+        "fertile"
+      ],
+      "machine_synergy": [
+        "drip_irrigation",
+        "cold_storage"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → petals → perfume → luxury perfume"
+        ],
+        "multipliers": [
+          3,
+          2.3,
+          2.3
+        ],
+        "stage4_value": 1180
+      },
+      "unlock_tier": 2,
+      "unlock_region": "highlands",
+      "description": "Aromatherapy in plant form. Extract prices are extraordinary.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Buckwheat",
+          "Blueberry"
+        ],
+        "trait_inherited": "flower synergy + sunny affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 116.4,
+        "coins_per_minute_idle": 69.84,
+        "processing_value_stage1": 223,
+        "processing_value_stage4": 1180,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_031",
+      "name": "Grape",
+      "emoji": "🍇",
+      "growth_time": 200,
+      "yield": 5,
+      "base_value": 141,
+      "value_per_minute": 211.5,
+      "seed_cost": 71,
+      "soil_type": "highlands",
+      "rarity": "rare",
+      "growth_bucket": "mid",
+      "weather_affinity": [
+        "sunny",
+        "fertile"
+      ],
+      "machine_synergy": [
+        "juice_press",
+        "auto_harvester"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → juice → wine → reserve"
+        ],
+        "multipliers": [
+          2.3,
+          2.3,
+          2.3
+        ],
+        "stage4_value": 1716
+      },
+      "unlock_tier": 3,
+      "unlock_region": "highlands",
+      "description": "The vintage begins here. Four processing tiers await.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Barley",
+          "Coffee"
+        ],
+        "trait_inherited": "fruit synergy + sunny affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 211.5,
+        "coins_per_minute_idle": 126.9,
+        "processing_value_stage1": 324,
+        "processing_value_stage4": 1716,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_032",
+      "name": "Strawberry",
+      "emoji": "🍓",
+      "growth_time": 180,
+      "yield": 4,
+      "base_value": 161,
+      "value_per_minute": 214.67,
+      "seed_cost": 81,
+      "soil_type": "meadow",
+      "rarity": "rare",
+      "growth_bucket": "mid",
+      "weather_affinity": [
+        "sunny",
+        "fertile"
+      ],
+      "machine_synergy": [
+        "juice_press",
+        "auto_harvester"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → juice → wine → reserve"
+        ],
+        "multipliers": [
+          2.3,
+          2.3,
+          2.3
+        ],
+        "stage4_value": 1959
+      },
+      "unlock_tier": 3,
+      "unlock_region": "meadow",
+      "description": "Delicate and fleeting. Peak-season prices are the highest.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Lavender",
+          "Tea"
+        ],
+        "trait_inherited": "fruit synergy + sunny affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 214.67,
+        "coins_per_minute_idle": 128.8,
+        "processing_value_stage1": 370,
+        "processing_value_stage4": 1959,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_033",
+      "name": "Blueberry",
+      "emoji": "🫐",
+      "growth_time": 240,
+      "yield": 4,
+      "base_value": 208,
+      "value_per_minute": 208,
+      "seed_cost": 104,
+      "soil_type": "highlands",
+      "rarity": "rare",
+      "growth_bucket": "mid",
+      "weather_affinity": [
+        "rainstorm",
+        "fertile"
+      ],
+      "machine_synergy": [
+        "juice_press",
+        "auto_harvester"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → juice → wine → reserve"
+        ],
+        "multipliers": [
+          2.3,
+          2.3,
+          2.3
+        ],
+        "stage4_value": 2531
+      },
+      "unlock_tier": 3,
+      "unlock_region": "highlands",
+      "description": "Antioxidant powerhouse. Export demand always strong.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Grape",
+          "Vanilla"
+        ],
+        "trait_inherited": "fruit synergy + rainstorm affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 208,
+        "coins_per_minute_idle": 124.8,
+        "processing_value_stage1": 478,
+        "processing_value_stage4": 2531,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_034",
+      "name": "Coffee",
+      "emoji": "☕",
+      "growth_time": 300,
+      "yield": 3,
+      "base_value": 339,
+      "value_per_minute": 203.4,
+      "seed_cost": 170,
+      "soil_type": "tropical",
+      "rarity": "rare",
+      "growth_bucket": "mid",
+      "weather_affinity": [
+        "sunny",
+        "fertile"
+      ],
+      "machine_synergy": [
+        "mega_harvester",
+        "ai_farm_mgr",
+        "processing_unit"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → bio-fuel → refined bio-fuel → energy cell"
+        ],
+        "multipliers": [
+          2.3,
+          2.3,
+          2.5
+        ],
+        "stage4_value": 4125
+      },
+      "unlock_tier": 3,
+      "unlock_region": "tropical",
+      "description": "The world's favourite stimulant. Roast it for 3x returns.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Strawberry",
+          "Mango"
+        ],
+        "trait_inherited": "industrial synergy + sunny affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 203.4,
+        "coins_per_minute_idle": 122.04,
+        "processing_value_stage1": 780,
+        "processing_value_stage4": 4125,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_035",
+      "name": "Tea",
+      "emoji": "🍵",
+      "growth_time": 250,
+      "yield": 4,
+      "base_value": 216,
+      "value_per_minute": 207.36,
+      "seed_cost": 108,
+      "soil_type": "highlands",
+      "rarity": "rare",
+      "growth_bucket": "mid",
+      "weather_affinity": [
+        "rainstorm",
+        "fertile"
+      ],
+      "machine_synergy": [
+        "drip_irrigation",
+        "roaster"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → dried herb → extract → essence"
+        ],
+        "multipliers": [
+          2.5,
+          2.5,
+          2.5
+        ],
+        "stage4_value": 2628
+      },
+      "unlock_tier": 3,
+      "unlock_region": "highlands",
+      "description": "Calming leaves with obsessive global demand.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Blueberry",
+          "Pineapple"
+        ],
+        "trait_inherited": "herb synergy + rainstorm affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 207.36,
+        "coins_per_minute_idle": 124.42,
+        "processing_value_stage1": 497,
+        "processing_value_stage4": 2628,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_036",
+      "name": "Vanilla",
+      "emoji": "🌸",
+      "growth_time": 400,
+      "yield": 2,
+      "base_value": 659,
+      "value_per_minute": 197.7,
+      "seed_cost": 330,
+      "soil_type": "tropical",
+      "rarity": "rare",
+      "growth_bucket": "mid",
+      "weather_affinity": [
+        "sunny"
+      ],
+      "machine_synergy": [
+        "drip_irrigation",
+        "roaster"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → dried herb → extract → essence"
+        ],
+        "multipliers": [
+          2.5,
+          2.5,
+          2.5
+        ],
+        "stage4_value": 8018
+      },
+      "unlock_tier": 3,
+      "unlock_region": "tropical",
+      "description": "The world's second most expensive spice. Extract is worth fortunes.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Coffee",
+          "Papaya"
+        ],
+        "trait_inherited": "herb synergy + sunny affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 197.7,
+        "coins_per_minute_idle": 118.62,
+        "processing_value_stage1": 1516,
+        "processing_value_stage4": 8018,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_037",
+      "name": "Mango",
+      "emoji": "🥭",
+      "growth_time": 220,
+      "yield": 4,
+      "base_value": 192,
+      "value_per_minute": 209.45,
+      "seed_cost": 96,
+      "soil_type": "tropical",
+      "rarity": "rare",
+      "growth_bucket": "mid",
+      "weather_affinity": [
+        "sunny",
+        "fertile"
+      ],
+      "machine_synergy": [
+        "hydroponic_bay",
+        "juice_press"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → pulp → exotic blend → premium export"
+        ],
+        "multipliers": [
+          2.3,
+          2.5,
+          2.5
+        ],
+        "stage4_value": 2336
+      },
+      "unlock_tier": 3,
+      "unlock_region": "tropical",
+      "description": "King of tropical fruits. Juice revenue is exceptional.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Tea",
+          "Cacao"
+        ],
+        "trait_inherited": "tropical synergy + sunny affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 209.45,
+        "coins_per_minute_idle": 125.67,
+        "processing_value_stage1": 442,
+        "processing_value_stage4": 2336,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_038",
+      "name": "Pineapple",
+      "emoji": "🍍",
+      "growth_time": 280,
+      "yield": 3,
+      "base_value": 319,
+      "value_per_minute": 205.07,
+      "seed_cost": 160,
+      "soil_type": "tropical",
+      "rarity": "rare",
+      "growth_bucket": "mid",
+      "weather_affinity": [
+        "sunny"
+      ],
+      "machine_synergy": [
+        "hydroponic_bay",
+        "juice_press"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → pulp → exotic blend → premium export"
+        ],
+        "multipliers": [
+          2.3,
+          2.5,
+          2.5
+        ],
+        "stage4_value": 3881
+      },
+      "unlock_tier": 3,
+      "unlock_region": "tropical",
+      "description": "Spiky exterior, sweet reward. Canning adds major value.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Vanilla",
+          "Dragon Fruit"
+        ],
+        "trait_inherited": "tropical synergy + sunny affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 205.07,
+        "coins_per_minute_idle": 123.04,
+        "processing_value_stage1": 734,
+        "processing_value_stage4": 3881,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_039",
+      "name": "Papaya",
+      "emoji": "🪔",
+      "growth_time": 260,
+      "yield": 4,
+      "base_value": 224,
+      "value_per_minute": 206.77,
+      "seed_cost": 112,
+      "soil_type": "tropical",
+      "rarity": "rare",
+      "growth_bucket": "mid",
+      "weather_affinity": [
+        "sunny",
+        "fertile"
+      ],
+      "machine_synergy": [
+        "hydroponic_bay",
+        "juice_press"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → pulp → exotic blend → premium export"
+        ],
+        "multipliers": [
+          2.3,
+          2.5,
+          2.5
+        ],
+        "stage4_value": 2725
+      },
+      "unlock_tier": 3,
+      "unlock_region": "tropical",
+      "description": "Enzymes in every bite. Prized by pharmaceutical buyers.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Mango",
+          "Saffron"
+        ],
+        "trait_inherited": "tropical synergy + sunny affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 206.77,
+        "coins_per_minute_idle": 124.06,
+        "processing_value_stage1": 515,
+        "processing_value_stage4": 2725,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_040",
+      "name": "Cacao",
+      "emoji": "🍫",
+      "growth_time": 350,
+      "yield": 3,
+      "base_value": 390,
+      "value_per_minute": 200.57,
+      "seed_cost": 195,
+      "soil_type": "tropical",
+      "rarity": "rare",
+      "growth_bucket": "mid",
+      "weather_affinity": [
+        "rainstorm",
+        "fertile"
+      ],
+      "machine_synergy": [
+        "mega_harvester",
+        "ai_farm_mgr",
+        "processing_unit"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → bio-fuel → refined bio-fuel → energy cell"
+        ],
+        "multipliers": [
+          2.3,
+          2.3,
+          2.5
+        ],
+        "stage4_value": 4745
+      },
+      "unlock_tier": 3,
+      "unlock_region": "tropical",
+      "description": "The raw material of chocolate empires. Four stages of bliss.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Pineapple",
+          "Black Truffle"
+        ],
+        "trait_inherited": "industrial synergy + rainstorm affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 200.57,
+        "coins_per_minute_idle": 120.34,
+        "processing_value_stage1": 897,
+        "processing_value_stage4": 4745,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_041",
+      "name": "Dragon Fruit",
+      "emoji": "🐉",
+      "growth_time": 450,
+      "yield": 3,
+      "base_value": 1140,
+      "value_per_minute": 456,
+      "seed_cost": 570,
+      "soil_type": "desert",
+      "rarity": "epic",
+      "growth_bucket": "mid",
+      "weather_affinity": [
+        "sunny"
+      ],
+      "machine_synergy": [
+        "hydroponic_bay",
+        "mega_harvester"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → refined → crystallized → ultra-rare export"
+        ],
+        "multipliers": [
+          3,
+          3,
+          3
+        ],
+        "stage4_value": 13870
+      },
+      "unlock_tier": 4,
+      "unlock_region": "arid",
+      "description": "Otherworldly in appearance, extraordinary in market value.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Papaya",
+          "Avocado"
+        ],
+        "trait_inherited": "exotic synergy + sunny affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 456,
+        "coins_per_minute_idle": 273.6,
+        "processing_value_stage1": 2622,
+        "processing_value_stage4": 13870,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_042",
+      "name": "Saffron",
+      "emoji": "🌷",
+      "growth_time": 500,
+      "yield": 1,
+      "base_value": 1880,
+      "value_per_minute": 225.6,
+      "seed_cost": 940,
+      "soil_type": "highlands",
+      "rarity": "epic",
+      "growth_bucket": "mid",
+      "weather_affinity": [
+        "sunny",
+        "fertile"
+      ],
+      "machine_synergy": [
+        "drip_irrigation",
+        "cold_storage"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → petals → perfume → luxury perfume"
+        ],
+        "multipliers": [
+          3,
+          2.3,
+          2.3
+        ],
+        "stage4_value": 22874
+      },
+      "unlock_tier": 4,
+      "unlock_region": "highlands",
+      "description": "The world's most expensive spice by weight. Rarity is the point.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Cacao",
+          "Artichoke"
+        ],
+        "trait_inherited": "flower synergy + sunny affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 225.6,
+        "coins_per_minute_idle": 135.36,
+        "processing_value_stage1": 4324,
+        "processing_value_stage4": 22874,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_043",
+      "name": "Black Truffle",
+      "emoji": "🍄",
+      "growth_time": 480,
+      "yield": 2,
+      "base_value": 1812,
+      "value_per_minute": 453,
+      "seed_cost": 906,
+      "soil_type": "highlands",
+      "rarity": "epic",
+      "growth_bucket": "mid",
+      "weather_affinity": [
+        "rainstorm"
+      ],
+      "machine_synergy": [
+        "cold_storage",
+        "processing_unit"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → dried → powder → supplement"
+        ],
+        "multipliers": [
+          2,
+          2.5,
+          3
+        ],
+        "stage4_value": 22047
+      },
+      "unlock_tier": 4,
+      "unlock_region": "highlands",
+      "description": "Found underground, sold in high-end restaurants worldwide.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Dragon Fruit",
+          "Quinoa"
+        ],
+        "trait_inherited": "mushroom synergy + rainstorm affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 453,
+        "coins_per_minute_idle": 271.8,
+        "processing_value_stage1": 4168,
+        "processing_value_stage4": 22047,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_044",
+      "name": "Avocado",
+      "emoji": "🥑",
+      "growth_time": 420,
+      "yield": 3,
+      "base_value": 1071,
+      "value_per_minute": 459,
+      "seed_cost": 536,
+      "soil_type": "tropical",
+      "rarity": "epic",
+      "growth_bucket": "mid",
+      "weather_affinity": [
+        "sunny"
+      ],
+      "machine_synergy": [
+        "hydroponic_bay",
+        "juice_press"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → pulp → exotic blend → premium export"
+        ],
+        "multipliers": [
+          2.3,
+          2.5,
+          2.5
+        ],
+        "stage4_value": 13031
+      },
+      "unlock_tier": 4,
+      "unlock_region": "tropical",
+      "description": "The millennial crop. Demand never wavers.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Saffron",
+          "Chia"
+        ],
+        "trait_inherited": "tropical synergy + sunny affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 459,
+        "coins_per_minute_idle": 275.4,
+        "processing_value_stage1": 2463,
+        "processing_value_stage4": 13031,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_045",
+      "name": "Artichoke",
+      "emoji": "🌿",
+      "growth_time": 360,
+      "yield": 2,
+      "base_value": 1399,
+      "value_per_minute": 466.33,
+      "seed_cost": 700,
+      "soil_type": "highlands",
+      "rarity": "epic",
+      "growth_bucket": "mid",
+      "weather_affinity": [
+        "fertile"
+      ],
+      "machine_synergy": [
+        "auto_planter",
+        "drip_irrigation"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → preserved → pickled → gourmet jar"
+        ],
+        "multipliers": [
+          2,
+          2,
+          2.3
+        ],
+        "stage4_value": 17022
+      },
+      "unlock_tier": 4,
+      "unlock_region": "highlands",
+      "description": "Architectural beauty with a gourmet price tag.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Black Truffle",
+          "Tahitian Lime"
+        ],
+        "trait_inherited": "vegetable synergy + fertile affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 466.33,
+        "coins_per_minute_idle": 279.8,
+        "processing_value_stage1": 3218,
+        "processing_value_stage4": 17022,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_046",
+      "name": "Quinoa",
+      "emoji": "🌾",
+      "growth_time": 390,
+      "yield": 4,
+      "base_value": 752,
+      "value_per_minute": 462.77,
+      "seed_cost": 376,
+      "soil_type": "highlands",
+      "rarity": "epic",
+      "growth_bucket": "mid",
+      "weather_affinity": [
+        "sunny"
+      ],
+      "machine_synergy": [
+        "grain_mill",
+        "auto_harvester"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → flour → bread → artisan loaf"
+        ],
+        "multipliers": [
+          2.3,
+          2.3,
+          2.3
+        ],
+        "stage4_value": 9150
+      },
+      "unlock_tier": 4,
+      "unlock_region": "highlands",
+      "description": "The super-grain of lost civilisations. Premium health-food pricing.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Avocado",
+          "Wasabi Root"
+        ],
+        "trait_inherited": "grain synergy + sunny affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 462.77,
+        "coins_per_minute_idle": 277.66,
+        "processing_value_stage1": 1730,
+        "processing_value_stage4": 9150,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_047",
+      "name": "Chia",
+      "emoji": "🌱",
+      "growth_time": 340,
+      "yield": 5,
+      "base_value": 531,
+      "value_per_minute": 468.53,
+      "seed_cost": 266,
+      "soil_type": "desert",
+      "rarity": "epic",
+      "growth_bucket": "mid",
+      "weather_affinity": [
+        "sunny"
+      ],
+      "machine_synergy": [
+        "seed_sorter",
+        "grain_mill"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → dried → paste → premium paste"
+        ],
+        "multipliers": [
+          1.8,
+          2,
+          2.3
+        ],
+        "stage4_value": 6461
+      },
+      "unlock_tier": 4,
+      "unlock_region": "arid",
+      "description": "Tiny seeds, enormous nutritional value. Global export potential.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Artichoke",
+          "Blue Oyster Mushroom"
+        ],
+        "trait_inherited": "legume synergy + sunny affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 468.53,
+        "coins_per_minute_idle": 281.12,
+        "processing_value_stage1": 1221,
+        "processing_value_stage4": 6461,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_048",
+      "name": "Tahitian Lime",
+      "emoji": "🍋",
+      "growth_time": 380,
+      "yield": 3,
+      "base_value": 979,
+      "value_per_minute": 463.74,
+      "seed_cost": 490,
+      "soil_type": "tropical",
+      "rarity": "epic",
+      "growth_bucket": "mid",
+      "weather_affinity": [
+        "rainstorm",
+        "sunny"
+      ],
+      "machine_synergy": [
+        "juice_press",
+        "auto_harvester"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → juice → wine → reserve"
+        ],
+        "multipliers": [
+          2.3,
+          2.3,
+          2.3
+        ],
+        "stage4_value": 11911
+      },
+      "unlock_tier": 4,
+      "unlock_region": "tropical",
+      "description": "Citrus royalty. The extract is used in luxury beverage lines.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Quinoa",
+          "White Truffle"
+        ],
+        "trait_inherited": "fruit synergy + rainstorm affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 463.74,
+        "coins_per_minute_idle": 278.24,
+        "processing_value_stage1": 2252,
+        "processing_value_stage4": 11911,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_049",
+      "name": "Wasabi Root",
+      "emoji": "🟢",
+      "growth_time": 900,
+      "yield": 2,
+      "base_value": 3191,
+      "value_per_minute": 425.47,
+      "seed_cost": 1596,
+      "soil_type": "riverlands",
+      "rarity": "epic",
+      "growth_bucket": "late",
+      "weather_affinity": [
+        "rainstorm",
+        "fertile"
+      ],
+      "machine_synergy": [
+        "drip_irrigation",
+        "roaster"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → dried herb → extract → essence"
+        ],
+        "multipliers": [
+          2.5,
+          2.5,
+          2.5
+        ],
+        "stage4_value": 38825
+      },
+      "unlock_tier": 4,
+      "unlock_region": "riverlands",
+      "description": "Grows only in cold stream beds. Authentic demand keeps prices elite.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Chia",
+          "Kopi Luwak"
+        ],
+        "trait_inherited": "herb synergy + rainstorm affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 425.47,
+        "coins_per_minute_idle": 255.28,
+        "processing_value_stage1": 7339,
+        "processing_value_stage4": 38825,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_050",
+      "name": "Blue Oyster Mushroom",
+      "emoji": "🍄",
+      "growth_time": 720,
+      "yield": 4,
+      "base_value": 1305,
+      "value_per_minute": 435,
+      "seed_cost": 653,
+      "soil_type": "riverlands",
+      "rarity": "epic",
+      "growth_bucket": "late",
+      "weather_affinity": [
+        "rainstorm"
+      ],
+      "machine_synergy": [
+        "cold_storage",
+        "processing_unit"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → dried → powder → supplement"
+        ],
+        "multipliers": [
+          2,
+          2.5,
+          3
+        ],
+        "stage4_value": 15878
+      },
+      "unlock_tier": 4,
+      "unlock_region": "riverlands",
+      "description": "Medical-grade mycelium. Extract commands pharmaceutical rates.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Tahitian Lime",
+          "Ghost Pepper"
+        ],
+        "trait_inherited": "mushroom synergy + rainstorm affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 435,
+        "coins_per_minute_idle": 261,
+        "processing_value_stage1": 3001,
+        "processing_value_stage4": 15878,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_051",
+      "name": "White Truffle",
+      "emoji": "✨",
+      "growth_time": 3600,
+      "yield": 1,
+      "base_value": 31747,
+      "value_per_minute": 529.12,
+      "seed_cost": 15874,
+      "soil_type": "highlands",
+      "rarity": "legendary",
+      "growth_bucket": "late",
+      "weather_affinity": [
+        "fertile"
+      ],
+      "machine_synergy": [
+        "cold_storage",
+        "processing_unit"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → dried → powder → supplement"
+        ],
+        "multipliers": [
+          2,
+          2.5,
+          3
+        ],
+        "stage4_value": 386266
+      },
+      "unlock_tier": 5,
+      "unlock_region": "highlands",
+      "description": "The jewel of gastronomy. A single harvest is worth a machine.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Wasabi Root",
+          "Sea Grape"
+        ],
+        "trait_inherited": "mushroom synergy + fertile affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 529.12,
+        "coins_per_minute_idle": 317.47,
+        "processing_value_stage1": 73018,
+        "processing_value_stage4": 386266,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_052",
+      "name": "Kopi Luwak",
+      "emoji": "☕",
+      "growth_time": 2400,
+      "yield": 1,
+      "base_value": 22040,
+      "value_per_minute": 551,
+      "seed_cost": 11020,
+      "soil_type": "tropical",
+      "rarity": "legendary",
+      "growth_bucket": "late",
+      "weather_affinity": [
+        "sunny",
+        "fertile"
+      ],
+      "machine_synergy": [
+        "mega_harvester",
+        "ai_farm_mgr",
+        "processing_unit"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → bio-fuel → refined bio-fuel → energy cell"
+        ],
+        "multipliers": [
+          2.3,
+          2.3,
+          2.5
+        ],
+        "stage4_value": 268161
+      },
+      "unlock_tier": 5,
+      "unlock_region": "tropical",
+      "description": "The world's rarest coffee. A cup sells for $80. You grow the beans.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Blue Oyster Mushroom",
+          "Argan Blossom"
+        ],
+        "trait_inherited": "industrial synergy + sunny affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 551,
+        "coins_per_minute_idle": 330.6,
+        "processing_value_stage1": 50692,
+        "processing_value_stage4": 268161,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_053",
+      "name": "Ghost Pepper",
+      "emoji": "🔥",
+      "growth_time": 1800,
+      "yield": 2,
+      "base_value": 17013,
+      "value_per_minute": 1134.2,
+      "seed_cost": 8507,
+      "soil_type": "desert",
+      "rarity": "legendary",
+      "growth_bucket": "late",
+      "weather_affinity": [
+        "sunny"
+      ],
+      "machine_synergy": [
+        "auto_planter",
+        "drip_irrigation"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → preserved → pickled → gourmet jar"
+        ],
+        "multipliers": [
+          2,
+          2,
+          2.3
+        ],
+        "stage4_value": 206997
+      },
+      "unlock_tier": 5,
+      "unlock_region": "arid",
+      "description": "Record-breaking Scoville rating. Pharmaceutical and food-tech buyers compete.",
+      "hybridization": {
+        "parent_suggestions": [
+          "White Truffle",
+          "Matsutake"
+        ],
+        "trait_inherited": "vegetable synergy + sunny affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 1134.2,
+        "coins_per_minute_idle": 680.52,
+        "processing_value_stage1": 39130,
+        "processing_value_stage4": 206997,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_054",
+      "name": "Sea Grape",
+      "emoji": "🌊",
+      "growth_time": 2700,
+      "yield": 2,
+      "base_value": 24505,
+      "value_per_minute": 1089.11,
+      "seed_cost": 12253,
+      "soil_type": "coastal",
+      "rarity": "legendary",
+      "growth_bucket": "late",
+      "weather_affinity": [
+        "rainstorm",
+        "sunny"
+      ],
+      "machine_synergy": [
+        "juice_press",
+        "auto_harvester"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → juice → wine → reserve"
+        ],
+        "multipliers": [
+          2.3,
+          2.3,
+          2.3
+        ],
+        "stage4_value": 298152
+      },
+      "unlock_tier": 5,
+      "unlock_region": "coastal",
+      "description": "Rare coastal delicacy. Only grows in salt-kissed soils near water.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Kopi Luwak",
+          "Manuka Flower"
+        ],
+        "trait_inherited": "fruit synergy + rainstorm affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 1089.11,
+        "coins_per_minute_idle": 653.47,
+        "processing_value_stage1": 56361,
+        "processing_value_stage4": 298152,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_055",
+      "name": "Argan Blossom",
+      "emoji": "🌺",
+      "growth_time": 2100,
+      "yield": 1,
+      "base_value": 19545,
+      "value_per_minute": 558.43,
+      "seed_cost": 9773,
+      "soil_type": "desert",
+      "rarity": "legendary",
+      "growth_bucket": "late",
+      "weather_affinity": [
+        "sunny"
+      ],
+      "machine_synergy": [
+        "drip_irrigation",
+        "cold_storage"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → petals → perfume → luxury perfume"
+        ],
+        "multipliers": [
+          3,
+          2.3,
+          2.3
+        ],
+        "stage4_value": 237804
+      },
+      "unlock_tier": 5,
+      "unlock_region": "arid",
+      "description": "The desert's treasure. Cold-pressed oil trades at extreme premiums.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Ghost Pepper",
+          "Oud Resin"
+        ],
+        "trait_inherited": "flower synergy + sunny affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 558.43,
+        "coins_per_minute_idle": 335.06,
+        "processing_value_stage1": 44954,
+        "processing_value_stage4": 237804,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_056",
+      "name": "Matsutake",
+      "emoji": "🍄",
+      "growth_time": 4200,
+      "yield": 1,
+      "base_value": 36472,
+      "value_per_minute": 521.03,
+      "seed_cost": 18236,
+      "soil_type": "highlands",
+      "rarity": "legendary",
+      "growth_bucket": "late",
+      "weather_affinity": [
+        "rainstorm"
+      ],
+      "machine_synergy": [
+        "cold_storage",
+        "processing_unit"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → dried → powder → supplement"
+        ],
+        "multipliers": [
+          2,
+          2.5,
+          3
+        ],
+        "stage4_value": 443755
+      },
+      "unlock_tier": 5,
+      "unlock_region": "highlands",
+      "description": "Japan's sacred mushroom. Gifted to emperors. Now sold to your buyers.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Sea Grape",
+          "Lunar Melon"
+        ],
+        "trait_inherited": "mushroom synergy + rainstorm affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 521.03,
+        "coins_per_minute_idle": 312.62,
+        "processing_value_stage1": 83886,
+        "processing_value_stage4": 443755,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_057",
+      "name": "Manuka Flower",
+      "emoji": "🌸",
+      "growth_time": 3000,
+      "yield": 2,
+      "base_value": 26943,
+      "value_per_minute": 1077.72,
+      "seed_cost": 13472,
+      "soil_type": "coastal",
+      "rarity": "legendary",
+      "growth_bucket": "late",
+      "weather_affinity": [
+        "sunny",
+        "fertile"
+      ],
+      "machine_synergy": [
+        "drip_irrigation",
+        "cold_storage"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → petals → perfume → luxury perfume"
+        ],
+        "multipliers": [
+          3,
+          2.3,
+          2.3
+        ],
+        "stage4_value": 327815
+      },
+      "unlock_tier": 5,
+      "unlock_region": "coastal",
+      "description": "The source of Manuka honey. Medical-grade antibacterial properties.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Argan Blossom",
+          "Aurora Cacao"
+        ],
+        "trait_inherited": "flower synergy + sunny affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 1077.72,
+        "coins_per_minute_idle": 646.63,
+        "processing_value_stage1": 61969,
+        "processing_value_stage4": 327815,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_058",
+      "name": "Oud Resin",
+      "emoji": "🪵",
+      "growth_time": 5400,
+      "yield": 1,
+      "base_value": 45728,
+      "value_per_minute": 508.09,
+      "seed_cost": 22864,
+      "soil_type": "tropical",
+      "rarity": "legendary",
+      "growth_bucket": "late",
+      "weather_affinity": [
+        "sunny"
+      ],
+      "machine_synergy": [
+        "hydroponic_bay",
+        "mega_harvester"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → refined → crystallized → ultra-rare export"
+        ],
+        "multipliers": [
+          3,
+          3,
+          3
+        ],
+        "stage4_value": 556373
+      },
+      "unlock_tier": 5,
+      "unlock_region": "tropical",
+      "description": "Liquid gold from agarwood trees. A kilogram trades for $10,000.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Matsutake",
+          "Aurora Cacao"
+        ],
+        "trait_inherited": "exotic synergy + sunny affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 508.09,
+        "coins_per_minute_idle": 304.85,
+        "processing_value_stage1": 105174,
+        "processing_value_stage4": 556373,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_059",
+      "name": "Lunar Melon",
+      "emoji": "🌙",
+      "growth_time": 7000,
+      "yield": 2,
+      "base_value": 57759,
+      "value_per_minute": 990.15,
+      "seed_cost": 28880,
+      "soil_type": "highlands",
+      "rarity": "legendary",
+      "growth_bucket": "late",
+      "weather_affinity": [
+        "fertile"
+      ],
+      "machine_synergy": [
+        "hydroponic_bay",
+        "mega_harvester"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → refined → crystallized → ultra-rare export"
+        ],
+        "multipliers": [
+          3,
+          3,
+          3
+        ],
+        "stage4_value": 702754
+      },
+      "unlock_tier": 5,
+      "unlock_region": "highlands",
+      "description": "A mythic heirloom variety. Said to only fruit under full-moon cycles.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Manuka Flower",
+          "Aurora Cacao"
+        ],
+        "trait_inherited": "exotic synergy + fertile affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 990.15,
+        "coins_per_minute_idle": 594.09,
+        "processing_value_stage1": 132846,
+        "processing_value_stage4": 702754,
+        "no_negative_arbitrage": true
+      }
+    },
+    {
+      "crop_id": "crop_060",
+      "name": "Aurora Cacao",
+      "emoji": "🌌",
+      "growth_time": 6500,
+      "yield": 1,
+      "base_value": 54032,
+      "value_per_minute": 498.76,
+      "seed_cost": 27016,
+      "soil_type": "tropical",
+      "rarity": "legendary",
+      "growth_bucket": "late",
+      "weather_affinity": [
+        "fertile",
+        "sunny"
+      ],
+      "machine_synergy": [
+        "mega_harvester",
+        "ai_farm_mgr",
+        "processing_unit"
+      ],
+      "processing_chain": {
+        "steps": [
+          "raw → bio-fuel → refined bio-fuel → energy cell"
+        ],
+        "multipliers": [
+          2.3,
+          2.3,
+          2.5
+        ],
+        "stage4_value": 657407
+      },
+      "unlock_tier": 5,
+      "unlock_region": "tropical",
+      "description": "A genetic marvel of cacao genetics. Chocolate houses pay fortunes for it.",
+      "hybridization": {
+        "parent_suggestions": [
+          "Oud Resin",
+          "Aurora Cacao"
+        ],
+        "trait_inherited": "industrial synergy + fertile affinity blend"
+      },
+      "kpis": {
+        "coins_per_minute_active": 498.76,
+        "coins_per_minute_idle": 299.26,
+        "processing_value_stage1": 124274,
+        "processing_value_stage4": 657407,
+        "no_negative_arbitrage": true
+      }
+    }
+  ]
+}

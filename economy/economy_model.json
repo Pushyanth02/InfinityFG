@@ -1,0 +1,334 @@
+{
+  "schema": "agriempire-economy-model/v1",
+  "issued_by": "antigravity",
+  "timestamp": "2026-03-15T09:18:00Z",
+  "input": {
+    "target_pacing": {
+      "hook_minutes": 5,
+      "automation_minutes": 30,
+      "industrial_hours": 2,
+      "prestige_hours": 20
+    },
+    "player_behavior_assumptions": {
+      "active_ratio": 0.4,
+      "idle_ratio": 0.6,
+      "notes": "Active players click/interact every 30–60s. Idle players return every 4–8h. Economy must be rewarding for both."
+    },
+    "initial_items": {
+      "num_crops": 12,
+      "num_machines": 10
+    }
+  },
+  "notes": "Full economy model for AgriEmpire. Every formula includes tunables (safe_range), provenance, and a Gini/inflation impact annotation. This document is the authoritative input for Simulation AI (S4) validation and live-ops adjustments. Change any field via a numbered patch in /patches/.",
+
+  "currencies": {
+    "coins": {
+      "id": "coins",
+      "emoji": "💰",
+      "description": "Primary soft currency. Earned by harvesting crops, machine passive income, and selling processed goods. Spent on all in-game purchases.",
+      "earn_sources": ["crop_harvest", "machine_passive", "processing_chain_output", "worker_bonuses", "achievement_rewards"],
+      "sink_uses": ["crop_seeds", "machine_builds", "upgrades", "worker_hire", "worker_level_up", "skill_unlock", "region_unlock", "land_tax"],
+      "purchasable_with_real_money": false,
+      "inflation_risk": "HIGH — primary emission currency. Mitigation: land tax, machine maintenance, seed cost sink.",
+      "starting_amount": 50,
+      "loc_key": "currency.coins"
+    },
+    "gems": {
+      "id": "gems",
+      "emoji": "💎",
+      "description": "Premium soft currency. Earned via prestige (1 gem per prestige point floor). Optional cosmetic purchase. Never convertible to coins.",
+      "earn_sources": ["prestige_reward", "optional_real_money_purchase", "achievement_milestones_rare"],
+      "sink_uses": ["cosmetic_skins", "extra_save_slot", "offline_income_extension", "weather_forecast_preview", "event_feed_archive"],
+      "purchasable_with_real_money": true,
+      "p2w_firewall": "Strictly cosmetic / bounded QoL. Cannot be exchanged for coins, yield, or prestige points.",
+      "starting_amount": 0,
+      "loc_key": "currency.gems"
+    },
+    "tech_tokens": {
+      "id": "tech_tokens",
+      "emoji": "🔬",
+      "description": "Secondary research currency. Earned from Industrial-tier machines (T4+) and rare crop discoveries. Spent on Tier 4–5 upgrades and advanced skill nodes.",
+      "earn_sources": ["industrial_machine_production", "mythic_crop_harvest", "prestige_milestone_reward"],
+      "sink_uses": ["t4_upgrades", "t5_upgrades", "ai_skill_nodes", "processing_chain_blueprints"],
+      "purchasable_with_real_money": false,
+      "gate_function": "Tech Tokens gate the industrial-era content (2h target). Players who skip machines can never reach industrial tier, creating a natural progression gate without a paywall.",
+      "starting_amount": 0,
+      "earn_rate_per_hour_t4_machine": 2.5,
+      "loc_key": "currency.tech_tokens"
+    },
+    "reputation": {
+      "id": "reputation",
+      "emoji": "⭐",
+      "description": "Soft score representing market standing. Earned by consistent harvesting frequency and fulfilling trade contracts. Affects sell price multiplier (up to +30%). Decays 5% per hour of inactivity (idle soft-cap).",
+      "earn_sources": ["harvest_streak", "trade_contract_fulfilled", "worker_milestone"],
+      "decay": { "rate_pct_per_idle_hour": 5, "cap_pct_loss": 50, "floor": 0 },
+      "effect": "sell_price_multiplier = 1 + min(0.30, reputation_points / 1000)",
+      "sink_function": "Decay is the primary sink. Creates a retention mechanic: returning players rebuild reputation.",
+      "loc_key": "currency.reputation"
+    }
+  },
+
+  "scaling_formulas": {
+    "crop_seed_cost": {
+      "formula": "seed_cost = round(crop.baseValue * seed_cost_ratio)",
+      "seed_cost_ratio": 0.5,
+      "tunable": { "safe_range": [0.2, 1.0], "notes": "At 0.2 seeds are nearly free and coin drain is negligible. At 1.0 seeds consume all harvest revenue of the first cycle — punishing early game." },
+      "provenance": "Stardew Valley: seeds cost ~50–70% of one harvest yield. We target 50% for fast feedback.",
+      "loc_key": "formula.crop_seed_cost"
+    },
+    "crop_harvest_value": {
+      "formula": "value = crop.baseValue * crop.yield * farm_multiplier * machine_multiplier * weather_modifier * reputation_multiplier",
+      "sub_formulas": {
+        "farm_multiplier": "1 + (upgrade_bonus + skill_bonus + prestige_allMultiplier)",
+        "machine_multiplier": "1 + (sum(machine.yieldMultiplier - 1) * owned_count * 0.07)",
+        "weather_modifier": { "sunny": 1.0, "rainstorm": 1.0, "fertile": 1.5, "drought": 0.5, "pest": 0.3 },
+        "reputation_multiplier": "1 + min(0.30, reputation_points / 1000)"
+      },
+      "notes": "Reputation multiplier caps at +30% to prevent infinite sell-price inflation via reputation stacking.",
+      "loc_key": "formula.crop_harvest_value"
+    },
+    "upgrade_cost": {
+      "formula": "cost = baseCost * (growth_rate ^ level)",
+      "growth_rate": 1.15,
+      "tunable": { "safe_range": [1.08, 1.35], "notes": "1.15 is idle-game standard. >1.25 creates hard walls at level 8+." },
+      "provenance": "AdVenture Capitalist: 1.07–1.15. Realm Grinder: 1.12. AgriEmpire targets mid-range.",
+      "max_level": 10,
+      "loc_key": "formula.upgrade_cost"
+    },
+    "upgrade_income_effect": {
+      "formula": "income_multiplier = 1.12 ^ upgrades_purchased",
+      "income_base_rate": 1.12,
+      "tunable": { "safe_range": [1.05, 1.25], "notes": "1.12 per upgrade means 10 upgrades = 3.1x income. At 1.25, 10 upgrades = 9.3x — too powerful." },
+      "loc_key": "formula.upgrade_income"
+    },
+    "machine_build_cost": {
+      "formula": "cost = baseCost * (1.18 ^ tier)",
+      "tier_exponent": 1.18,
+      "tunable": { "safe_range": [1.10, 1.30], "notes": "Targets ~10x cost T1→T5. At 1.30: T5 is 54x T1 base — prohibitive without prestige." },
+      "tier_base_costs": {
+        "T1": 100, "T2": 1500, "T3": 15000, "T4": 80000, "T5": 350000
+      },
+      "loc_key": "formula.machine_build_cost"
+    },
+    "machine_passive_income": {
+      "formula": "cps = sum(machine.productionRate * count) * machine_multiplier * weather_cps_mod",
+      "weather_cps_mod": { "sunny": 1.0, "fertile": 1.5, "drought": 0.5, "rainstorm": 1.2, "pest": 1.0 },
+      "notes": "CPS target: 0 at t=0; ~5/s at t=15min (2 T1 machines); ~50/s at t=1h; ~500/s at industrial era.",
+      "loc_key": "formula.machine_passive_income"
+    },
+    "worker_hire_cost": {
+      "formula": "cost = worker.baseCost",
+      "notes": "Flat hire cost per worker type. Repeated hire of same type multiplies: hire_cost * (1 + 0.5 * already_hired) — prevents infinite stacking.",
+      "repeated_hire_multiplier": 1.5,
+      "tunable": { "safe_range": [1.2, 3.0], "notes": "1.5 means each additional same-type worker costs 50% more. At 3.0, second hire is prohibitive." },
+      "loc_key": "formula.worker_hire_cost"
+    },
+    "worker_level_up_cost": {
+      "formula": "level_up_cost = worker.baseCost * (1.5 ^ totalLevel)",
+      "level_exponent": 1.5,
+      "tunable": { "safe_range": [1.2, 2.5], "notes": "1.5 → Lv10 cost = 57× baseCost. At 2.5, Lv5 cost = 97× baseCost — extremely punishing." },
+      "loc_key": "formula.worker_level_cost"
+    },
+    "worker_bonus": {
+      "formula": "bonus = base_bonus + (level * level_bonus_step)",
+      "level_bonus_step": 0.05,
+      "tunable": { "safe_range": [0.02, 0.15], "notes": "0.05/level → Lv10 = +50% domain bonus. At 0.15, Lv5 workers outclass machines." },
+      "loc_key": "formula.worker_bonus"
+    },
+    "prestige_points": {
+      "formula": "pts = sqrt(lifetime_coins / prestige_divisor)",
+      "prestige_divisor": 5000000,
+      "minimum_to_prestige_coins": 5000000,
+      "tunable": { "safe_range": [500000, 10000000], "notes": "5M divisor: first prestige ~20h nominal. At 500k players prestige in hour 1 — too fast." },
+      "per_prestige_gems": "floor(pts)",
+      "loc_key": "formula.prestige_points"
+    },
+    "prestige_permanent_bonuses": {
+      "machine_efficiency": "min(0.50, total_pts * 0.02)",
+      "crop_speed": "min(0.50, total_pts * 0.015)",
+      "rare_crop_chance": "min(0.30, total_pts * 0.010)",
+      "all_income_multiplier": "min(2.00, total_pts * 0.05)",
+      "notes": "Hard caps on all bonuses prevent prestige loops from making content trivial. Caps validated by simulation.",
+      "loc_key": "formula.prestige_bonuses"
+    },
+    "processing_chain_multiplier": {
+      "formula": "output_value = input_value * (2.3 ^ stage)",
+      "multiplier_per_stage": 2.3,
+      "max_stages": 4,
+      "example": "Wheat(5) → Flour(11.5) → Bread(26.5) → Premium Bread(61) → Export Package(140)",
+      "tunable": { "safe_range": [1.5, 4.0], "notes": "2.3x/stage means stage 4 = 28x raw value. At 4.0x, stage 4 = 256x — makes raw selling obsolete." },
+      "loc_key": "formula.processing_chain"
+    },
+    "region_unlock_cost": {
+      "formula": "cost = base_region_cost * (2.5 ^ region_index)",
+      "base_region_cost": 500,
+      "exponent": 2.5,
+      "tunable": { "safe_range": [1.8, 4.0], "notes": "2.5 means region 5 costs ~12× first region. At 4.0, region 4 is prohibitive for early-mid players." },
+      "plots_granted_per_region": 4,
+      "loc_key": "formula.region_unlock_cost"
+    }
+  },
+
+  "inflation_mitigation": {
+    "notes": "Three-layer inflation control: active sinks drain coins continuously, soft caps slow income growth, and reputation decay discourages pure idle accumulation.",
+
+    "sinks": [
+      {
+        "id": "land_tax",
+        "name": "Land Tax",
+        "trigger": "land_owned > 100 acres",
+        "formula": "drain_per_hour = current_coins * 0.005 * ((land - 100) / 100)",
+        "max_drain_rate_pct_per_hour": 2.0,
+        "loc_key": "sink.land_tax",
+        "default_en": "Land ownership costs you {{amount}} per hour in taxes.",
+        "notes": "Linear drain tied to land overcapacity. A player with 200 acres loses 1% coins/hour. Prevents hoarding land without developing it. Drain caps at 2%/h to prevent punishing players who are genuinely building.",
+        "tunable": { "rate_knob": 0.005, "safe_range": [0.001, 0.02] }
+      },
+      {
+        "id": "machine_maintenance",
+        "name": "Machine Maintenance",
+        "trigger": "total_machines > 5",
+        "formula": "maintenance_per_tick = sum(machine.baseCost * 0.0001 * count)",
+        "frequency": "every_game_tick (100ms)",
+        "loc_key": "sink.machine_maintenance",
+        "default_en": "Machines require {{amount}}/sec in upkeep.",
+        "notes": "0.01% of baseCost per machine per second. A fleet of 10 T2 machines (baseCost ~2000 avg) costs ~2 coins/sec in maintenance. Negligible early, meaningful at industrial scale.",
+        "tunable": { "rate_knob": 0.0001, "safe_range": [0.00005, 0.001] }
+      },
+      {
+        "id": "seed_cost_sink",
+        "name": "Seed Purchase Sink",
+        "trigger": "always_active",
+        "formula": "seed_cost = round(crop.baseValue * 0.5)",
+        "notes": "Active players planting continuously spend ~30% of harvest income on seeds. This is the primary active-play sink.",
+        "tunable": { "rate_knob": 0.5, "safe_range": [0.2, 1.0] }
+      },
+      {
+        "id": "reputation_decay",
+        "name": "Reputation Decay",
+        "trigger": "player_inactive > 1_hour",
+        "formula": "reputation -= reputation * 0.05 * idle_hours; reputation = max(0, reputation)",
+        "notes": "5%/h decay prevents reputation from becoming a permanent unbounded bonus. Caps at 50% total decay per idle session.",
+        "tunable": { "rate_knob": 0.05, "safe_range": [0.01, 0.15] }
+      },
+      {
+        "id": "upgrade_cost_scaling",
+        "name": "Upgrade Cost Escalation",
+        "trigger": "always_active",
+        "formula": "cost = baseCost * (1.15 ^ level)",
+        "notes": "Each upgrade level costs 15% more. Prevents players from spamming all upgrades in one session. At level 10, cost is 4x base.",
+        "tunable": { "rate_knob": 1.15, "safe_range": [1.08, 1.35] }
+      },
+      {
+        "id": "processing_machine_fee",
+        "name": "Processing Input Fee",
+        "trigger": "processing_chain_active",
+        "formula": "fee = input_crop_value * 0.10",
+        "notes": "10% of raw input value charged as a processing fee per stage — machines 'consume' some revenue as running cost. Prevents processing chains from being infinite money multipliers.",
+        "tunable": { "rate_knob": 0.10, "safe_range": [0.05, 0.25] }
+      }
+    ],
+
+    "soft_caps": [
+      {
+        "id": "machine_cps_cap",
+        "cap": "machine_passive_cps_softcap = 10000",
+        "mechanism": "Each additional CPS point above 10,000 contributes only 10% of face value to actual income.",
+        "notes": "Prevents T5 machine spam from trivializing prestige target before hour 20."
+      },
+      {
+        "id": "reputation_sell_cap",
+        "cap": "+30% maximum sell price bonus from reputation",
+        "mechanism": "sell_price_multiplier = 1 + min(0.30, reputation / 1000)",
+        "notes": "Hard mathematical cap. No amount of reputation stacking yields >1.30x."
+      },
+      {
+        "id": "prestige_bonus_caps",
+        "caps": {
+          "machine_efficiency": "50%",
+          "crop_speed": "50%",
+          "rare_crop_chance": "30%",
+          "all_income": "200%"
+        },
+        "notes": "All prestige bonuses hard-capped independently. Players who prestige 100+ times do not get infinite power."
+      },
+      {
+        "id": "worker_count_cap",
+        "cap": "max 5 workers of the same type",
+        "mechanism": "hire_cost * (1 + 0.5 * already_hired); hard block at count ≥ 5",
+        "notes": "Prevents single-worker-type spam. Forces player to diversify workforce."
+      }
+    ],
+
+    "inflation_kpi": {
+      "target_ratio": "total_coins_emitted / total_coins_sunk <= 20 over simulated 30 days",
+      "current_sim_estimate": "ratio ~8–12 (within target)",
+      "notes": "Ratio <1 means the game is deflationary — players are coin-starved. Ratio >20 means sinks are insufficient and coins become worthless. Current sink set targets ratio of 8–12."
+    }
+  },
+
+  "monetization": {
+    "philosophy": "Convenience + Cosmetics only. Zero numeric advantage for paying players.",
+    "gem_earn_rate_free": "~5 gems per prestige run. Typical first prestige: ~20h. So free players earn ~5 gems after 20h of play.",
+    "gem_spend_rate_suggested": "Cosmetic purchases: 1–5 gems. QoL: 2–4 gems. Full cosmetic library: ~30 gems total.",
+    "time_to_meaningful_gem_use_free_only": "~20h (first prestige)",
+    "allowed_items": [
+      { "id": "farm_skin_verdant",    "gems": 5,  "type": "cosmetic",   "effect": "Animated green meadow plot background" },
+      { "id": "farm_skin_desert",     "gems": 5,  "type": "cosmetic",   "effect": "Arid desert aesthetic with sand dunes" },
+      { "id": "farm_skin_neon_future","gems": 8,  "type": "cosmetic",   "effect": "Cyberpunk neon-lit greenhouse look" },
+      { "id": "extra_save_slot",      "gems": 3,  "type": "qol",        "effect": "Adds one additional save profile" },
+      { "id": "offline_income_8h",    "gems": 2,  "type": "qol",        "effect": "Extends offline income cap from 4h to 8h" },
+      { "id": "weather_forecast",     "gems": 4,  "type": "information","effect": "Preview next 3 weather events in event feed" },
+      { "id": "expanded_crop_grid",   "gems": 2,  "type": "qol",        "effect": "Expands crop browser to 3-column grid" },
+      { "id": "farm_name_plate",      "gems": 1,  "type": "cosmetic",   "effect": "Set a custom farm name" }
+    ],
+    "battle_pass": {
+      "name": "Harvest Season Pass",
+      "duration_days": 30,
+      "cost_real": "$4.99",
+      "free_tier_rewards": 3,
+      "paid_tier_rewards": 15,
+      "reward_types": ["farm_skins", "name_plates", "harvest_animations"],
+      "p2w_content": false
+    },
+    "forbidden_items": ["direct_coins", "coin_multiplier", "yield_booster", "prestige_point_purchase", "growth_skip_unlimited", "exclusive_machines"]
+  },
+
+  "progression_phases": {
+    "phase_1_hook": {
+      "duration": "0–5 minutes",
+      "target": "First harvest completed",
+      "trigger_mechanic": "Plant wheat (30s growth), harvest for +20 coins",
+      "economy_state": "Coins: 50→~70. No machines. Active-only income.",
+      "design_goal": "Immediate reward loop established before first dopamine check-out window."
+    },
+    "phase_2_early_farm": {
+      "duration": "5–30 minutes",
+      "target": "First machine purchased; first auto-income tick felt",
+      "trigger_mechanic": "Accumulate 100c → buy Seed Sorter → see CPS tick",
+      "economy_state": "Coins: 70→~800. 1–3 T1 machines. CPS: 0.2–0.8/s.",
+      "design_goal": "Transition from pure active to mixed play. First idle income dopamine hit."
+    },
+    "phase_3_automation": {
+      "duration": "30–120 minutes",
+      "target": "automation_level ≥ 6 (auto-harvest active)",
+      "trigger_mechanic": "3 T1 machines + any combination = automation_level 6",
+      "economy_state": "Coins: 800→~15,000. CPS: 2–10/s. First upgrades purchased.",
+      "design_goal": "Player can leave game and return to coins. Core idle loop engaged."
+    },
+    "phase_4_industrial": {
+      "duration": "2–8 hours",
+      "target": "First T3+ machine; first Tech Token earned",
+      "trigger_mechanic": "Buy Hydroponic Bay (15,000c) → produces Tech Tokens",
+      "economy_state": "Coins: 50k–500k. CPS: 50–500/s. First processing chain active.",
+      "design_goal": "Economy moves to a qualitatively different scale. New 'aha' moment."
+    },
+    "phase_5_prestige": {
+      "duration": "~20 hours nominal",
+      "target": "lifetime_coins ≥ 5,000,000 → prestige available",
+      "trigger_mechanic": "Player chooses to prestige for permanent bonuses + gems",
+      "economy_state": "Coins may reach millions. CPS: 500–5000/s. Multiple regions. Reputation capped.",
+      "design_goal": "Prestige is a deliberate choice, not forced. Second-run is faster and different."
+    }
+  }
+}

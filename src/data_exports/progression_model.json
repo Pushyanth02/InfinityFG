@@ -1,0 +1,764 @@
+{
+  "unlock_table": [
+    {
+      "tier": 1,
+      "type": "machine",
+      "unlock": "Root-Bot Mk 1",
+      "requirement": "earn 50 coins",
+      "coins_threshold": 50
+    },
+    {
+      "tier": 1,
+      "type": "machine",
+      "unlock": "Terra-Core 100",
+      "requirement": "earn 60 coins",
+      "coins_threshold": 60
+    },
+    {
+      "tier": 1,
+      "type": "machine",
+      "unlock": "Furrow-Matic 100",
+      "requirement": "earn 70 coins",
+      "coins_threshold": 70
+    },
+    {
+      "tier": 1,
+      "type": "machine",
+      "unlock": "Root-Tech v1.0",
+      "requirement": "earn 80 coins",
+      "coins_threshold": 80
+    },
+    {
+      "tier": 1,
+      "type": "machine",
+      "unlock": "Soil-Bot v1.0",
+      "requirement": "earn 90 coins",
+      "coins_threshold": 90
+    },
+    {
+      "tier": 1,
+      "type": "machine",
+      "unlock": "Seed-Max 1000",
+      "requirement": "earn 100 coins",
+      "coins_threshold": 100
+    },
+    {
+      "tier": 1,
+      "type": "machine",
+      "unlock": "Seed-Matic 1000",
+      "requirement": "earn 110 coins",
+      "coins_threshold": 110
+    },
+    {
+      "tier": 1,
+      "type": "machine",
+      "unlock": "Seed-Forge Mk 1",
+      "requirement": "earn 120 coins",
+      "coins_threshold": 120
+    },
+    {
+      "tier": 1,
+      "type": "machine",
+      "unlock": "Soil-Tron v1.0",
+      "requirement": "earn 130 coins",
+      "coins_threshold": 130
+    },
+    {
+      "tier": 1,
+      "type": "machine",
+      "unlock": "Terra-Tron 100",
+      "requirement": "earn 140 coins",
+      "coins_threshold": 140
+    },
+    {
+      "tier": 2,
+      "type": "machine",
+      "unlock": "Mist-Forge 2000",
+      "requirement": "earn 150 coins",
+      "coins_threshold": 150
+    },
+    {
+      "tier": 2,
+      "type": "machine",
+      "unlock": "Flow-Matic 200",
+      "requirement": "earn 160 coins",
+      "coins_threshold": 160
+    },
+    {
+      "tier": 2,
+      "type": "machine",
+      "unlock": "Aqua-Sync 2000",
+      "requirement": "earn 170 coins",
+      "coins_threshold": 170
+    },
+    {
+      "tier": 2,
+      "type": "machine",
+      "unlock": "Irrig-Sync v2.0",
+      "requirement": "earn 180 coins",
+      "coins_threshold": 180
+    },
+    {
+      "tier": 2,
+      "type": "machine",
+      "unlock": "Hydro-Core Pro",
+      "requirement": "earn 190 coins",
+      "coins_threshold": 190
+    },
+    {
+      "tier": 2,
+      "type": "machine",
+      "unlock": "Irrig-Max Mk 2",
+      "requirement": "earn 200 coins",
+      "coins_threshold": 200
+    },
+    {
+      "tier": 2,
+      "type": "machine",
+      "unlock": "Irrig-Tron X2",
+      "requirement": "earn 210 coins",
+      "coins_threshold": 210
+    },
+    {
+      "tier": 2,
+      "type": "crop",
+      "unlock": "Mint",
+      "requirement": "earn 220 coins",
+      "coins_threshold": 220
+    },
+    {
+      "tier": 2,
+      "type": "machine",
+      "unlock": "Irrig-Max Pro",
+      "requirement": "earn 230 coins",
+      "coins_threshold": 230
+    },
+    {
+      "tier": 2,
+      "type": "crop",
+      "unlock": "Kale",
+      "requirement": "earn 240 coins",
+      "coins_threshold": 240
+    },
+    {
+      "tier": 2,
+      "type": "machine",
+      "unlock": "Flow-Matic 2000",
+      "requirement": "earn 250 coins",
+      "coins_threshold": 250
+    },
+    {
+      "tier": 2,
+      "type": "machine",
+      "unlock": "Aqua-Max X2",
+      "requirement": "earn 260 coins",
+      "coins_threshold": 260
+    },
+    {
+      "tier": 2,
+      "type": "crop",
+      "unlock": "Basil",
+      "requirement": "earn 270 coins",
+      "coins_threshold": 270
+    },
+    {
+      "tier": 2,
+      "type": "crop",
+      "unlock": "Soybean",
+      "requirement": "earn 280 coins",
+      "coins_threshold": 280
+    },
+    {
+      "tier": 2,
+      "type": "crop",
+      "unlock": "Lentil",
+      "requirement": "earn 290 coins",
+      "coins_threshold": 290
+    },
+    {
+      "tier": 2,
+      "type": "crop",
+      "unlock": "Onion",
+      "requirement": "earn 300 coins",
+      "coins_threshold": 300
+    },
+    {
+      "tier": 2,
+      "type": "crop",
+      "unlock": "Rice",
+      "requirement": "earn 310 coins",
+      "coins_threshold": 310
+    },
+    {
+      "tier": 1,
+      "type": "crop",
+      "unlock": "Garlic",
+      "requirement": "earn 320 coins",
+      "coins_threshold": 320
+    },
+    {
+      "tier": 2,
+      "type": "crop",
+      "unlock": "Sunflower",
+      "requirement": "earn 330 coins",
+      "coins_threshold": 330
+    },
+    {
+      "tier": 3,
+      "type": "machine",
+      "unlock": "Crop-Bot Pro",
+      "requirement": "earn 340 coins",
+      "coins_threshold": 340
+    },
+    {
+      "tier": 2,
+      "type": "crop",
+      "unlock": "Chamomile",
+      "requirement": "earn 350 coins",
+      "coins_threshold": 350
+    },
+    {
+      "tier": 2,
+      "type": "crop",
+      "unlock": "Oats",
+      "requirement": "earn 360 coins",
+      "coins_threshold": 360
+    },
+    {
+      "tier": 2,
+      "type": "crop",
+      "unlock": "Pumpkin",
+      "requirement": "earn 370 coins",
+      "coins_threshold": 370
+    },
+    {
+      "tier": 2,
+      "type": "crop",
+      "unlock": "Fennel",
+      "requirement": "earn 380 coins",
+      "coins_threshold": 380
+    },
+    {
+      "tier": 2,
+      "type": "crop",
+      "unlock": "Sugarcane",
+      "requirement": "earn 390 coins",
+      "coins_threshold": 390
+    },
+    {
+      "tier": 2,
+      "type": "crop",
+      "unlock": "Pepper",
+      "requirement": "earn 400 coins",
+      "coins_threshold": 400
+    },
+    {
+      "tier": 2,
+      "type": "crop",
+      "unlock": "Barley",
+      "requirement": "earn 410 coins",
+      "coins_threshold": 410
+    },
+    {
+      "tier": 2,
+      "type": "crop",
+      "unlock": "Buckwheat",
+      "requirement": "earn 420 coins",
+      "coins_threshold": 420
+    },
+    {
+      "tier": 3,
+      "type": "machine",
+      "unlock": "Refine-Sync Pro",
+      "requirement": "earn 430 coins",
+      "coins_threshold": 430
+    },
+    {
+      "tier": 2,
+      "type": "crop",
+      "unlock": "Ginger",
+      "requirement": "earn 440 coins",
+      "coins_threshold": 440
+    },
+    {
+      "tier": 3,
+      "type": "machine",
+      "unlock": "Yield-Matic 300",
+      "requirement": "earn 560 coins",
+      "coins_threshold": 560
+    },
+    {
+      "tier": 2,
+      "type": "crop",
+      "unlock": "Lavender",
+      "requirement": "earn 613 coins",
+      "coins_threshold": 613
+    },
+    {
+      "tier": 3,
+      "type": "machine",
+      "unlock": "Crop-Tron Pro",
+      "requirement": "earn 735 coins",
+      "coins_threshold": 735
+    },
+    {
+      "tier": 3,
+      "type": "machine",
+      "unlock": "Synth-Tech 300",
+      "requirement": "earn 805 coins",
+      "coins_threshold": 805
+    },
+    {
+      "tier": 3,
+      "type": "machine",
+      "unlock": "Gather-Core Mk 3",
+      "requirement": "earn 840 coins",
+      "coins_threshold": 840
+    },
+    {
+      "tier": 3,
+      "type": "machine",
+      "unlock": "Crop-Bot X3",
+      "requirement": "earn 875 coins",
+      "coins_threshold": 875
+    },
+    {
+      "tier": 3,
+      "type": "crop",
+      "unlock": "Grape",
+      "requirement": "earn 888 coins",
+      "coins_threshold": 888
+    },
+    {
+      "tier": 3,
+      "type": "machine",
+      "unlock": "Yield-Tech v3.0",
+      "requirement": "earn 910 coins",
+      "coins_threshold": 910
+    },
+    {
+      "tier": 3,
+      "type": "crop",
+      "unlock": "Strawberry",
+      "requirement": "earn 1,013 coins",
+      "coins_threshold": 1013
+    },
+    {
+      "tier": 3,
+      "type": "machine",
+      "unlock": "Gather-Matic v3.0",
+      "requirement": "earn 1,015 coins",
+      "coins_threshold": 1015
+    },
+    {
+      "tier": 3,
+      "type": "crop",
+      "unlock": "Mango",
+      "requirement": "earn 1,200 coins",
+      "coins_threshold": 1200
+    },
+    {
+      "tier": 3,
+      "type": "crop",
+      "unlock": "Blueberry",
+      "requirement": "earn 1,300 coins",
+      "coins_threshold": 1300
+    },
+    {
+      "tier": 3,
+      "type": "crop",
+      "unlock": "Tea",
+      "requirement": "earn 1,350 coins",
+      "coins_threshold": 1350
+    },
+    {
+      "tier": 3,
+      "type": "crop",
+      "unlock": "Papaya",
+      "requirement": "earn 1,400 coins",
+      "coins_threshold": 1400
+    },
+    {
+      "tier": 3,
+      "type": "machine",
+      "unlock": "Mill-Bot Pro",
+      "requirement": "earn 1,435 coins",
+      "coins_threshold": 1435
+    },
+    {
+      "tier": 3,
+      "type": "machine",
+      "unlock": "Scythe-Sync v3.0",
+      "requirement": "earn 1,505 coins",
+      "coins_threshold": 1505
+    },
+    {
+      "tier": 3,
+      "type": "machine",
+      "unlock": "Mill-Forge v3.0",
+      "requirement": "earn 1,515 coins",
+      "coins_threshold": 1515
+    },
+    {
+      "tier": 3,
+      "type": "machine",
+      "unlock": "Mill-Tron X3",
+      "requirement": "earn 1,680 coins",
+      "coins_threshold": 1680
+    },
+    {
+      "tier": 3,
+      "type": "machine",
+      "unlock": "Crop-Bot Mk 3",
+      "requirement": "earn 1,715 coins",
+      "coins_threshold": 1715
+    },
+    {
+      "tier": 3,
+      "type": "machine",
+      "unlock": "Yield-Bot v3.0",
+      "requirement": "earn 1,750 coins",
+      "coins_threshold": 1750
+    },
+    {
+      "tier": 3,
+      "type": "crop",
+      "unlock": "Pineapple",
+      "requirement": "earn 2,000 coins",
+      "coins_threshold": 2000
+    },
+    {
+      "tier": 4,
+      "type": "machine",
+      "unlock": "Blend-Tech X4",
+      "requirement": "earn 2,030 coins",
+      "coins_threshold": 2030
+    },
+    {
+      "tier": 3,
+      "type": "crop",
+      "unlock": "Coffee",
+      "requirement": "earn 2,125 coins",
+      "coins_threshold": 2125
+    },
+    {
+      "tier": 3,
+      "type": "crop",
+      "unlock": "Cacao",
+      "requirement": "earn 2,438 coins",
+      "coins_threshold": 2438
+    },
+    {
+      "tier": 4,
+      "type": "crop",
+      "unlock": "Chia",
+      "requirement": "earn 3,325 coins",
+      "coins_threshold": 3325
+    },
+    {
+      "tier": 4,
+      "type": "machine",
+      "unlock": "Swift-Tech 4000",
+      "requirement": "earn 3,850 coins",
+      "coins_threshold": 3850
+    },
+    {
+      "tier": 3,
+      "type": "crop",
+      "unlock": "Vanilla",
+      "requirement": "earn 4,125 coins",
+      "coins_threshold": 4125
+    },
+    {
+      "tier": 4,
+      "type": "crop",
+      "unlock": "Quinoa",
+      "requirement": "earn 4,700 coins",
+      "coins_threshold": 4700
+    },
+    {
+      "tier": 4,
+      "type": "crop",
+      "unlock": "Tahitian Lime",
+      "requirement": "earn 6,125 coins",
+      "coins_threshold": 6125
+    },
+    {
+      "tier": 4,
+      "type": "machine",
+      "unlock": "Refine-Core 4000",
+      "requirement": "earn 6,650 coins",
+      "coins_threshold": 6650
+    },
+    {
+      "tier": 4,
+      "type": "crop",
+      "unlock": "Avocado",
+      "requirement": "earn 6,700 coins",
+      "coins_threshold": 6700
+    },
+    {
+      "tier": 4,
+      "type": "machine",
+      "unlock": "Sky-Tech v4.0",
+      "requirement": "earn 7,000 coins",
+      "coins_threshold": 7000
+    },
+    {
+      "tier": 4,
+      "type": "crop",
+      "unlock": "Dragon Fruit",
+      "requirement": "earn 7,125 coins",
+      "coins_threshold": 7125
+    },
+    {
+      "tier": 4,
+      "type": "machine",
+      "unlock": "Refine-Max v4.0",
+      "requirement": "earn 7,350 coins",
+      "coins_threshold": 7350
+    },
+    {
+      "tier": 4,
+      "type": "crop",
+      "unlock": "Blue Oyster Mushroom",
+      "requirement": "earn 8,163 coins",
+      "coins_threshold": 8163
+    },
+    {
+      "tier": 4,
+      "type": "crop",
+      "unlock": "Artichoke",
+      "requirement": "earn 8,750 coins",
+      "coins_threshold": 8750
+    },
+    {
+      "tier": 4,
+      "type": "machine",
+      "unlock": "Mill-Sync Pro",
+      "requirement": "earn 10,850 coins",
+      "coins_threshold": 10850
+    },
+    {
+      "tier": 4,
+      "type": "machine",
+      "unlock": "Aero-Sync Mk 4",
+      "requirement": "earn 11,200 coins",
+      "coins_threshold": 11200
+    },
+    {
+      "tier": 4,
+      "type": "crop",
+      "unlock": "Black Truffle",
+      "requirement": "earn 11,325 coins",
+      "coins_threshold": 11325
+    },
+    {
+      "tier": 4,
+      "type": "crop",
+      "unlock": "Saffron",
+      "requirement": "earn 11,750 coins",
+      "coins_threshold": 11750
+    },
+    {
+      "tier": 4,
+      "type": "machine",
+      "unlock": "Synth-Tron Pro",
+      "requirement": "earn 14,350 coins",
+      "coins_threshold": 14350
+    },
+    {
+      "tier": 4,
+      "type": "machine",
+      "unlock": "Sky-Sync X4",
+      "requirement": "earn 14,360 coins",
+      "coins_threshold": 14360
+    },
+    {
+      "tier": 4,
+      "type": "machine",
+      "unlock": "Opti-Matic 4000",
+      "requirement": "earn 15,050 coins",
+      "coins_threshold": 15050
+    },
+    {
+      "tier": 4,
+      "type": "crop",
+      "unlock": "Wasabi Root",
+      "requirement": "earn 19,950 coins",
+      "coins_threshold": 19950
+    },
+    {
+      "tier": 5,
+      "type": "machine",
+      "unlock": "Aero-Sync 5000",
+      "requirement": "earn 35,000 coins",
+      "coins_threshold": 35000
+    },
+    {
+      "tier": 2,
+      "type": "region",
+      "unlock": "Riverlands",
+      "requirement": "earn 50,000 coins",
+      "coins_threshold": 50000
+    },
+    {
+      "tier": 5,
+      "type": "machine",
+      "unlock": "Sky-Tron 500",
+      "requirement": "earn 70,000 coins",
+      "coins_threshold": 70000
+    },
+    {
+      "tier": 5,
+      "type": "crop",
+      "unlock": "Ghost Pepper",
+      "requirement": "earn 1,06,338 coins",
+      "coins_threshold": 106338
+    },
+    {
+      "tier": 5,
+      "type": "machine",
+      "unlock": "Sky-Tron Mk 5",
+      "requirement": "earn 1,15,500 coins",
+      "coins_threshold": 115500
+    },
+    {
+      "tier": 5,
+      "type": "crop",
+      "unlock": "Argan Blossom",
+      "requirement": "earn 1,22,163 coins",
+      "coins_threshold": 122163
+    },
+    {
+      "tier": 5,
+      "type": "machine",
+      "unlock": "Aero-Forge Pro",
+      "requirement": "earn 1,26,000 coins",
+      "coins_threshold": 126000
+    },
+    {
+      "tier": 5,
+      "type": "crop",
+      "unlock": "Kopi Luwak",
+      "requirement": "earn 1,37,750 coins",
+      "coins_threshold": 137750
+    },
+    {
+      "tier": 5,
+      "type": "crop",
+      "unlock": "Sea Grape",
+      "requirement": "earn 1,53,163 coins",
+      "coins_threshold": 153163
+    },
+    {
+      "tier": 5,
+      "type": "machine",
+      "unlock": "Swift-Max v5.0",
+      "requirement": "earn 1,61,000 coins",
+      "coins_threshold": 161000
+    },
+    {
+      "tier": 5,
+      "type": "crop",
+      "unlock": "Manuka Flower",
+      "requirement": "earn 1,68,400 coins",
+      "coins_threshold": 168400
+    },
+    {
+      "tier": 5,
+      "type": "crop",
+      "unlock": "White Truffle",
+      "requirement": "earn 1,98,425 coins",
+      "coins_threshold": 198425
+    },
+    {
+      "tier": 5,
+      "type": "crop",
+      "unlock": "Matsutake",
+      "requirement": "earn 2,27,950 coins",
+      "coins_threshold": 227950
+    },
+    {
+      "tier": 3,
+      "type": "region",
+      "unlock": "Desert Oasis",
+      "requirement": "earn 2,50,000 coins",
+      "coins_threshold": 250000
+    },
+    {
+      "tier": 5,
+      "type": "crop",
+      "unlock": "Oud Resin",
+      "requirement": "earn 2,85,800 coins",
+      "coins_threshold": 285800
+    },
+    {
+      "tier": 5,
+      "type": "crop",
+      "unlock": "Aurora Cacao",
+      "requirement": "earn 3,37,700 coins",
+      "coins_threshold": 337700
+    },
+    {
+      "tier": 5,
+      "type": "crop",
+      "unlock": "Lunar Melon",
+      "requirement": "earn 3,61,000 coins",
+      "coins_threshold": 361000
+    },
+    {
+      "tier": 4,
+      "type": "region",
+      "unlock": "Frozen Tundra",
+      "requirement": "earn 10,00,000 coins",
+      "coins_threshold": 1000000
+    },
+    {
+      "tier": 5,
+      "type": "region",
+      "unlock": "Volcanic Soil",
+      "requirement": "earn 50,00,000 coins",
+      "coins_threshold": 5000000
+    },
+    {
+      "tier": 6,
+      "type": "region",
+      "unlock": "Sky Farmlands",
+      "requirement": "earn 2,50,00,000 coins",
+      "coins_threshold": 25000000
+    }
+  ],
+  "prestige_curve": {
+    "formula": "prestige_points = sqrt(total_coins / 8000000)",
+    "recommended_reset_benefits": [
+      "+2% Permanent Machine Efficiency per point",
+      "+1% Crop Value per point",
+      "Unlocks prestigious cosmetical decorations"
+    ]
+  },
+  "ui_strings": {
+    "first_20_goals": [
+      "Earn 50 coins to unlock Root-Bot Mk 1!",
+      "Earn 60 coins to unlock Terra-Core 100!",
+      "Earn 70 coins to unlock Furrow-Matic 100!",
+      "Earn 80 coins to unlock Root-Tech v1.0!",
+      "Earn 90 coins to unlock Soil-Bot v1.0!",
+      "Earn 100 coins to unlock Seed-Max 1000!",
+      "Earn 110 coins to unlock Seed-Matic 1000!",
+      "Earn 120 coins to unlock Seed-Forge Mk 1!",
+      "Earn 130 coins to unlock Soil-Tron v1.0!",
+      "Earn 140 coins to unlock Terra-Tron 100!",
+      "Earn 150 coins to unlock Mist-Forge 2000!",
+      "Earn 160 coins to unlock Flow-Matic 200!",
+      "Earn 170 coins to unlock Aqua-Sync 2000!",
+      "Earn 180 coins to unlock Irrig-Sync v2.0!",
+      "Earn 190 coins to unlock Hydro-Core Pro!",
+      "Earn 200 coins to unlock Irrig-Max Mk 2!",
+      "Earn 210 coins to unlock Irrig-Tron X2!",
+      "Earn 220 coins to unlock the Mint!",
+      "Earn 230 coins to unlock Irrig-Max Pro!",
+      "Earn 240 coins to unlock the Kale!"
+    ]
+  }
+}

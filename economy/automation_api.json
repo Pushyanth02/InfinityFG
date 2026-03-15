@@ -1,0 +1,71 @@
+{
+  "api_contract": {
+    "version": "1.0",
+    "description": "API contract for controlling machines, simulating wear, and interacting with the Automation System AI.",
+    "state_machine": {
+      "states": ["idle", "active", "maintenance", "overclocked"],
+      "transitions": {
+        "start": "idle -> active",
+        "stop": "active|overclocked -> idle",
+        "overclock": "active -> overclocked",
+        "trigger_maintenance": "idle|active|overclocked -> maintenance",
+        "finish_maintenance": "maintenance -> idle"
+      }
+    },
+    "actions": {
+      "start_machine": {
+        "payload": { "instance_id": "string" },
+        "conditions": ["wear < 100", "state == 'idle'"],
+        "effect": "State becomes 'active'. Machine begins generating production_rate."
+      },
+      "stop_machine": {
+        "payload": { "instance_id": "string" },
+        "conditions": ["state in ['active', 'overclocked']"],
+        "effect": "State becomes 'idle'."
+      },
+      "overclock_machine": {
+        "payload": { "instance_id": "string" },
+        "conditions": ["state == 'active'", "machine_def.overclockable == true"],
+        "effect": "State becomes 'overclocked'. Speed is multiplied by machine_def.overclock_effects.speed_multiplier. Wear generation is multiplied by machine_def.overclock_effects.wear_rate_multiplier."
+      },
+      "assign_worker": {
+        "payload": { "instance_id": "string", "worker_level": "number" },
+        "conditions": [],
+        "effect": "Sets assigned_worker_level. Efficiency becomes base * (1 + 0.03 * worker_level)."
+      },
+      "maintenance": {
+        "payload": { "instance_id": "string" },
+        "conditions": ["state != 'maintenance'"],
+        "effect": "State becomes 'maintenance'. Machine stops producing. Deducts maintenance_cost_per_hour. Wear resets to 0 after downtime (default 60 seconds)."
+      }
+    },
+    "metrics": {
+      "efficiency": "base_production * (1 + 0.03 * assigned_worker_level)",
+      "wear_rate_per_sec": "0.1 * (state == 'overclocked' ? overclock_wear_mult : 1.0)",
+      "breakdown_chance": "wear > 80 ? (wear - 80) * 0.05 : 0"
+    },
+    "example_telemetry_logs": [
+      {
+        "timestamp": 1205,
+        "instance_id": "inst_01",
+        "event": "STATE_CHANGE",
+        "data": { "from": "idle", "to": "active" },
+        "log_text": "[14:00:05] Auto Harvester Mk 1 started. Base CPS: 10."
+      },
+      {
+        "timestamp": 1260,
+        "instance_id": "inst_01",
+        "event": "OVERCLOCK_ENABLED",
+        "data": { "speed_multiplier": 1.5, "wear_rate": 2.5 },
+        "log_text": "[14:01:00] WARNING: Auto Harvester Mk 1 OVERCLOCKED. Production +50%. Wear rate critical."
+      },
+      {
+        "timestamp": 1500,
+        "instance_id": "inst_01",
+        "event": "MAINTENANCE_REQUIRED",
+        "data": { "wear": 100, "cost": 25 },
+        "log_text": "[14:05:00] CRITICAL: Auto Harvester Mk 1 broken down due to 100% wear. Entering forced maintenance (60s downtime, -25 Coins)."
+      }
+    ]
+  }
+}

@@ -1,0 +1,108 @@
+{
+  "schema": "agriempire-engineering-standards/v1",
+  "issued_by": "antigravity",
+  "timestamp": "2026-03-15T08:23:07Z",
+  "game": "AgriEmpire",
+  "notes": "This document governs how all engineering decisions, outputs, and parameter changes must be structured. Treat this as a contract between Antigravity AI and the product team.",
+
+  "standards": {
+    "S1_machine_readable_output": {
+      "description": "All balancing artifacts must be emitted as JSON with a 'notes' field. Human-readable copy may accompany but the JSON artifact is authoritative.",
+      "required_fields": ["schema_version", "issued_by", "timestamp", "notes"],
+      "enforcement": "CI lint step checks for presence of required_fields in any JSON under /patches/ and /economy/",
+      "loc_key": "std.S1.description",
+      "default_en": "All game config changes must ship as machine-readable JSON artifacts."
+    },
+
+    "S2_explain_tunables": {
+      "description": "Every formula that ships in game_config.json must expose exactly 3 tunable knobs, each with: current value, safe_range [min, max], provenance string, and notes string.",
+      "minimum_tunables_per_formula": 3,
+      "required_tunable_fields": ["knob", "current", "safe_range", "provenance", "notes"],
+      "enforcement": "Automated schema validator runs on CI against game_config.json",
+      "loc_key": "std.S2.description",
+      "default_en": "Every formula must document 3 tunable knobs with safe ranges."
+    },
+
+    "S3_no_magic_numbers": {
+      "description": "Every numeric constant introduced in code or config must either reference a named tunable in game_config.json or include an inline comment with provenance. Anonymous literals in game logic are a build warning.",
+      "exceptions": ["0", "1", "-1", "100", "1000", "Math.PI"],
+      "enforcement": "ESLint custom rule: no-magic-numbers (configured with exceptions list)",
+      "loc_key": "std.S3.description",
+      "default_en": "No anonymous numeric constants. All must be named with provenance."
+    },
+
+    "S4_simulation_first": {
+      "description": "Any proposed change to a formula tunable must be validated by the Monte Carlo balance simulator before being accepted into game_config.json. The simulation must run at least 1000 virtual-player sessions.",
+      "minimum_player_sessions": 1000,
+      "target_metrics": {
+        "first_harvest_minutes": { "target": 5, "tolerance_minutes": 2 },
+        "first_automation_minutes": { "target": 30, "tolerance_minutes": 10 },
+        "prestige_hours": { "target": 20, "tolerance_hours": 5 },
+        "coins_per_sec_at_1h": { "target": 50, "tolerance_percent": 30 }
+      },
+      "enforcement": "simulation/balance_sim.ts must be re-run and output appended to simulation/reports/ before merging any economy change.",
+      "loc_key": "std.S4.description",
+      "default_en": "All balance changes must be validated by the Monte Carlo simulation first."
+    },
+
+    "S5_rollback_metadata": {
+      "description": "Every parameter patch must be stored as a JSON file in /patches/ with the required rollback schema.",
+      "patch_schema": {
+        "patch_id": "string (semver)",
+        "issued_by": "string (agent or human name)",
+        "timestamp": "ISO8601 UTC string",
+        "reason": "string (human-readable justification)",
+        "changes": "array of {path, old_value, new_value}",
+        "rollback_conditions": "array of strings describing when to revert",
+        "sim_report_ref": "path to simulation output that validated this patch",
+        "approved_by": "string (product lead name or 'auto' if within safe_range)"
+      },
+      "enforcement": "CI block: patches without all schema fields will not be applied to production config.",
+      "loc_key": "std.S5.description",
+      "default_en": "Every parameter patch must include rollback conditions and simulation evidence."
+    },
+
+    "S6_localization_keys": {
+      "description": "Every player-facing string must have a loc_key and a default 'en' string in src/i18n/en.json. Hardcoded strings in UI components are a lint error.",
+      "key_format": "{domain}.{sub}.{identifier}",
+      "examples": ["ui.farm.harvest_button", "weather.rainstorm.description", "achievement.first_harvest.name"],
+      "enforcement": "ESLint rule: no-hardcoded-ui-strings (custom). CI runs i18n-checker to ensure all loc_keys in en.json are used.",
+      "loc_key": "std.S6.description",
+      "default_en": "All player-facing text must use loc_keys from the i18n system."
+    },
+
+    "S7_security_and_fairness": {
+      "description": "The game must not implement pay-to-win mechanics. Gems (premium currency) are restricted to cosmetic and quality-of-life purchases only. Any proposed feature that gives paying players a numeric gameplay advantage must be rejected.",
+      "pay_to_win_definition": "Any purchase that increases coins, CPS, crop yield, machine efficiency, or prestige points beyond what is achievable by free players within the same time window.",
+      "allowed_gem_purchases": [
+        "Cosmetic farm skins",
+        "Extra save slots",
+        "Offline income time extension (max 4h, matches free 4h cap)",
+        "Expanded crop display grid (cosmetic QOL)",
+        "Name-your-farm feature",
+        "Weather forecast preview (information, not power)"
+      ],
+      "forbidden_gem_purchases": [
+        "Coins or coin multipliers",
+        "Crop yield boosters beyond free player ceiling",
+        "Prestige point purchases",
+        "Exclusive machines or workers not earnable by free players",
+        "Skip timers that reduce growth time beyond the free cap"
+      ],
+      "enforcement": "Code review gate: any new GemShop item must be listed in allowed_gem_purchases. Automated scan for 'coins += gem' patterns.",
+      "loc_key": "std.S7.description",
+      "default_en": "No pay-to-win. Gems are for cosmetics and convenience only."
+    }
+  },
+
+  "team_roles": {
+    "notes": "Roles and their responsibilities when working with Antigravity.",
+    "product_manager": "Accepts/rejects features and sets acceptance criteria. Approves patches flagged as manual-review.",
+    "data_scientist": "Validates simulation outputs for statistical significance. Signs off on S4 reports.",
+    "backend_engineer": "Implements APIs and database schemas. Ensures all tables include version and patch_id columns.",
+    "frontend_engineer": "Implements text UI and state management. Enforces S6 loc_key discipline.",
+    "qa_engineer": "Runs exploit-hunting and fuzz sessions. Files rollback_conditions when vulnerabilities discovered.",
+    "live_ops_manager": "Plans campaigns and coordinates rollbacks. Has authority to invoke rollback_conditions unilaterally.",
+    "antigravity_ai": "Designs, generates, simulates, and documents. Does not unilaterally deploy to production."
+  }
+}

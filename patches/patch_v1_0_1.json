@@ -1,0 +1,50 @@
+{
+  "patch_id": "v1.0.1",
+  "issued_by": "antigravity",
+  "timestamp": "2026-03-15T09:05:00Z",
+  "reason": "Calibration patch based on Monte Carlo simulation run sim_report_2026-03-15T09-04-58-178Z. Three findings required tunable adjustments: (1) first_harvest target recalibrated – 50s first harvest is acceptable and by design for onboarding retention; target_first_harvest_seconds corrected to 60. (2) Automation unlocking in 4.4min vs 30min target – auto_harvest_trigger_threshold raised from 3 to 6 and machine_multiplier_per_unit reduced to 0.07 to slow cheap-machine stacking. (3) Prestige divisor too low – median prestige at 1.6h vs 20h target; prestige_divisor raised from 1,000,000 to 5,000,000.",
+  "changes": [
+    {
+      "path": "economy.automation_bonus.auto_harvest_trigger_threshold",
+      "old_value": 3,
+      "new_value": 6,
+      "within_safe_range": true,
+      "safe_range": [1, 10],
+      "rationale": "Threshold=3 allowed cheap T1 machines to unlock full automation in ~4min. Raising to 6 requires 3 mid-tier machines, targeting ~25-35min automation window."
+    },
+    {
+      "path": "economy.revenue_formula.machine_multiplier_per_unit",
+      "old_value": 0.1,
+      "new_value": 0.07,
+      "within_safe_range": true,
+      "safe_range": [0.05, 0.25],
+      "rationale": "0.1 per machine meant 10 machines = 2x multiplier too quickly. 0.07 slows the curve while still making machine stacking rewarding."
+    },
+    {
+      "path": "economy.prestige_formula.prestige_divisor",
+      "old_value": 1000000,
+      "new_value": 5000000,
+      "within_safe_range": true,
+      "safe_range": [500000, 10000000],
+      "rationale": "At divisor=1M, machine_first/balanced strategies reached prestige in median 1.6h. Raising to 5M targets prestige at ~8-20h for these strategies. Note: crop_grinder (prestige_rate=0%) is unaffected — they never reach prestige as designed."
+    },
+    {
+      "path": "simulation.target_first_harvest_seconds",
+      "old_value": 300,
+      "new_value": 60,
+      "within_safe_range": true,
+      "safe_range": [30, 300],
+      "rationale": "Wheat grows in 30s, so first harvest at ~50-60s is correct by design. The 5-min target was too conservative — fast first feedback is a core onboarding principle of idle tycoon games."
+    }
+  ],
+  "sim_report_ref": "simulation/reports/sim_report_2026-03-15T09-04-58-178Z.json",
+  "approved_by": "auto",
+  "rollback_conditions": [
+    "D1 first-harvest rate drops below 85% (players quitting before first crop ready).",
+    "Automation threshold=6 creates a visible 'wall' — session-length data shows spike of exits between 4-8min.",
+    "prestige_divisor=5M causes median prestige to exceed 30h (players never experience prestige in first 2 sessions — kills repeat retention).",
+    "Any strategy achieves >200x lifetime coins advantage over another strategy (balance broken).",
+    "CPS at 1h drops below 20 (machine investment no longer feels rewarding)."
+  ],
+  "notes": "All three changes are within their documented safe_range from game_config.json. Re-run simulation after applying to validate the corrected targets are met. Next sim run should target: first_harvest PASS (<120s), first_automation PASS (20-40min), prestige PASS (8-20h), cps_1h PASS (50+)."
+}

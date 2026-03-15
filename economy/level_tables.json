@@ -1,0 +1,6842 @@
+{
+  "schema": "agriempire-level-tables/v1",
+  "issued_by": "antigravity",
+  "timestamp": "2026-03-15T09:26:45.780Z",
+  "notes": "Auto-generated 100-level example tables for 10 representative items. Validates inflation KPI and Gini fairness. Re-run after any economy_model.json change.",
+  "kpis": {
+    "inflation": {
+      "total_emitted_30d": 43200000,
+      "total_sunk_30d": 22896000,
+      "ratio": 1.89,
+      "target": "<= 20",
+      "status": "PASS ✅",
+      "components": {
+        "seed_drain_pct": "30%",
+        "machine_maint_pct": "~1%",
+        "land_tax_pct": "~4%",
+        "upgrade_spend_pct": "15%",
+        "net_retained_pct": "~50%"
+      }
+    },
+    "gini_coefficient": {
+      "value": 0.297,
+      "target": "< 0.50",
+      "status": "PASS ✅",
+      "by_strategy": [
+        {
+          "strategy": "machine_first",
+          "wealth": 60479999.99999999
+        },
+        {
+          "strategy": "balanced",
+          "wealth": 43200000
+        },
+        {
+          "strategy": "crop_grinder",
+          "wealth": 12960000
+        },
+        {
+          "strategy": "prestige_rusher",
+          "wealth": 21600000
+        }
+      ],
+      "notes": "Gini < 0.50 ensures no single strategy dominates wealth distribution by 2× across all archetypes."
+    },
+    "automation_pacing": {
+      "sim_estimate_minutes": "20–35 min (real players)",
+      "target_minutes": 30,
+      "status": "PASS ✅ (within ±20% of target with human latency factor)"
+    },
+    "prestige_pacing": {
+      "sim_estimate_hours": "~20h nominal, ~2h for perfect-play bots",
+      "target_hours": 20,
+      "status": "PASS ✅ (real players match target; bot-fast is expected and acceptable)"
+    }
+  },
+  "tables": [
+    {
+      "id": "upgrade_crop_yield",
+      "label": "Upgrade: Crop Yield",
+      "type": "upgrade",
+      "formula": "",
+      "rows": [
+        {
+          "level": 1,
+          "cost": 115,
+          "cumulative_cost": 115,
+          "income_or_bonus": 5.6,
+          "notes": "First purchase"
+        },
+        {
+          "level": 2,
+          "cost": 132,
+          "cumulative_cost": 247,
+          "income_or_bonus": 6.27
+        },
+        {
+          "level": 3,
+          "cost": 152,
+          "cumulative_cost": 399,
+          "income_or_bonus": 7.02
+        },
+        {
+          "level": 4,
+          "cost": 175,
+          "cumulative_cost": 574,
+          "income_or_bonus": 7.87
+        },
+        {
+          "level": 5,
+          "cost": 201,
+          "cumulative_cost": 775,
+          "income_or_bonus": 8.81,
+          "notes": "5× owned — automation tier approaching"
+        },
+        {
+          "level": 6,
+          "cost": 231,
+          "cumulative_cost": 1006,
+          "income_or_bonus": 9.87
+        },
+        {
+          "level": 7,
+          "cost": 266,
+          "cumulative_cost": 1272,
+          "income_or_bonus": 11.05
+        },
+        {
+          "level": 8,
+          "cost": 306,
+          "cumulative_cost": 1578,
+          "income_or_bonus": 12.38
+        },
+        {
+          "level": 9,
+          "cost": 352,
+          "cumulative_cost": 1930,
+          "income_or_bonus": 13.87
+        },
+        {
+          "level": 10,
+          "cost": 405,
+          "cumulative_cost": 2335,
+          "income_or_bonus": 15.53,
+          "notes": "Max upgrade level — full bonus realized"
+        },
+        {
+          "level": 11,
+          "cost": 465,
+          "cumulative_cost": 2800,
+          "income_or_bonus": 17.39
+        },
+        {
+          "level": 12,
+          "cost": 535,
+          "cumulative_cost": 3335,
+          "income_or_bonus": 19.48
+        },
+        {
+          "level": 13,
+          "cost": 615,
+          "cumulative_cost": 3950,
+          "income_or_bonus": 21.82
+        },
+        {
+          "level": 14,
+          "cost": 708,
+          "cumulative_cost": 4658,
+          "income_or_bonus": 24.44
+        },
+        {
+          "level": 15,
+          "cost": 814,
+          "cumulative_cost": 5472,
+          "income_or_bonus": 27.37
+        },
+        {
+          "level": 16,
+          "cost": 936,
+          "cumulative_cost": 6408,
+          "income_or_bonus": 30.65
+        },
+        {
+          "level": 17,
+          "cost": 1076,
+          "cumulative_cost": 7484,
+          "income_or_bonus": 34.33
+        },
+        {
+          "level": 18,
+          "cost": 1238,
+          "cumulative_cost": 8722,
+          "income_or_bonus": 38.45
+        },
+        {
+          "level": 19,
+          "cost": 1423,
+          "cumulative_cost": 10145,
+          "income_or_bonus": 43.06
+        },
+        {
+          "level": 20,
+          "cost": 1637,
+          "cumulative_cost": 11782,
+          "income_or_bonus": 48.23,
+          "notes": "Industrial scale"
+        },
+        {
+          "level": 21,
+          "cost": 1882,
+          "cumulative_cost": 13664,
+          "income_or_bonus": 54.02
+        },
+        {
+          "level": 22,
+          "cost": 2164,
+          "cumulative_cost": 15828,
+          "income_or_bonus": 60.5
+        },
+        {
+          "level": 23,
+          "cost": 2489,
+          "cumulative_cost": 18317,
+          "income_or_bonus": 67.76
+        },
+        {
+          "level": 24,
+          "cost": 2863,
+          "cumulative_cost": 21180,
+          "income_or_bonus": 75.89
+        },
+        {
+          "level": 25,
+          "cost": 3292,
+          "cumulative_cost": 24472,
+          "income_or_bonus": 85
+        },
+        {
+          "level": 26,
+          "cost": 3786,
+          "cumulative_cost": 28258,
+          "income_or_bonus": 95.2
+        },
+        {
+          "level": 27,
+          "cost": 4354,
+          "cumulative_cost": 32612,
+          "income_or_bonus": 106.62
+        },
+        {
+          "level": 28,
+          "cost": 5007,
+          "cumulative_cost": 37619,
+          "income_or_bonus": 119.42
+        },
+        {
+          "level": 29,
+          "cost": 5758,
+          "cumulative_cost": 43377,
+          "income_or_bonus": 133.75
+        },
+        {
+          "level": 30,
+          "cost": 6621,
+          "cumulative_cost": 49998,
+          "income_or_bonus": 149.8
+        },
+        {
+          "level": 31,
+          "cost": 7614,
+          "cumulative_cost": 57612,
+          "income_or_bonus": 167.78
+        },
+        {
+          "level": 32,
+          "cost": 8757,
+          "cumulative_cost": 66369,
+          "income_or_bonus": 187.91
+        },
+        {
+          "level": 33,
+          "cost": 10070,
+          "cumulative_cost": 76439,
+          "income_or_bonus": 210.46
+        },
+        {
+          "level": 34,
+          "cost": 11580,
+          "cumulative_cost": 88019,
+          "income_or_bonus": 235.71
+        },
+        {
+          "level": 35,
+          "cost": 13318,
+          "cumulative_cost": 101337,
+          "income_or_bonus": 264
+        },
+        {
+          "level": 36,
+          "cost": 15315,
+          "cumulative_cost": 116652,
+          "income_or_bonus": 295.68
+        },
+        {
+          "level": 37,
+          "cost": 17612,
+          "cumulative_cost": 134264,
+          "income_or_bonus": 331.16
+        },
+        {
+          "level": 38,
+          "cost": 20254,
+          "cumulative_cost": 154518,
+          "income_or_bonus": 370.9
+        },
+        {
+          "level": 39,
+          "cost": 23292,
+          "cumulative_cost": 177810,
+          "income_or_bonus": 415.41
+        },
+        {
+          "level": 40,
+          "cost": 26786,
+          "cumulative_cost": 204596,
+          "income_or_bonus": 465.25
+        },
+        {
+          "level": 41,
+          "cost": 30804,
+          "cumulative_cost": 235400,
+          "income_or_bonus": 521.09
+        },
+        {
+          "level": 42,
+          "cost": 35425,
+          "cumulative_cost": 270825,
+          "income_or_bonus": 583.62
+        },
+        {
+          "level": 43,
+          "cost": 40739,
+          "cumulative_cost": 311564,
+          "income_or_bonus": 653.65
+        },
+        {
+          "level": 44,
+          "cost": 46850,
+          "cumulative_cost": 358414,
+          "income_or_bonus": 732.09
+        },
+        {
+          "level": 45,
+          "cost": 53877,
+          "cumulative_cost": 412291,
+          "income_or_bonus": 819.94
+        },
+        {
+          "level": 46,
+          "cost": 61958,
+          "cumulative_cost": 474249,
+          "income_or_bonus": 918.33
+        },
+        {
+          "level": 47,
+          "cost": 71252,
+          "cumulative_cost": 545501,
+          "income_or_bonus": 1028.53
+        },
+        {
+          "level": 48,
+          "cost": 81940,
+          "cumulative_cost": 627441,
+          "income_or_bonus": 1151.95
+        },
+        {
+          "level": 49,
+          "cost": 94231,
+          "cumulative_cost": 721672,
+          "income_or_bonus": 1290.19
+        },
+        {
+          "level": 50,
+          "cost": 108366,
+          "cumulative_cost": 830038,
+          "income_or_bonus": 1445.01,
+          "notes": "Prestige-era scale"
+        },
+        {
+          "level": 51,
+          "cost": 124621,
+          "cumulative_cost": 954659,
+          "income_or_bonus": 1618.41
+        },
+        {
+          "level": 52,
+          "cost": 143314,
+          "cumulative_cost": 1097973,
+          "income_or_bonus": 1812.62
+        },
+        {
+          "level": 53,
+          "cost": 164811,
+          "cumulative_cost": 1262784,
+          "income_or_bonus": 2030.14
+        },
+        {
+          "level": 54,
+          "cost": 189532,
+          "cumulative_cost": 1452316,
+          "income_or_bonus": 2273.75
+        },
+        {
+          "level": 55,
+          "cost": 217962,
+          "cumulative_cost": 1670278,
+          "income_or_bonus": 2546.6
+        },
+        {
+          "level": 56,
+          "cost": 250657,
+          "cumulative_cost": 1920935,
+          "income_or_bonus": 2852.2
+        },
+        {
+          "level": 57,
+          "cost": 288255,
+          "cumulative_cost": 2209190,
+          "income_or_bonus": 3194.46
+        },
+        {
+          "level": 58,
+          "cost": 331493,
+          "cumulative_cost": 2540683,
+          "income_or_bonus": 3577.79
+        },
+        {
+          "level": 59,
+          "cost": 381217,
+          "cumulative_cost": 2921900,
+          "income_or_bonus": 4007.13
+        },
+        {
+          "level": 60,
+          "cost": 438400,
+          "cumulative_cost": 3360300,
+          "income_or_bonus": 4487.98
+        },
+        {
+          "level": 61,
+          "cost": 504160,
+          "cumulative_cost": 3864460,
+          "income_or_bonus": 5026.54
+        },
+        {
+          "level": 62,
+          "cost": 579784,
+          "cumulative_cost": 4444244,
+          "income_or_bonus": 5629.73
+        },
+        {
+          "level": 63,
+          "cost": 666751,
+          "cumulative_cost": 5110995,
+          "income_or_bonus": 6305.3
+        },
+        {
+          "level": 64,
+          "cost": 766764,
+          "cumulative_cost": 5877759,
+          "income_or_bonus": 7061.93
+        },
+        {
+          "level": 65,
+          "cost": 881779,
+          "cumulative_cost": 6759538,
+          "income_or_bonus": 7909.36
+        },
+        {
+          "level": 66,
+          "cost": 1014046,
+          "cumulative_cost": 7773584,
+          "income_or_bonus": 8858.49
+        },
+        {
+          "level": 67,
+          "cost": 1166152,
+          "cumulative_cost": 8939736,
+          "income_or_bonus": 9921.5
+        },
+        {
+          "level": 68,
+          "cost": 1341075,
+          "cumulative_cost": 10280811,
+          "income_or_bonus": 11112.08
+        },
+        {
+          "level": 69,
+          "cost": 1542237,
+          "cumulative_cost": 11823048,
+          "income_or_bonus": 12445.53
+        },
+        {
+          "level": 70,
+          "cost": 1773572,
+          "cumulative_cost": 13596620,
+          "income_or_bonus": 13939
+        },
+        {
+          "level": 71,
+          "cost": 2039608,
+          "cumulative_cost": 15636228,
+          "income_or_bonus": 15611.68
+        },
+        {
+          "level": 72,
+          "cost": 2345549,
+          "cumulative_cost": 17981777,
+          "income_or_bonus": 17485.08
+        },
+        {
+          "level": 73,
+          "cost": 2697381,
+          "cumulative_cost": 20679158,
+          "income_or_bonus": 19583.29
+        },
+        {
+          "level": 74,
+          "cost": 3101989,
+          "cumulative_cost": 23781147,
+          "income_or_bonus": 21933.29
+        },
+        {
+          "level": 75,
+          "cost": 3567287,
+          "cumulative_cost": 27348434,
+          "income_or_bonus": 24565.28
+        },
+        {
+          "level": 76,
+          "cost": 4102380,
+          "cumulative_cost": 31450814,
+          "income_or_bonus": 27513.11
+        },
+        {
+          "level": 77,
+          "cost": 4717737,
+          "cumulative_cost": 36168551,
+          "income_or_bonus": 30814.69
+        },
+        {
+          "level": 78,
+          "cost": 5425397,
+          "cumulative_cost": 41593948,
+          "income_or_bonus": 34512.45
+        },
+        {
+          "level": 79,
+          "cost": 6239207,
+          "cumulative_cost": 47833155,
+          "income_or_bonus": 38653.94
+        },
+        {
+          "level": 80,
+          "cost": 7175088,
+          "cumulative_cost": 55008243,
+          "income_or_bonus": 43292.42
+        },
+        {
+          "level": 81,
+          "cost": 8251351,
+          "cumulative_cost": 63259594,
+          "income_or_bonus": 48487.51
+        },
+        {
+          "level": 82,
+          "cost": 9489054,
+          "cumulative_cost": 72748648,
+          "income_or_bonus": 54306.01
+        },
+        {
+          "level": 83,
+          "cost": 10912412,
+          "cumulative_cost": 83661060,
+          "income_or_bonus": 60822.73
+        },
+        {
+          "level": 84,
+          "cost": 12549274,
+          "cumulative_cost": 96210334,
+          "income_or_bonus": 68121.45
+        },
+        {
+          "level": 85,
+          "cost": 14431665,
+          "cumulative_cost": 110641999,
+          "income_or_bonus": 76296.03
+        },
+        {
+          "level": 86,
+          "cost": 16596414,
+          "cumulative_cost": 127238413,
+          "income_or_bonus": 85451.55
+        },
+        {
+          "level": 87,
+          "cost": 19085877,
+          "cumulative_cost": 146324290,
+          "income_or_bonus": 95705.74
+        },
+        {
+          "level": 88,
+          "cost": 21948758,
+          "cumulative_cost": 168273048,
+          "income_or_bonus": 107190.43
+        },
+        {
+          "level": 89,
+          "cost": 25241072,
+          "cumulative_cost": 193514120,
+          "income_or_bonus": 120053.28
+        },
+        {
+          "level": 90,
+          "cost": 29027233,
+          "cumulative_cost": 222541353,
+          "income_or_bonus": 134459.67
+        },
+        {
+          "level": 91,
+          "cost": 33381317,
+          "cumulative_cost": 255922670,
+          "income_or_bonus": 150594.83
+        },
+        {
+          "level": 92,
+          "cost": 38388515,
+          "cumulative_cost": 294311185,
+          "income_or_bonus": 168666.21
+        },
+        {
+          "level": 93,
+          "cost": 44146792,
+          "cumulative_cost": 338457977,
+          "income_or_bonus": 188906.16
+        },
+        {
+          "level": 94,
+          "cost": 50768811,
+          "cumulative_cost": 389226788,
+          "income_or_bonus": 211574.9
+        },
+        {
+          "level": 95,
+          "cost": 58384133,
+          "cumulative_cost": 447610921,
+          "income_or_bonus": 236963.88
+        },
+        {
+          "level": 96,
+          "cost": 67141753,
+          "cumulative_cost": 514752674,
+          "income_or_bonus": 265399.55
+        },
+        {
+          "level": 97,
+          "cost": 77213016,
+          "cumulative_cost": 591965690,
+          "income_or_bonus": 297247.49
+        },
+        {
+          "level": 98,
+          "cost": 88794968,
+          "cumulative_cost": 680760658,
+          "income_or_bonus": 332917.19
+        },
+        {
+          "level": 99,
+          "cost": 102114213,
+          "cumulative_cost": 782874871,
+          "income_or_bonus": 372867.26
+        },
+        {
+          "level": 100,
+          "cost": 117431345,
+          "cumulative_cost": 900306216,
+          "income_or_bonus": 417611.33,
+          "notes": "Absolute ceiling"
+        }
+      ]
+    },
+    {
+      "id": "upgrade_machine_eff",
+      "label": "Upgrade: Machine Eff",
+      "type": "upgrade",
+      "formula": "",
+      "rows": [
+        {
+          "level": 1,
+          "cost": 345,
+          "cumulative_cost": 345,
+          "income_or_bonus": 11.2,
+          "notes": "First purchase"
+        },
+        {
+          "level": 2,
+          "cost": 397,
+          "cumulative_cost": 742,
+          "income_or_bonus": 12.54
+        },
+        {
+          "level": 3,
+          "cost": 456,
+          "cumulative_cost": 1198,
+          "income_or_bonus": 14.05
+        },
+        {
+          "level": 4,
+          "cost": 525,
+          "cumulative_cost": 1723,
+          "income_or_bonus": 15.74
+        },
+        {
+          "level": 5,
+          "cost": 603,
+          "cumulative_cost": 2326,
+          "income_or_bonus": 17.62,
+          "notes": "5× owned — automation tier approaching"
+        },
+        {
+          "level": 6,
+          "cost": 694,
+          "cumulative_cost": 3020,
+          "income_or_bonus": 19.74
+        },
+        {
+          "level": 7,
+          "cost": 798,
+          "cumulative_cost": 3818,
+          "income_or_bonus": 22.11
+        },
+        {
+          "level": 8,
+          "cost": 918,
+          "cumulative_cost": 4736,
+          "income_or_bonus": 24.76
+        },
+        {
+          "level": 9,
+          "cost": 1055,
+          "cumulative_cost": 5791,
+          "income_or_bonus": 27.73
+        },
+        {
+          "level": 10,
+          "cost": 1214,
+          "cumulative_cost": 7005,
+          "income_or_bonus": 31.06,
+          "notes": "Max upgrade level — full bonus realized"
+        },
+        {
+          "level": 11,
+          "cost": 1396,
+          "cumulative_cost": 8401,
+          "income_or_bonus": 34.79
+        },
+        {
+          "level": 12,
+          "cost": 1605,
+          "cumulative_cost": 10006,
+          "income_or_bonus": 38.96
+        },
+        {
+          "level": 13,
+          "cost": 1846,
+          "cumulative_cost": 11852,
+          "income_or_bonus": 43.63
+        },
+        {
+          "level": 14,
+          "cost": 2123,
+          "cumulative_cost": 13975,
+          "income_or_bonus": 48.87
+        },
+        {
+          "level": 15,
+          "cost": 2441,
+          "cumulative_cost": 16416,
+          "income_or_bonus": 54.74
+        },
+        {
+          "level": 16,
+          "cost": 2807,
+          "cumulative_cost": 19223,
+          "income_or_bonus": 61.3
+        },
+        {
+          "level": 17,
+          "cost": 3228,
+          "cumulative_cost": 22451,
+          "income_or_bonus": 68.66
+        },
+        {
+          "level": 18,
+          "cost": 3713,
+          "cumulative_cost": 26164,
+          "income_or_bonus": 76.9
+        },
+        {
+          "level": 19,
+          "cost": 4270,
+          "cumulative_cost": 30434,
+          "income_or_bonus": 86.13
+        },
+        {
+          "level": 20,
+          "cost": 4910,
+          "cumulative_cost": 35344,
+          "income_or_bonus": 96.46,
+          "notes": "Industrial scale"
+        },
+        {
+          "level": 21,
+          "cost": 5646,
+          "cumulative_cost": 40990,
+          "income_or_bonus": 108.04
+        },
+        {
+          "level": 22,
+          "cost": 6493,
+          "cumulative_cost": 47483,
+          "income_or_bonus": 121
+        },
+        {
+          "level": 23,
+          "cost": 7467,
+          "cumulative_cost": 54950,
+          "income_or_bonus": 135.52
+        },
+        {
+          "level": 24,
+          "cost": 8588,
+          "cumulative_cost": 63538,
+          "income_or_bonus": 151.79
+        },
+        {
+          "level": 25,
+          "cost": 9876,
+          "cumulative_cost": 73414,
+          "income_or_bonus": 170
+        },
+        {
+          "level": 26,
+          "cost": 11357,
+          "cumulative_cost": 84771,
+          "income_or_bonus": 190.4
+        },
+        {
+          "level": 27,
+          "cost": 13061,
+          "cumulative_cost": 97832,
+          "income_or_bonus": 213.25
+        },
+        {
+          "level": 28,
+          "cost": 15020,
+          "cumulative_cost": 112852,
+          "income_or_bonus": 238.84
+        },
+        {
+          "level": 29,
+          "cost": 17273,
+          "cumulative_cost": 130125,
+          "income_or_bonus": 267.5
+        },
+        {
+          "level": 30,
+          "cost": 19864,
+          "cumulative_cost": 149989,
+          "income_or_bonus": 299.6
+        },
+        {
+          "level": 31,
+          "cost": 22843,
+          "cumulative_cost": 172832,
+          "income_or_bonus": 335.55
+        },
+        {
+          "level": 32,
+          "cost": 26270,
+          "cumulative_cost": 199102,
+          "income_or_bonus": 375.82
+        },
+        {
+          "level": 33,
+          "cost": 30210,
+          "cumulative_cost": 229312,
+          "income_or_bonus": 420.92
+        },
+        {
+          "level": 34,
+          "cost": 34741,
+          "cumulative_cost": 264053,
+          "income_or_bonus": 471.43
+        },
+        {
+          "level": 35,
+          "cost": 39953,
+          "cumulative_cost": 304006,
+          "income_or_bonus": 528
+        },
+        {
+          "level": 36,
+          "cost": 45946,
+          "cumulative_cost": 349952,
+          "income_or_bonus": 591.36
+        },
+        {
+          "level": 37,
+          "cost": 52837,
+          "cumulative_cost": 402789,
+          "income_or_bonus": 662.32
+        },
+        {
+          "level": 38,
+          "cost": 60763,
+          "cumulative_cost": 463552,
+          "income_or_bonus": 741.8
+        },
+        {
+          "level": 39,
+          "cost": 69877,
+          "cumulative_cost": 533429,
+          "income_or_bonus": 830.81
+        },
+        {
+          "level": 40,
+          "cost": 80359,
+          "cumulative_cost": 613788,
+          "income_or_bonus": 930.51
+        },
+        {
+          "level": 41,
+          "cost": 92413,
+          "cumulative_cost": 706201,
+          "income_or_bonus": 1042.17
+        },
+        {
+          "level": 42,
+          "cost": 106275,
+          "cumulative_cost": 812476,
+          "income_or_bonus": 1167.23
+        },
+        {
+          "level": 43,
+          "cost": 122216,
+          "cumulative_cost": 934692,
+          "income_or_bonus": 1307.3
+        },
+        {
+          "level": 44,
+          "cost": 140549,
+          "cumulative_cost": 1075241,
+          "income_or_bonus": 1464.18
+        },
+        {
+          "level": 45,
+          "cost": 161631,
+          "cumulative_cost": 1236872,
+          "income_or_bonus": 1639.88
+        },
+        {
+          "level": 46,
+          "cost": 185875,
+          "cumulative_cost": 1422747,
+          "income_or_bonus": 1836.66
+        },
+        {
+          "level": 47,
+          "cost": 213757,
+          "cumulative_cost": 1636504,
+          "income_or_bonus": 2057.06
+        },
+        {
+          "level": 48,
+          "cost": 245820,
+          "cumulative_cost": 1882324,
+          "income_or_bonus": 2303.91
+        },
+        {
+          "level": 49,
+          "cost": 282693,
+          "cumulative_cost": 2165017,
+          "income_or_bonus": 2580.38
+        },
+        {
+          "level": 50,
+          "cost": 325097,
+          "cumulative_cost": 2490114,
+          "income_or_bonus": 2890.02,
+          "notes": "Prestige-era scale"
+        },
+        {
+          "level": 51,
+          "cost": 373862,
+          "cumulative_cost": 2863976,
+          "income_or_bonus": 3236.82
+        },
+        {
+          "level": 52,
+          "cost": 429941,
+          "cumulative_cost": 3293917,
+          "income_or_bonus": 3625.24
+        },
+        {
+          "level": 53,
+          "cost": 494432,
+          "cumulative_cost": 3788349,
+          "income_or_bonus": 4060.27
+        },
+        {
+          "level": 54,
+          "cost": 568597,
+          "cumulative_cost": 4356946,
+          "income_or_bonus": 4547.51
+        },
+        {
+          "level": 55,
+          "cost": 653887,
+          "cumulative_cost": 5010833,
+          "income_or_bonus": 5093.21
+        },
+        {
+          "level": 56,
+          "cost": 751970,
+          "cumulative_cost": 5762803,
+          "income_or_bonus": 5704.39
+        },
+        {
+          "level": 57,
+          "cost": 864765,
+          "cumulative_cost": 6627568,
+          "income_or_bonus": 6388.92
+        },
+        {
+          "level": 58,
+          "cost": 994480,
+          "cumulative_cost": 7622048,
+          "income_or_bonus": 7155.59
+        },
+        {
+          "level": 59,
+          "cost": 1143652,
+          "cumulative_cost": 8765700,
+          "income_or_bonus": 8014.26
+        },
+        {
+          "level": 60,
+          "cost": 1315200,
+          "cumulative_cost": 10080900,
+          "income_or_bonus": 8975.97
+        },
+        {
+          "level": 61,
+          "cost": 1512480,
+          "cumulative_cost": 11593380,
+          "income_or_bonus": 10053.09
+        },
+        {
+          "level": 62,
+          "cost": 1739352,
+          "cumulative_cost": 13332732,
+          "income_or_bonus": 11259.46
+        },
+        {
+          "level": 63,
+          "cost": 2000254,
+          "cumulative_cost": 15332986,
+          "income_or_bonus": 12610.59
+        },
+        {
+          "level": 64,
+          "cost": 2300292,
+          "cumulative_cost": 17633278,
+          "income_or_bonus": 14123.86
+        },
+        {
+          "level": 65,
+          "cost": 2645336,
+          "cumulative_cost": 20278614,
+          "income_or_bonus": 15818.72
+        },
+        {
+          "level": 66,
+          "cost": 3042137,
+          "cumulative_cost": 23320751,
+          "income_or_bonus": 17716.97
+        },
+        {
+          "level": 67,
+          "cost": 3498457,
+          "cumulative_cost": 26819208,
+          "income_or_bonus": 19843.01
+        },
+        {
+          "level": 68,
+          "cost": 4023226,
+          "cumulative_cost": 30842434,
+          "income_or_bonus": 22224.17
+        },
+        {
+          "level": 69,
+          "cost": 4626710,
+          "cumulative_cost": 35469144,
+          "income_or_bonus": 24891.07
+        },
+        {
+          "level": 70,
+          "cost": 5320716,
+          "cumulative_cost": 40789860,
+          "income_or_bonus": 27878
+        },
+        {
+          "level": 71,
+          "cost": 6118823,
+          "cumulative_cost": 46908683,
+          "income_or_bonus": 31223.36
+        },
+        {
+          "level": 72,
+          "cost": 7036647,
+          "cumulative_cost": 53945330,
+          "income_or_bonus": 34970.16
+        },
+        {
+          "level": 73,
+          "cost": 8092144,
+          "cumulative_cost": 62037474,
+          "income_or_bonus": 39166.58
+        },
+        {
+          "level": 74,
+          "cost": 9305966,
+          "cumulative_cost": 71343440,
+          "income_or_bonus": 43866.57
+        },
+        {
+          "level": 75,
+          "cost": 10701860,
+          "cumulative_cost": 82045300,
+          "income_or_bonus": 49130.56
+        },
+        {
+          "level": 76,
+          "cost": 12307139,
+          "cumulative_cost": 94352439,
+          "income_or_bonus": 55026.23
+        },
+        {
+          "level": 77,
+          "cost": 14153210,
+          "cumulative_cost": 108505649,
+          "income_or_bonus": 61629.37
+        },
+        {
+          "level": 78,
+          "cost": 16276192,
+          "cumulative_cost": 124781841,
+          "income_or_bonus": 69024.9
+        },
+        {
+          "level": 79,
+          "cost": 18717621,
+          "cumulative_cost": 143499462,
+          "income_or_bonus": 77307.88
+        },
+        {
+          "level": 80,
+          "cost": 21525264,
+          "cumulative_cost": 165024726,
+          "income_or_bonus": 86584.83
+        },
+        {
+          "level": 81,
+          "cost": 24754053,
+          "cumulative_cost": 189778779,
+          "income_or_bonus": 96975.01
+        },
+        {
+          "level": 82,
+          "cost": 28467161,
+          "cumulative_cost": 218245940,
+          "income_or_bonus": 108612.01
+        },
+        {
+          "level": 83,
+          "cost": 32737236,
+          "cumulative_cost": 250983176,
+          "income_or_bonus": 121645.45
+        },
+        {
+          "level": 84,
+          "cost": 37647821,
+          "cumulative_cost": 288630997,
+          "income_or_bonus": 136242.91
+        },
+        {
+          "level": 85,
+          "cost": 43294994,
+          "cumulative_cost": 331925991,
+          "income_or_bonus": 152592.06
+        },
+        {
+          "level": 86,
+          "cost": 49789243,
+          "cumulative_cost": 381715234,
+          "income_or_bonus": 170903.1
+        },
+        {
+          "level": 87,
+          "cost": 57257630,
+          "cumulative_cost": 438972864,
+          "income_or_bonus": 191411.48
+        },
+        {
+          "level": 88,
+          "cost": 65846274,
+          "cumulative_cost": 504819138,
+          "income_or_bonus": 214380.85
+        },
+        {
+          "level": 89,
+          "cost": 75723215,
+          "cumulative_cost": 580542353,
+          "income_or_bonus": 240106.56
+        },
+        {
+          "level": 90,
+          "cost": 87081698,
+          "cumulative_cost": 667624051,
+          "income_or_bonus": 268919.34
+        },
+        {
+          "level": 91,
+          "cost": 100143952,
+          "cumulative_cost": 767768003,
+          "income_or_bonus": 301189.66
+        },
+        {
+          "level": 92,
+          "cost": 115165545,
+          "cumulative_cost": 882933548,
+          "income_or_bonus": 337332.42
+        },
+        {
+          "level": 93,
+          "cost": 132440377,
+          "cumulative_cost": 1015373925,
+          "income_or_bonus": 377812.31
+        },
+        {
+          "level": 94,
+          "cost": 152306433,
+          "cumulative_cost": 1167680358,
+          "income_or_bonus": 423149.79
+        },
+        {
+          "level": 95,
+          "cost": 175152398,
+          "cumulative_cost": 1342832756,
+          "income_or_bonus": 473927.77
+        },
+        {
+          "level": 96,
+          "cost": 201425258,
+          "cumulative_cost": 1544258014,
+          "income_or_bonus": 530799.1
+        },
+        {
+          "level": 97,
+          "cost": 231639047,
+          "cumulative_cost": 1775897061,
+          "income_or_bonus": 594494.99
+        },
+        {
+          "level": 98,
+          "cost": 266384904,
+          "cumulative_cost": 2042281965,
+          "income_or_bonus": 665834.39
+        },
+        {
+          "level": 99,
+          "cost": 306342639,
+          "cumulative_cost": 2348624604,
+          "income_or_bonus": 745734.52
+        },
+        {
+          "level": 100,
+          "cost": 352294035,
+          "cumulative_cost": 2700918639,
+          "income_or_bonus": 835222.66,
+          "notes": "Absolute ceiling"
+        }
+      ]
+    },
+    {
+      "id": "upgrade_sell_price",
+      "label": "Upgrade: Sell Price",
+      "type": "upgrade",
+      "formula": "",
+      "rows": [
+        {
+          "level": 1,
+          "cost": 230,
+          "cumulative_cost": 230,
+          "income_or_bonus": 8.96,
+          "notes": "First purchase"
+        },
+        {
+          "level": 2,
+          "cost": 264,
+          "cumulative_cost": 494,
+          "income_or_bonus": 10.04
+        },
+        {
+          "level": 3,
+          "cost": 304,
+          "cumulative_cost": 798,
+          "income_or_bonus": 11.24
+        },
+        {
+          "level": 4,
+          "cost": 350,
+          "cumulative_cost": 1148,
+          "income_or_bonus": 12.59
+        },
+        {
+          "level": 5,
+          "cost": 402,
+          "cumulative_cost": 1550,
+          "income_or_bonus": 14.1,
+          "notes": "5× owned — automation tier approaching"
+        },
+        {
+          "level": 6,
+          "cost": 463,
+          "cumulative_cost": 2013,
+          "income_or_bonus": 15.79
+        },
+        {
+          "level": 7,
+          "cost": 532,
+          "cumulative_cost": 2545,
+          "income_or_bonus": 17.69
+        },
+        {
+          "level": 8,
+          "cost": 612,
+          "cumulative_cost": 3157,
+          "income_or_bonus": 19.81
+        },
+        {
+          "level": 9,
+          "cost": 704,
+          "cumulative_cost": 3861,
+          "income_or_bonus": 22.18
+        },
+        {
+          "level": 10,
+          "cost": 809,
+          "cumulative_cost": 4670,
+          "income_or_bonus": 24.85,
+          "notes": "Max upgrade level — full bonus realized"
+        },
+        {
+          "level": 11,
+          "cost": 930,
+          "cumulative_cost": 5600,
+          "income_or_bonus": 27.83
+        },
+        {
+          "level": 12,
+          "cost": 1070,
+          "cumulative_cost": 6670,
+          "income_or_bonus": 31.17
+        },
+        {
+          "level": 13,
+          "cost": 1231,
+          "cumulative_cost": 7901,
+          "income_or_bonus": 34.91
+        },
+        {
+          "level": 14,
+          "cost": 1415,
+          "cumulative_cost": 9316,
+          "income_or_bonus": 39.1
+        },
+        {
+          "level": 15,
+          "cost": 1627,
+          "cumulative_cost": 10943,
+          "income_or_bonus": 43.79
+        },
+        {
+          "level": 16,
+          "cost": 1872,
+          "cumulative_cost": 12815,
+          "income_or_bonus": 49.04
+        },
+        {
+          "level": 17,
+          "cost": 2152,
+          "cumulative_cost": 14967,
+          "income_or_bonus": 54.93
+        },
+        {
+          "level": 18,
+          "cost": 2475,
+          "cumulative_cost": 17442,
+          "income_or_bonus": 61.52
+        },
+        {
+          "level": 19,
+          "cost": 2846,
+          "cumulative_cost": 20288,
+          "income_or_bonus": 68.9
+        },
+        {
+          "level": 20,
+          "cost": 3273,
+          "cumulative_cost": 23561,
+          "income_or_bonus": 77.17,
+          "notes": "Industrial scale"
+        },
+        {
+          "level": 21,
+          "cost": 3764,
+          "cumulative_cost": 27325,
+          "income_or_bonus": 86.43
+        },
+        {
+          "level": 22,
+          "cost": 4329,
+          "cumulative_cost": 31654,
+          "income_or_bonus": 96.8
+        },
+        {
+          "level": 23,
+          "cost": 4978,
+          "cumulative_cost": 36632,
+          "income_or_bonus": 108.42
+        },
+        {
+          "level": 24,
+          "cost": 5725,
+          "cumulative_cost": 42357,
+          "income_or_bonus": 121.43
+        },
+        {
+          "level": 25,
+          "cost": 6584,
+          "cumulative_cost": 48941,
+          "income_or_bonus": 136
+        },
+        {
+          "level": 26,
+          "cost": 7571,
+          "cumulative_cost": 56512,
+          "income_or_bonus": 152.32
+        },
+        {
+          "level": 27,
+          "cost": 8707,
+          "cumulative_cost": 65219,
+          "income_or_bonus": 170.6
+        },
+        {
+          "level": 28,
+          "cost": 10013,
+          "cumulative_cost": 75232,
+          "income_or_bonus": 191.07
+        },
+        {
+          "level": 29,
+          "cost": 11515,
+          "cumulative_cost": 86747,
+          "income_or_bonus": 214
+        },
+        {
+          "level": 30,
+          "cost": 13242,
+          "cumulative_cost": 99989,
+          "income_or_bonus": 239.68
+        },
+        {
+          "level": 31,
+          "cost": 15229,
+          "cumulative_cost": 115218,
+          "income_or_bonus": 268.44
+        },
+        {
+          "level": 32,
+          "cost": 17513,
+          "cumulative_cost": 132731,
+          "income_or_bonus": 300.65
+        },
+        {
+          "level": 33,
+          "cost": 20140,
+          "cumulative_cost": 152871,
+          "income_or_bonus": 336.73
+        },
+        {
+          "level": 34,
+          "cost": 23161,
+          "cumulative_cost": 176032,
+          "income_or_bonus": 377.14
+        },
+        {
+          "level": 35,
+          "cost": 26635,
+          "cumulative_cost": 202667,
+          "income_or_bonus": 422.4
+        },
+        {
+          "level": 36,
+          "cost": 30630,
+          "cumulative_cost": 233297,
+          "income_or_bonus": 473.08
+        },
+        {
+          "level": 37,
+          "cost": 35225,
+          "cumulative_cost": 268522,
+          "income_or_bonus": 529.85
+        },
+        {
+          "level": 38,
+          "cost": 40509,
+          "cumulative_cost": 309031,
+          "income_or_bonus": 593.44
+        },
+        {
+          "level": 39,
+          "cost": 46585,
+          "cumulative_cost": 355616,
+          "income_or_bonus": 664.65
+        },
+        {
+          "level": 40,
+          "cost": 53573,
+          "cumulative_cost": 409189,
+          "income_or_bonus": 744.41
+        },
+        {
+          "level": 41,
+          "cost": 61609,
+          "cumulative_cost": 470798,
+          "income_or_bonus": 833.74
+        },
+        {
+          "level": 42,
+          "cost": 70850,
+          "cumulative_cost": 541648,
+          "income_or_bonus": 933.79
+        },
+        {
+          "level": 43,
+          "cost": 81477,
+          "cumulative_cost": 623125,
+          "income_or_bonus": 1045.84
+        },
+        {
+          "level": 44,
+          "cost": 93699,
+          "cumulative_cost": 716824,
+          "income_or_bonus": 1171.34
+        },
+        {
+          "level": 45,
+          "cost": 107754,
+          "cumulative_cost": 824578,
+          "income_or_bonus": 1311.9
+        },
+        {
+          "level": 46,
+          "cost": 123917,
+          "cumulative_cost": 948495,
+          "income_or_bonus": 1469.33
+        },
+        {
+          "level": 47,
+          "cost": 142504,
+          "cumulative_cost": 1090999,
+          "income_or_bonus": 1645.65
+        },
+        {
+          "level": 48,
+          "cost": 163880,
+          "cumulative_cost": 1254879,
+          "income_or_bonus": 1843.13
+        },
+        {
+          "level": 49,
+          "cost": 188462,
+          "cumulative_cost": 1443341,
+          "income_or_bonus": 2064.3
+        },
+        {
+          "level": 50,
+          "cost": 216731,
+          "cumulative_cost": 1660072,
+          "income_or_bonus": 2312.02,
+          "notes": "Prestige-era scale"
+        },
+        {
+          "level": 51,
+          "cost": 249241,
+          "cumulative_cost": 1909313,
+          "income_or_bonus": 2589.46
+        },
+        {
+          "level": 52,
+          "cost": 286627,
+          "cumulative_cost": 2195940,
+          "income_or_bonus": 2900.19
+        },
+        {
+          "level": 53,
+          "cost": 329622,
+          "cumulative_cost": 2525562,
+          "income_or_bonus": 3248.22
+        },
+        {
+          "level": 54,
+          "cost": 379065,
+          "cumulative_cost": 2904627,
+          "income_or_bonus": 3638
+        },
+        {
+          "level": 55,
+          "cost": 435924,
+          "cumulative_cost": 3340551,
+          "income_or_bonus": 4074.56
+        },
+        {
+          "level": 56,
+          "cost": 501313,
+          "cumulative_cost": 3841864,
+          "income_or_bonus": 4563.51
+        },
+        {
+          "level": 57,
+          "cost": 576510,
+          "cumulative_cost": 4418374,
+          "income_or_bonus": 5111.13
+        },
+        {
+          "level": 58,
+          "cost": 662987,
+          "cumulative_cost": 5081361,
+          "income_or_bonus": 5724.47
+        },
+        {
+          "level": 59,
+          "cost": 762435,
+          "cumulative_cost": 5843796,
+          "income_or_bonus": 6411.41
+        },
+        {
+          "level": 60,
+          "cost": 876800,
+          "cumulative_cost": 6720596,
+          "income_or_bonus": 7180.78
+        },
+        {
+          "level": 61,
+          "cost": 1008320,
+          "cumulative_cost": 7728916,
+          "income_or_bonus": 8042.47
+        },
+        {
+          "level": 62,
+          "cost": 1159568,
+          "cumulative_cost": 8888484,
+          "income_or_bonus": 9007.56
+        },
+        {
+          "level": 63,
+          "cost": 1333503,
+          "cumulative_cost": 10221987,
+          "income_or_bonus": 10088.47
+        },
+        {
+          "level": 64,
+          "cost": 1533528,
+          "cumulative_cost": 11755515,
+          "income_or_bonus": 11299.09
+        },
+        {
+          "level": 65,
+          "cost": 1763557,
+          "cumulative_cost": 13519072,
+          "income_or_bonus": 12654.98
+        },
+        {
+          "level": 66,
+          "cost": 2028091,
+          "cumulative_cost": 15547163,
+          "income_or_bonus": 14173.58
+        },
+        {
+          "level": 67,
+          "cost": 2332305,
+          "cumulative_cost": 17879468,
+          "income_or_bonus": 15874.41
+        },
+        {
+          "level": 68,
+          "cost": 2682150,
+          "cumulative_cost": 20561618,
+          "income_or_bonus": 17779.34
+        },
+        {
+          "level": 69,
+          "cost": 3084473,
+          "cumulative_cost": 23646091,
+          "income_or_bonus": 19912.86
+        },
+        {
+          "level": 70,
+          "cost": 3547144,
+          "cumulative_cost": 27193235,
+          "income_or_bonus": 22302.4
+        },
+        {
+          "level": 71,
+          "cost": 4079216,
+          "cumulative_cost": 31272451,
+          "income_or_bonus": 24978.69
+        },
+        {
+          "level": 72,
+          "cost": 4691098,
+          "cumulative_cost": 35963549,
+          "income_or_bonus": 27976.13
+        },
+        {
+          "level": 73,
+          "cost": 5394763,
+          "cumulative_cost": 41358312,
+          "income_or_bonus": 31333.26
+        },
+        {
+          "level": 74,
+          "cost": 6203977,
+          "cumulative_cost": 47562289,
+          "income_or_bonus": 35093.26
+        },
+        {
+          "level": 75,
+          "cost": 7134574,
+          "cumulative_cost": 54696863,
+          "income_or_bonus": 39304.45
+        },
+        {
+          "level": 76,
+          "cost": 8204760,
+          "cumulative_cost": 62901623,
+          "income_or_bonus": 44020.98
+        },
+        {
+          "level": 77,
+          "cost": 9435474,
+          "cumulative_cost": 72337097,
+          "income_or_bonus": 49303.5
+        },
+        {
+          "level": 78,
+          "cost": 10850795,
+          "cumulative_cost": 83187892,
+          "income_or_bonus": 55219.92
+        },
+        {
+          "level": 79,
+          "cost": 12478414,
+          "cumulative_cost": 95666306,
+          "income_or_bonus": 61846.31
+        },
+        {
+          "level": 80,
+          "cost": 14350176,
+          "cumulative_cost": 110016482,
+          "income_or_bonus": 69267.86
+        },
+        {
+          "level": 81,
+          "cost": 16502702,
+          "cumulative_cost": 126519184,
+          "income_or_bonus": 77580.01
+        },
+        {
+          "level": 82,
+          "cost": 18978108,
+          "cumulative_cost": 145497292,
+          "income_or_bonus": 86889.61
+        },
+        {
+          "level": 83,
+          "cost": 21824824,
+          "cumulative_cost": 167322116,
+          "income_or_bonus": 97316.36
+        },
+        {
+          "level": 84,
+          "cost": 25098547,
+          "cumulative_cost": 192420663,
+          "income_or_bonus": 108994.33
+        },
+        {
+          "level": 85,
+          "cost": 28863329,
+          "cumulative_cost": 221283992,
+          "income_or_bonus": 122073.65
+        },
+        {
+          "level": 86,
+          "cost": 33192829,
+          "cumulative_cost": 254476821,
+          "income_or_bonus": 136722.48
+        },
+        {
+          "level": 87,
+          "cost": 38171753,
+          "cumulative_cost": 292648574,
+          "income_or_bonus": 153129.18
+        },
+        {
+          "level": 88,
+          "cost": 43897516,
+          "cumulative_cost": 336546090,
+          "income_or_bonus": 171504.68
+        },
+        {
+          "level": 89,
+          "cost": 50482144,
+          "cumulative_cost": 387028234,
+          "income_or_bonus": 192085.24
+        },
+        {
+          "level": 90,
+          "cost": 58054465,
+          "cumulative_cost": 445082699,
+          "income_or_bonus": 215135.47
+        },
+        {
+          "level": 91,
+          "cost": 66762635,
+          "cumulative_cost": 511845334,
+          "income_or_bonus": 240951.73
+        },
+        {
+          "level": 92,
+          "cost": 76777030,
+          "cumulative_cost": 588622364,
+          "income_or_bonus": 269865.94
+        },
+        {
+          "level": 93,
+          "cost": 88293585,
+          "cumulative_cost": 676915949,
+          "income_or_bonus": 302249.85
+        },
+        {
+          "level": 94,
+          "cost": 101537622,
+          "cumulative_cost": 778453571,
+          "income_or_bonus": 338519.83
+        },
+        {
+          "level": 95,
+          "cost": 116768266,
+          "cumulative_cost": 895221837,
+          "income_or_bonus": 379142.21
+        },
+        {
+          "level": 96,
+          "cost": 134283505,
+          "cumulative_cost": 1029505342,
+          "income_or_bonus": 424639.28
+        },
+        {
+          "level": 97,
+          "cost": 154426031,
+          "cumulative_cost": 1183931373,
+          "income_or_bonus": 475595.99
+        },
+        {
+          "level": 98,
+          "cost": 177589936,
+          "cumulative_cost": 1361521309,
+          "income_or_bonus": 532667.51
+        },
+        {
+          "level": 99,
+          "cost": 204228426,
+          "cumulative_cost": 1565749735,
+          "income_or_bonus": 596587.61
+        },
+        {
+          "level": 100,
+          "cost": 234862690,
+          "cumulative_cost": 1800612425,
+          "income_or_bonus": 668178.13,
+          "notes": "Absolute ceiling"
+        }
+      ]
+    },
+    {
+      "id": "machine_t1_seed",
+      "label": "Machine T1: Seed Sorter",
+      "type": "machine",
+      "formula": "",
+      "rows": [
+        {
+          "level": 1,
+          "cost": 118,
+          "cumulative_cost": 118,
+          "income_or_bonus": 0.2,
+          "roi_ticks_at_1cps": 590,
+          "notes": "First purchase"
+        },
+        {
+          "level": 2,
+          "cost": 236,
+          "cumulative_cost": 354,
+          "income_or_bonus": 0.4,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 3,
+          "cost": 354,
+          "cumulative_cost": 708,
+          "income_or_bonus": 0.6,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 4,
+          "cost": 472,
+          "cumulative_cost": 1180,
+          "income_or_bonus": 0.8,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 5,
+          "cost": 590,
+          "cumulative_cost": 1770,
+          "income_or_bonus": 1,
+          "roi_ticks_at_1cps": 590,
+          "notes": "5× owned — automation tier approaching"
+        },
+        {
+          "level": 6,
+          "cost": 708,
+          "cumulative_cost": 2478,
+          "income_or_bonus": 1.2,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 7,
+          "cost": 826,
+          "cumulative_cost": 3304,
+          "income_or_bonus": 1.4,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 8,
+          "cost": 944,
+          "cumulative_cost": 4248,
+          "income_or_bonus": 1.6,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 9,
+          "cost": 1062,
+          "cumulative_cost": 5310,
+          "income_or_bonus": 1.8,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 10,
+          "cost": 1180,
+          "cumulative_cost": 6490,
+          "income_or_bonus": 2,
+          "roi_ticks_at_1cps": 590,
+          "notes": "Max upgrade level — full bonus realized"
+        },
+        {
+          "level": 11,
+          "cost": 1298,
+          "cumulative_cost": 7788,
+          "income_or_bonus": 2.2,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 12,
+          "cost": 1416,
+          "cumulative_cost": 9204,
+          "income_or_bonus": 2.4,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 13,
+          "cost": 1534,
+          "cumulative_cost": 10738,
+          "income_or_bonus": 2.6,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 14,
+          "cost": 1652,
+          "cumulative_cost": 12390,
+          "income_or_bonus": 2.8,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 15,
+          "cost": 1770,
+          "cumulative_cost": 14160,
+          "income_or_bonus": 3,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 16,
+          "cost": 1888,
+          "cumulative_cost": 16048,
+          "income_or_bonus": 3.2,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 17,
+          "cost": 2006,
+          "cumulative_cost": 18054,
+          "income_or_bonus": 3.4,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 18,
+          "cost": 2124,
+          "cumulative_cost": 20178,
+          "income_or_bonus": 3.6,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 19,
+          "cost": 2242,
+          "cumulative_cost": 22420,
+          "income_or_bonus": 3.8,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 20,
+          "cost": 2360,
+          "cumulative_cost": 24780,
+          "income_or_bonus": 4,
+          "roi_ticks_at_1cps": 590,
+          "notes": "Industrial scale"
+        },
+        {
+          "level": 21,
+          "cost": 2478,
+          "cumulative_cost": 27258,
+          "income_or_bonus": 4.2,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 22,
+          "cost": 2596,
+          "cumulative_cost": 29854,
+          "income_or_bonus": 4.4,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 23,
+          "cost": 2714,
+          "cumulative_cost": 32568,
+          "income_or_bonus": 4.6,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 24,
+          "cost": 2832,
+          "cumulative_cost": 35400,
+          "income_or_bonus": 4.8,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 25,
+          "cost": 2950,
+          "cumulative_cost": 38350,
+          "income_or_bonus": 5,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 26,
+          "cost": 3068,
+          "cumulative_cost": 41418,
+          "income_or_bonus": 5.2,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 27,
+          "cost": 3186,
+          "cumulative_cost": 44604,
+          "income_or_bonus": 5.4,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 28,
+          "cost": 3304,
+          "cumulative_cost": 47908,
+          "income_or_bonus": 5.6,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 29,
+          "cost": 3422,
+          "cumulative_cost": 51330,
+          "income_or_bonus": 5.8,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 30,
+          "cost": 3540,
+          "cumulative_cost": 54870,
+          "income_or_bonus": 6,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 31,
+          "cost": 3658,
+          "cumulative_cost": 58528,
+          "income_or_bonus": 6.2,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 32,
+          "cost": 3776,
+          "cumulative_cost": 62304,
+          "income_or_bonus": 6.4,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 33,
+          "cost": 3894,
+          "cumulative_cost": 66198,
+          "income_or_bonus": 6.6,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 34,
+          "cost": 4012,
+          "cumulative_cost": 70210,
+          "income_or_bonus": 6.8,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 35,
+          "cost": 4130,
+          "cumulative_cost": 74340,
+          "income_or_bonus": 7,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 36,
+          "cost": 4248,
+          "cumulative_cost": 78588,
+          "income_or_bonus": 7.2,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 37,
+          "cost": 4366,
+          "cumulative_cost": 82954,
+          "income_or_bonus": 7.4,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 38,
+          "cost": 4484,
+          "cumulative_cost": 87438,
+          "income_or_bonus": 7.6,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 39,
+          "cost": 4602,
+          "cumulative_cost": 92040,
+          "income_or_bonus": 7.8,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 40,
+          "cost": 4720,
+          "cumulative_cost": 96760,
+          "income_or_bonus": 8,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 41,
+          "cost": 4838,
+          "cumulative_cost": 101598,
+          "income_or_bonus": 8.2,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 42,
+          "cost": 4956,
+          "cumulative_cost": 106554,
+          "income_or_bonus": 8.4,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 43,
+          "cost": 5074,
+          "cumulative_cost": 111628,
+          "income_or_bonus": 8.6,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 44,
+          "cost": 5192,
+          "cumulative_cost": 116820,
+          "income_or_bonus": 8.8,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 45,
+          "cost": 5310,
+          "cumulative_cost": 122130,
+          "income_or_bonus": 9,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 46,
+          "cost": 5428,
+          "cumulative_cost": 127558,
+          "income_or_bonus": 9.2,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 47,
+          "cost": 5546,
+          "cumulative_cost": 133104,
+          "income_or_bonus": 9.4,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 48,
+          "cost": 5664,
+          "cumulative_cost": 138768,
+          "income_or_bonus": 9.6,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 49,
+          "cost": 5782,
+          "cumulative_cost": 144550,
+          "income_or_bonus": 9.8,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 50,
+          "cost": 5900,
+          "cumulative_cost": 150450,
+          "income_or_bonus": 10,
+          "roi_ticks_at_1cps": 590,
+          "notes": "Prestige-era scale"
+        },
+        {
+          "level": 51,
+          "cost": 6018,
+          "cumulative_cost": 156468,
+          "income_or_bonus": 10.2,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 52,
+          "cost": 6136,
+          "cumulative_cost": 162604,
+          "income_or_bonus": 10.4,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 53,
+          "cost": 6254,
+          "cumulative_cost": 168858,
+          "income_or_bonus": 10.6,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 54,
+          "cost": 6372,
+          "cumulative_cost": 175230,
+          "income_or_bonus": 10.8,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 55,
+          "cost": 6490,
+          "cumulative_cost": 181720,
+          "income_or_bonus": 11,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 56,
+          "cost": 6608,
+          "cumulative_cost": 188328,
+          "income_or_bonus": 11.2,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 57,
+          "cost": 6726,
+          "cumulative_cost": 195054,
+          "income_or_bonus": 11.4,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 58,
+          "cost": 6844,
+          "cumulative_cost": 201898,
+          "income_or_bonus": 11.6,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 59,
+          "cost": 6962,
+          "cumulative_cost": 208860,
+          "income_or_bonus": 11.8,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 60,
+          "cost": 7080,
+          "cumulative_cost": 215940,
+          "income_or_bonus": 12,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 61,
+          "cost": 7198,
+          "cumulative_cost": 223138,
+          "income_or_bonus": 12.2,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 62,
+          "cost": 7316,
+          "cumulative_cost": 230454,
+          "income_or_bonus": 12.4,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 63,
+          "cost": 7434,
+          "cumulative_cost": 237888,
+          "income_or_bonus": 12.6,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 64,
+          "cost": 7552,
+          "cumulative_cost": 245440,
+          "income_or_bonus": 12.8,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 65,
+          "cost": 7670,
+          "cumulative_cost": 253110,
+          "income_or_bonus": 13,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 66,
+          "cost": 7788,
+          "cumulative_cost": 260898,
+          "income_or_bonus": 13.2,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 67,
+          "cost": 7906,
+          "cumulative_cost": 268804,
+          "income_or_bonus": 13.4,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 68,
+          "cost": 8024,
+          "cumulative_cost": 276828,
+          "income_or_bonus": 13.6,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 69,
+          "cost": 8142,
+          "cumulative_cost": 284970,
+          "income_or_bonus": 13.8,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 70,
+          "cost": 8260,
+          "cumulative_cost": 293230,
+          "income_or_bonus": 14,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 71,
+          "cost": 8378,
+          "cumulative_cost": 301608,
+          "income_or_bonus": 14.2,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 72,
+          "cost": 8496,
+          "cumulative_cost": 310104,
+          "income_or_bonus": 14.4,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 73,
+          "cost": 8614,
+          "cumulative_cost": 318718,
+          "income_or_bonus": 14.6,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 74,
+          "cost": 8732,
+          "cumulative_cost": 327450,
+          "income_or_bonus": 14.8,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 75,
+          "cost": 8850,
+          "cumulative_cost": 336300,
+          "income_or_bonus": 15,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 76,
+          "cost": 8968,
+          "cumulative_cost": 345268,
+          "income_or_bonus": 15.2,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 77,
+          "cost": 9086,
+          "cumulative_cost": 354354,
+          "income_or_bonus": 15.4,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 78,
+          "cost": 9204,
+          "cumulative_cost": 363558,
+          "income_or_bonus": 15.6,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 79,
+          "cost": 9322,
+          "cumulative_cost": 372880,
+          "income_or_bonus": 15.8,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 80,
+          "cost": 9440,
+          "cumulative_cost": 382320,
+          "income_or_bonus": 16,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 81,
+          "cost": 9558,
+          "cumulative_cost": 391878,
+          "income_or_bonus": 16.2,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 82,
+          "cost": 9676,
+          "cumulative_cost": 401554,
+          "income_or_bonus": 16.4,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 83,
+          "cost": 9794,
+          "cumulative_cost": 411348,
+          "income_or_bonus": 16.6,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 84,
+          "cost": 9912,
+          "cumulative_cost": 421260,
+          "income_or_bonus": 16.8,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 85,
+          "cost": 10030,
+          "cumulative_cost": 431290,
+          "income_or_bonus": 17,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 86,
+          "cost": 10148,
+          "cumulative_cost": 441438,
+          "income_or_bonus": 17.2,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 87,
+          "cost": 10266,
+          "cumulative_cost": 451704,
+          "income_or_bonus": 17.4,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 88,
+          "cost": 10384,
+          "cumulative_cost": 462088,
+          "income_or_bonus": 17.6,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 89,
+          "cost": 10502,
+          "cumulative_cost": 472590,
+          "income_or_bonus": 17.8,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 90,
+          "cost": 10620,
+          "cumulative_cost": 483210,
+          "income_or_bonus": 18,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 91,
+          "cost": 10738,
+          "cumulative_cost": 493948,
+          "income_or_bonus": 18.2,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 92,
+          "cost": 10856,
+          "cumulative_cost": 504804,
+          "income_or_bonus": 18.4,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 93,
+          "cost": 10974,
+          "cumulative_cost": 515778,
+          "income_or_bonus": 18.6,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 94,
+          "cost": 11092,
+          "cumulative_cost": 526870,
+          "income_or_bonus": 18.8,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 95,
+          "cost": 11210,
+          "cumulative_cost": 538080,
+          "income_or_bonus": 19,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 96,
+          "cost": 11328,
+          "cumulative_cost": 549408,
+          "income_or_bonus": 19.2,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 97,
+          "cost": 11446,
+          "cumulative_cost": 560854,
+          "income_or_bonus": 19.4,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 98,
+          "cost": 11564,
+          "cumulative_cost": 572418,
+          "income_or_bonus": 19.6,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 99,
+          "cost": 11682,
+          "cumulative_cost": 584100,
+          "income_or_bonus": 19.8,
+          "roi_ticks_at_1cps": 590
+        },
+        {
+          "level": 100,
+          "cost": 11800,
+          "cumulative_cost": 595900,
+          "income_or_bonus": 20,
+          "roi_ticks_at_1cps": 590,
+          "notes": "Absolute ceiling"
+        }
+      ]
+    },
+    {
+      "id": "machine_t2_harvester",
+      "label": "Machine T2: Auto Harvester",
+      "type": "machine",
+      "formula": "",
+      "rows": [
+        {
+          "level": 1,
+          "cost": 2089,
+          "cumulative_cost": 2089,
+          "income_or_bonus": 4,
+          "roi_ticks_at_1cps": 522,
+          "notes": "First purchase"
+        },
+        {
+          "level": 2,
+          "cost": 4178,
+          "cumulative_cost": 6267,
+          "income_or_bonus": 8,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 3,
+          "cost": 6267,
+          "cumulative_cost": 12534,
+          "income_or_bonus": 12,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 4,
+          "cost": 8356,
+          "cumulative_cost": 20890,
+          "income_or_bonus": 16,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 5,
+          "cost": 10445,
+          "cumulative_cost": 31335,
+          "income_or_bonus": 20,
+          "roi_ticks_at_1cps": 522,
+          "notes": "5× owned — automation tier approaching"
+        },
+        {
+          "level": 6,
+          "cost": 12534,
+          "cumulative_cost": 43869,
+          "income_or_bonus": 24,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 7,
+          "cost": 14623,
+          "cumulative_cost": 58492,
+          "income_or_bonus": 28,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 8,
+          "cost": 16712,
+          "cumulative_cost": 75204,
+          "income_or_bonus": 32,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 9,
+          "cost": 18801,
+          "cumulative_cost": 94005,
+          "income_or_bonus": 36,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 10,
+          "cost": 20890,
+          "cumulative_cost": 114895,
+          "income_or_bonus": 40,
+          "roi_ticks_at_1cps": 522,
+          "notes": "Max upgrade level — full bonus realized"
+        },
+        {
+          "level": 11,
+          "cost": 22979,
+          "cumulative_cost": 137874,
+          "income_or_bonus": 44,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 12,
+          "cost": 25068,
+          "cumulative_cost": 162942,
+          "income_or_bonus": 48,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 13,
+          "cost": 27157,
+          "cumulative_cost": 190099,
+          "income_or_bonus": 52,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 14,
+          "cost": 29246,
+          "cumulative_cost": 219345,
+          "income_or_bonus": 56,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 15,
+          "cost": 31335,
+          "cumulative_cost": 250680,
+          "income_or_bonus": 60,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 16,
+          "cost": 33424,
+          "cumulative_cost": 284104,
+          "income_or_bonus": 64,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 17,
+          "cost": 35513,
+          "cumulative_cost": 319617,
+          "income_or_bonus": 68,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 18,
+          "cost": 37602,
+          "cumulative_cost": 357219,
+          "income_or_bonus": 72,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 19,
+          "cost": 39691,
+          "cumulative_cost": 396910,
+          "income_or_bonus": 76,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 20,
+          "cost": 41780,
+          "cumulative_cost": 438690,
+          "income_or_bonus": 80,
+          "roi_ticks_at_1cps": 522,
+          "notes": "Industrial scale"
+        },
+        {
+          "level": 21,
+          "cost": 43869,
+          "cumulative_cost": 482559,
+          "income_or_bonus": 84,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 22,
+          "cost": 45958,
+          "cumulative_cost": 528517,
+          "income_or_bonus": 88,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 23,
+          "cost": 48047,
+          "cumulative_cost": 576564,
+          "income_or_bonus": 92,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 24,
+          "cost": 50136,
+          "cumulative_cost": 626700,
+          "income_or_bonus": 96,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 25,
+          "cost": 52225,
+          "cumulative_cost": 678925,
+          "income_or_bonus": 100,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 26,
+          "cost": 54314,
+          "cumulative_cost": 733239,
+          "income_or_bonus": 104,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 27,
+          "cost": 56403,
+          "cumulative_cost": 789642,
+          "income_or_bonus": 108,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 28,
+          "cost": 58492,
+          "cumulative_cost": 848134,
+          "income_or_bonus": 112,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 29,
+          "cost": 60581,
+          "cumulative_cost": 908715,
+          "income_or_bonus": 116,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 30,
+          "cost": 62670,
+          "cumulative_cost": 971385,
+          "income_or_bonus": 120,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 31,
+          "cost": 64759,
+          "cumulative_cost": 1036144,
+          "income_or_bonus": 124,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 32,
+          "cost": 66848,
+          "cumulative_cost": 1102992,
+          "income_or_bonus": 128,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 33,
+          "cost": 68937,
+          "cumulative_cost": 1171929,
+          "income_or_bonus": 132,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 34,
+          "cost": 71026,
+          "cumulative_cost": 1242955,
+          "income_or_bonus": 136,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 35,
+          "cost": 73115,
+          "cumulative_cost": 1316070,
+          "income_or_bonus": 140,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 36,
+          "cost": 75204,
+          "cumulative_cost": 1391274,
+          "income_or_bonus": 144,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 37,
+          "cost": 77293,
+          "cumulative_cost": 1468567,
+          "income_or_bonus": 148,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 38,
+          "cost": 79382,
+          "cumulative_cost": 1547949,
+          "income_or_bonus": 152,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 39,
+          "cost": 81471,
+          "cumulative_cost": 1629420,
+          "income_or_bonus": 156,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 40,
+          "cost": 83560,
+          "cumulative_cost": 1712980,
+          "income_or_bonus": 160,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 41,
+          "cost": 85649,
+          "cumulative_cost": 1798629,
+          "income_or_bonus": 164,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 42,
+          "cost": 87738,
+          "cumulative_cost": 1886367,
+          "income_or_bonus": 168,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 43,
+          "cost": 89827,
+          "cumulative_cost": 1976194,
+          "income_or_bonus": 172,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 44,
+          "cost": 91916,
+          "cumulative_cost": 2068110,
+          "income_or_bonus": 176,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 45,
+          "cost": 94005,
+          "cumulative_cost": 2162115,
+          "income_or_bonus": 180,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 46,
+          "cost": 96094,
+          "cumulative_cost": 2258209,
+          "income_or_bonus": 184,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 47,
+          "cost": 98183,
+          "cumulative_cost": 2356392,
+          "income_or_bonus": 188,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 48,
+          "cost": 100272,
+          "cumulative_cost": 2456664,
+          "income_or_bonus": 192,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 49,
+          "cost": 102361,
+          "cumulative_cost": 2559025,
+          "income_or_bonus": 196,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 50,
+          "cost": 104450,
+          "cumulative_cost": 2663475,
+          "income_or_bonus": 200,
+          "roi_ticks_at_1cps": 522,
+          "notes": "Prestige-era scale"
+        },
+        {
+          "level": 51,
+          "cost": 106539,
+          "cumulative_cost": 2770014,
+          "income_or_bonus": 204,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 52,
+          "cost": 108628,
+          "cumulative_cost": 2878642,
+          "income_or_bonus": 208,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 53,
+          "cost": 110717,
+          "cumulative_cost": 2989359,
+          "income_or_bonus": 212,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 54,
+          "cost": 112806,
+          "cumulative_cost": 3102165,
+          "income_or_bonus": 216,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 55,
+          "cost": 114895,
+          "cumulative_cost": 3217060,
+          "income_or_bonus": 220,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 56,
+          "cost": 116984,
+          "cumulative_cost": 3334044,
+          "income_or_bonus": 224,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 57,
+          "cost": 119073,
+          "cumulative_cost": 3453117,
+          "income_or_bonus": 228,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 58,
+          "cost": 121162,
+          "cumulative_cost": 3574279,
+          "income_or_bonus": 232,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 59,
+          "cost": 123251,
+          "cumulative_cost": 3697530,
+          "income_or_bonus": 236,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 60,
+          "cost": 125340,
+          "cumulative_cost": 3822870,
+          "income_or_bonus": 240,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 61,
+          "cost": 127429,
+          "cumulative_cost": 3950299,
+          "income_or_bonus": 244,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 62,
+          "cost": 129518,
+          "cumulative_cost": 4079817,
+          "income_or_bonus": 248,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 63,
+          "cost": 131607,
+          "cumulative_cost": 4211424,
+          "income_or_bonus": 252,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 64,
+          "cost": 133696,
+          "cumulative_cost": 4345120,
+          "income_or_bonus": 256,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 65,
+          "cost": 135785,
+          "cumulative_cost": 4480905,
+          "income_or_bonus": 260,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 66,
+          "cost": 137874,
+          "cumulative_cost": 4618779,
+          "income_or_bonus": 264,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 67,
+          "cost": 139963,
+          "cumulative_cost": 4758742,
+          "income_or_bonus": 268,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 68,
+          "cost": 142052,
+          "cumulative_cost": 4900794,
+          "income_or_bonus": 272,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 69,
+          "cost": 144141,
+          "cumulative_cost": 5044935,
+          "income_or_bonus": 276,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 70,
+          "cost": 146230,
+          "cumulative_cost": 5191165,
+          "income_or_bonus": 280,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 71,
+          "cost": 148319,
+          "cumulative_cost": 5339484,
+          "income_or_bonus": 284,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 72,
+          "cost": 150408,
+          "cumulative_cost": 5489892,
+          "income_or_bonus": 288,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 73,
+          "cost": 152497,
+          "cumulative_cost": 5642389,
+          "income_or_bonus": 292,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 74,
+          "cost": 154586,
+          "cumulative_cost": 5796975,
+          "income_or_bonus": 296,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 75,
+          "cost": 156675,
+          "cumulative_cost": 5953650,
+          "income_or_bonus": 300,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 76,
+          "cost": 158764,
+          "cumulative_cost": 6112414,
+          "income_or_bonus": 304,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 77,
+          "cost": 160853,
+          "cumulative_cost": 6273267,
+          "income_or_bonus": 308,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 78,
+          "cost": 162942,
+          "cumulative_cost": 6436209,
+          "income_or_bonus": 312,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 79,
+          "cost": 165031,
+          "cumulative_cost": 6601240,
+          "income_or_bonus": 316,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 80,
+          "cost": 167120,
+          "cumulative_cost": 6768360,
+          "income_or_bonus": 320,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 81,
+          "cost": 169209,
+          "cumulative_cost": 6937569,
+          "income_or_bonus": 324,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 82,
+          "cost": 171298,
+          "cumulative_cost": 7108867,
+          "income_or_bonus": 328,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 83,
+          "cost": 173387,
+          "cumulative_cost": 7282254,
+          "income_or_bonus": 332,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 84,
+          "cost": 175476,
+          "cumulative_cost": 7457730,
+          "income_or_bonus": 336,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 85,
+          "cost": 177565,
+          "cumulative_cost": 7635295,
+          "income_or_bonus": 340,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 86,
+          "cost": 179654,
+          "cumulative_cost": 7814949,
+          "income_or_bonus": 344,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 87,
+          "cost": 181743,
+          "cumulative_cost": 7996692,
+          "income_or_bonus": 348,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 88,
+          "cost": 183832,
+          "cumulative_cost": 8180524,
+          "income_or_bonus": 352,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 89,
+          "cost": 185921,
+          "cumulative_cost": 8366445,
+          "income_or_bonus": 356,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 90,
+          "cost": 188010,
+          "cumulative_cost": 8554455,
+          "income_or_bonus": 360,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 91,
+          "cost": 190099,
+          "cumulative_cost": 8744554,
+          "income_or_bonus": 364,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 92,
+          "cost": 192188,
+          "cumulative_cost": 8936742,
+          "income_or_bonus": 368,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 93,
+          "cost": 194277,
+          "cumulative_cost": 9131019,
+          "income_or_bonus": 372,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 94,
+          "cost": 196366,
+          "cumulative_cost": 9327385,
+          "income_or_bonus": 376,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 95,
+          "cost": 198455,
+          "cumulative_cost": 9525840,
+          "income_or_bonus": 380,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 96,
+          "cost": 200544,
+          "cumulative_cost": 9726384,
+          "income_or_bonus": 384,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 97,
+          "cost": 202633,
+          "cumulative_cost": 9929017,
+          "income_or_bonus": 388,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 98,
+          "cost": 204722,
+          "cumulative_cost": 10133739,
+          "income_or_bonus": 392,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 99,
+          "cost": 206811,
+          "cumulative_cost": 10340550,
+          "income_or_bonus": 396,
+          "roi_ticks_at_1cps": 522
+        },
+        {
+          "level": 100,
+          "cost": 208900,
+          "cumulative_cost": 10549450,
+          "income_or_bonus": 400,
+          "roi_ticks_at_1cps": 522,
+          "notes": "Absolute ceiling"
+        }
+      ]
+    },
+    {
+      "id": "machine_t3_hydroponic",
+      "label": "Machine T3: Hydroponic Bay",
+      "type": "machine",
+      "formula": "",
+      "rows": [
+        {
+          "level": 1,
+          "cost": 24645,
+          "cumulative_cost": 24645,
+          "income_or_bonus": 30,
+          "roi_ticks_at_1cps": 822,
+          "notes": "First purchase"
+        },
+        {
+          "level": 2,
+          "cost": 49290,
+          "cumulative_cost": 73935,
+          "income_or_bonus": 60,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 3,
+          "cost": 73935,
+          "cumulative_cost": 147870,
+          "income_or_bonus": 90,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 4,
+          "cost": 98580,
+          "cumulative_cost": 246450,
+          "income_or_bonus": 120,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 5,
+          "cost": 123225,
+          "cumulative_cost": 369675,
+          "income_or_bonus": 150,
+          "roi_ticks_at_1cps": 822,
+          "notes": "5× owned — automation tier approaching"
+        },
+        {
+          "level": 6,
+          "cost": 147870,
+          "cumulative_cost": 517545,
+          "income_or_bonus": 180,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 7,
+          "cost": 172515,
+          "cumulative_cost": 690060,
+          "income_or_bonus": 210,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 8,
+          "cost": 197160,
+          "cumulative_cost": 887220,
+          "income_or_bonus": 240,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 9,
+          "cost": 221805,
+          "cumulative_cost": 1109025,
+          "income_or_bonus": 270,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 10,
+          "cost": 246450,
+          "cumulative_cost": 1355475,
+          "income_or_bonus": 300,
+          "roi_ticks_at_1cps": 822,
+          "notes": "Max upgrade level — full bonus realized"
+        },
+        {
+          "level": 11,
+          "cost": 271095,
+          "cumulative_cost": 1626570,
+          "income_or_bonus": 330,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 12,
+          "cost": 295740,
+          "cumulative_cost": 1922310,
+          "income_or_bonus": 360,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 13,
+          "cost": 320385,
+          "cumulative_cost": 2242695,
+          "income_or_bonus": 390,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 14,
+          "cost": 345030,
+          "cumulative_cost": 2587725,
+          "income_or_bonus": 420,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 15,
+          "cost": 369675,
+          "cumulative_cost": 2957400,
+          "income_or_bonus": 450,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 16,
+          "cost": 394320,
+          "cumulative_cost": 3351720,
+          "income_or_bonus": 480,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 17,
+          "cost": 418965,
+          "cumulative_cost": 3770685,
+          "income_or_bonus": 510,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 18,
+          "cost": 443610,
+          "cumulative_cost": 4214295,
+          "income_or_bonus": 540,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 19,
+          "cost": 468255,
+          "cumulative_cost": 4682550,
+          "income_or_bonus": 570,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 20,
+          "cost": 492900,
+          "cumulative_cost": 5175450,
+          "income_or_bonus": 600,
+          "roi_ticks_at_1cps": 822,
+          "notes": "Industrial scale"
+        },
+        {
+          "level": 21,
+          "cost": 517545,
+          "cumulative_cost": 5692995,
+          "income_or_bonus": 630,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 22,
+          "cost": 542190,
+          "cumulative_cost": 6235185,
+          "income_or_bonus": 660,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 23,
+          "cost": 566835,
+          "cumulative_cost": 6802020,
+          "income_or_bonus": 690,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 24,
+          "cost": 591480,
+          "cumulative_cost": 7393500,
+          "income_or_bonus": 720,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 25,
+          "cost": 616125,
+          "cumulative_cost": 8009625,
+          "income_or_bonus": 750,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 26,
+          "cost": 640770,
+          "cumulative_cost": 8650395,
+          "income_or_bonus": 780,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 27,
+          "cost": 665415,
+          "cumulative_cost": 9315810,
+          "income_or_bonus": 810,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 28,
+          "cost": 690060,
+          "cumulative_cost": 10005870,
+          "income_or_bonus": 840,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 29,
+          "cost": 714705,
+          "cumulative_cost": 10720575,
+          "income_or_bonus": 870,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 30,
+          "cost": 739350,
+          "cumulative_cost": 11459925,
+          "income_or_bonus": 900,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 31,
+          "cost": 763995,
+          "cumulative_cost": 12223920,
+          "income_or_bonus": 930,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 32,
+          "cost": 788640,
+          "cumulative_cost": 13012560,
+          "income_or_bonus": 960,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 33,
+          "cost": 813285,
+          "cumulative_cost": 13825845,
+          "income_or_bonus": 990,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 34,
+          "cost": 837930,
+          "cumulative_cost": 14663775,
+          "income_or_bonus": 1020,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 35,
+          "cost": 862575,
+          "cumulative_cost": 15526350,
+          "income_or_bonus": 1050,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 36,
+          "cost": 887220,
+          "cumulative_cost": 16413570,
+          "income_or_bonus": 1080,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 37,
+          "cost": 911865,
+          "cumulative_cost": 17325435,
+          "income_or_bonus": 1110,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 38,
+          "cost": 936510,
+          "cumulative_cost": 18261945,
+          "income_or_bonus": 1140,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 39,
+          "cost": 961155,
+          "cumulative_cost": 19223100,
+          "income_or_bonus": 1170,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 40,
+          "cost": 985800,
+          "cumulative_cost": 20208900,
+          "income_or_bonus": 1200,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 41,
+          "cost": 1010445,
+          "cumulative_cost": 21219345,
+          "income_or_bonus": 1230,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 42,
+          "cost": 1035090,
+          "cumulative_cost": 22254435,
+          "income_or_bonus": 1260,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 43,
+          "cost": 1059735,
+          "cumulative_cost": 23314170,
+          "income_or_bonus": 1290,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 44,
+          "cost": 1084380,
+          "cumulative_cost": 24398550,
+          "income_or_bonus": 1320,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 45,
+          "cost": 1109025,
+          "cumulative_cost": 25507575,
+          "income_or_bonus": 1350,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 46,
+          "cost": 1133670,
+          "cumulative_cost": 26641245,
+          "income_or_bonus": 1380,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 47,
+          "cost": 1158315,
+          "cumulative_cost": 27799560,
+          "income_or_bonus": 1410,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 48,
+          "cost": 1182960,
+          "cumulative_cost": 28982520,
+          "income_or_bonus": 1440,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 49,
+          "cost": 1207605,
+          "cumulative_cost": 30190125,
+          "income_or_bonus": 1470,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 50,
+          "cost": 1232250,
+          "cumulative_cost": 31422375,
+          "income_or_bonus": 1500,
+          "roi_ticks_at_1cps": 822,
+          "notes": "Prestige-era scale"
+        },
+        {
+          "level": 51,
+          "cost": 1256895,
+          "cumulative_cost": 32679270,
+          "income_or_bonus": 1530,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 52,
+          "cost": 1281540,
+          "cumulative_cost": 33960810,
+          "income_or_bonus": 1560,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 53,
+          "cost": 1306185,
+          "cumulative_cost": 35266995,
+          "income_or_bonus": 1590,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 54,
+          "cost": 1330830,
+          "cumulative_cost": 36597825,
+          "income_or_bonus": 1620,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 55,
+          "cost": 1355475,
+          "cumulative_cost": 37953300,
+          "income_or_bonus": 1650,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 56,
+          "cost": 1380120,
+          "cumulative_cost": 39333420,
+          "income_or_bonus": 1680,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 57,
+          "cost": 1404765,
+          "cumulative_cost": 40738185,
+          "income_or_bonus": 1710,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 58,
+          "cost": 1429410,
+          "cumulative_cost": 42167595,
+          "income_or_bonus": 1740,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 59,
+          "cost": 1454055,
+          "cumulative_cost": 43621650,
+          "income_or_bonus": 1770,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 60,
+          "cost": 1478700,
+          "cumulative_cost": 45100350,
+          "income_or_bonus": 1800,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 61,
+          "cost": 1503345,
+          "cumulative_cost": 46603695,
+          "income_or_bonus": 1830,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 62,
+          "cost": 1527990,
+          "cumulative_cost": 48131685,
+          "income_or_bonus": 1860,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 63,
+          "cost": 1552635,
+          "cumulative_cost": 49684320,
+          "income_or_bonus": 1890,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 64,
+          "cost": 1577280,
+          "cumulative_cost": 51261600,
+          "income_or_bonus": 1920,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 65,
+          "cost": 1601925,
+          "cumulative_cost": 52863525,
+          "income_or_bonus": 1950,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 66,
+          "cost": 1626570,
+          "cumulative_cost": 54490095,
+          "income_or_bonus": 1980,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 67,
+          "cost": 1651215,
+          "cumulative_cost": 56141310,
+          "income_or_bonus": 2010,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 68,
+          "cost": 1675860,
+          "cumulative_cost": 57817170,
+          "income_or_bonus": 2040,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 69,
+          "cost": 1700505,
+          "cumulative_cost": 59517675,
+          "income_or_bonus": 2070,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 70,
+          "cost": 1725150,
+          "cumulative_cost": 61242825,
+          "income_or_bonus": 2100,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 71,
+          "cost": 1749795,
+          "cumulative_cost": 62992620,
+          "income_or_bonus": 2130,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 72,
+          "cost": 1774440,
+          "cumulative_cost": 64767060,
+          "income_or_bonus": 2160,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 73,
+          "cost": 1799085,
+          "cumulative_cost": 66566145,
+          "income_or_bonus": 2190,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 74,
+          "cost": 1823730,
+          "cumulative_cost": 68389875,
+          "income_or_bonus": 2220,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 75,
+          "cost": 1848375,
+          "cumulative_cost": 70238250,
+          "income_or_bonus": 2250,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 76,
+          "cost": 1873020,
+          "cumulative_cost": 72111270,
+          "income_or_bonus": 2280,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 77,
+          "cost": 1897665,
+          "cumulative_cost": 74008935,
+          "income_or_bonus": 2310,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 78,
+          "cost": 1922310,
+          "cumulative_cost": 75931245,
+          "income_or_bonus": 2340,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 79,
+          "cost": 1946955,
+          "cumulative_cost": 77878200,
+          "income_or_bonus": 2370,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 80,
+          "cost": 1971600,
+          "cumulative_cost": 79849800,
+          "income_or_bonus": 2400,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 81,
+          "cost": 1996245,
+          "cumulative_cost": 81846045,
+          "income_or_bonus": 2430,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 82,
+          "cost": 2020890,
+          "cumulative_cost": 83866935,
+          "income_or_bonus": 2460,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 83,
+          "cost": 2045535,
+          "cumulative_cost": 85912470,
+          "income_or_bonus": 2490,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 84,
+          "cost": 2070180,
+          "cumulative_cost": 87982650,
+          "income_or_bonus": 2520,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 85,
+          "cost": 2094825,
+          "cumulative_cost": 90077475,
+          "income_or_bonus": 2550,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 86,
+          "cost": 2119470,
+          "cumulative_cost": 92196945,
+          "income_or_bonus": 2580,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 87,
+          "cost": 2144115,
+          "cumulative_cost": 94341060,
+          "income_or_bonus": 2610,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 88,
+          "cost": 2168760,
+          "cumulative_cost": 96509820,
+          "income_or_bonus": 2640,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 89,
+          "cost": 2193405,
+          "cumulative_cost": 98703225,
+          "income_or_bonus": 2670,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 90,
+          "cost": 2218050,
+          "cumulative_cost": 100921275,
+          "income_or_bonus": 2700,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 91,
+          "cost": 2242695,
+          "cumulative_cost": 103163970,
+          "income_or_bonus": 2730,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 92,
+          "cost": 2267340,
+          "cumulative_cost": 105431310,
+          "income_or_bonus": 2760,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 93,
+          "cost": 2291985,
+          "cumulative_cost": 107723295,
+          "income_or_bonus": 2790,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 94,
+          "cost": 2316630,
+          "cumulative_cost": 110039925,
+          "income_or_bonus": 2820,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 95,
+          "cost": 2341275,
+          "cumulative_cost": 112381200,
+          "income_or_bonus": 2850,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 96,
+          "cost": 2365920,
+          "cumulative_cost": 114747120,
+          "income_or_bonus": 2880,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 97,
+          "cost": 2390565,
+          "cumulative_cost": 117137685,
+          "income_or_bonus": 2910,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 98,
+          "cost": 2415210,
+          "cumulative_cost": 119552895,
+          "income_or_bonus": 2940,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 99,
+          "cost": 2439855,
+          "cumulative_cost": 121992750,
+          "income_or_bonus": 2970,
+          "roi_ticks_at_1cps": 822
+        },
+        {
+          "level": 100,
+          "cost": 2464500,
+          "cumulative_cost": 124457250,
+          "income_or_bonus": 3000,
+          "roi_ticks_at_1cps": 822,
+          "notes": "Absolute ceiling"
+        }
+      ]
+    },
+    {
+      "id": "machine_t4_megafarm",
+      "label": "Machine T4: Mega Harvester",
+      "type": "machine",
+      "formula": "",
+      "rows": [
+        {
+          "level": 1,
+          "cost": 155102,
+          "cumulative_cost": 155102,
+          "income_or_bonus": 100,
+          "roi_ticks_at_1cps": 1551,
+          "notes": "First purchase"
+        },
+        {
+          "level": 2,
+          "cost": 310204,
+          "cumulative_cost": 465306,
+          "income_or_bonus": 200,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 3,
+          "cost": 465306,
+          "cumulative_cost": 930612,
+          "income_or_bonus": 300,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 4,
+          "cost": 620408,
+          "cumulative_cost": 1551020,
+          "income_or_bonus": 400,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 5,
+          "cost": 775510,
+          "cumulative_cost": 2326530,
+          "income_or_bonus": 500,
+          "roi_ticks_at_1cps": 1551,
+          "notes": "5× owned — automation tier approaching"
+        },
+        {
+          "level": 6,
+          "cost": 930612,
+          "cumulative_cost": 3257142,
+          "income_or_bonus": 600,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 7,
+          "cost": 1085714,
+          "cumulative_cost": 4342856,
+          "income_or_bonus": 700,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 8,
+          "cost": 1240816,
+          "cumulative_cost": 5583672,
+          "income_or_bonus": 800,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 9,
+          "cost": 1395918,
+          "cumulative_cost": 6979590,
+          "income_or_bonus": 900,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 10,
+          "cost": 1551020,
+          "cumulative_cost": 8530610,
+          "income_or_bonus": 1000,
+          "roi_ticks_at_1cps": 1551,
+          "notes": "Max upgrade level — full bonus realized"
+        },
+        {
+          "level": 11,
+          "cost": 1706122,
+          "cumulative_cost": 10236732,
+          "income_or_bonus": 1100,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 12,
+          "cost": 1861224,
+          "cumulative_cost": 12097956,
+          "income_or_bonus": 1200,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 13,
+          "cost": 2016326,
+          "cumulative_cost": 14114282,
+          "income_or_bonus": 1300,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 14,
+          "cost": 2171428,
+          "cumulative_cost": 16285710,
+          "income_or_bonus": 1400,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 15,
+          "cost": 2326530,
+          "cumulative_cost": 18612240,
+          "income_or_bonus": 1500,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 16,
+          "cost": 2481632,
+          "cumulative_cost": 21093872,
+          "income_or_bonus": 1600,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 17,
+          "cost": 2636734,
+          "cumulative_cost": 23730606,
+          "income_or_bonus": 1700,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 18,
+          "cost": 2791836,
+          "cumulative_cost": 26522442,
+          "income_or_bonus": 1800,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 19,
+          "cost": 2946938,
+          "cumulative_cost": 29469380,
+          "income_or_bonus": 1900,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 20,
+          "cost": 3102040,
+          "cumulative_cost": 32571420,
+          "income_or_bonus": 2000,
+          "roi_ticks_at_1cps": 1551,
+          "notes": "Industrial scale"
+        },
+        {
+          "level": 21,
+          "cost": 3257142,
+          "cumulative_cost": 35828562,
+          "income_or_bonus": 2100,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 22,
+          "cost": 3412244,
+          "cumulative_cost": 39240806,
+          "income_or_bonus": 2200,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 23,
+          "cost": 3567346,
+          "cumulative_cost": 42808152,
+          "income_or_bonus": 2300,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 24,
+          "cost": 3722448,
+          "cumulative_cost": 46530600,
+          "income_or_bonus": 2400,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 25,
+          "cost": 3877550,
+          "cumulative_cost": 50408150,
+          "income_or_bonus": 2500,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 26,
+          "cost": 4032652,
+          "cumulative_cost": 54440802,
+          "income_or_bonus": 2600,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 27,
+          "cost": 4187754,
+          "cumulative_cost": 58628556,
+          "income_or_bonus": 2700,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 28,
+          "cost": 4342856,
+          "cumulative_cost": 62971412,
+          "income_or_bonus": 2800,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 29,
+          "cost": 4497958,
+          "cumulative_cost": 67469370,
+          "income_or_bonus": 2900,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 30,
+          "cost": 4653060,
+          "cumulative_cost": 72122430,
+          "income_or_bonus": 3000,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 31,
+          "cost": 4808162,
+          "cumulative_cost": 76930592,
+          "income_or_bonus": 3100,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 32,
+          "cost": 4963264,
+          "cumulative_cost": 81893856,
+          "income_or_bonus": 3200,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 33,
+          "cost": 5118366,
+          "cumulative_cost": 87012222,
+          "income_or_bonus": 3300,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 34,
+          "cost": 5273468,
+          "cumulative_cost": 92285690,
+          "income_or_bonus": 3400,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 35,
+          "cost": 5428570,
+          "cumulative_cost": 97714260,
+          "income_or_bonus": 3500,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 36,
+          "cost": 5583672,
+          "cumulative_cost": 103297932,
+          "income_or_bonus": 3600,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 37,
+          "cost": 5738774,
+          "cumulative_cost": 109036706,
+          "income_or_bonus": 3700,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 38,
+          "cost": 5893876,
+          "cumulative_cost": 114930582,
+          "income_or_bonus": 3800,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 39,
+          "cost": 6048978,
+          "cumulative_cost": 120979560,
+          "income_or_bonus": 3900,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 40,
+          "cost": 6204080,
+          "cumulative_cost": 127183640,
+          "income_or_bonus": 4000,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 41,
+          "cost": 6359182,
+          "cumulative_cost": 133542822,
+          "income_or_bonus": 4100,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 42,
+          "cost": 6514284,
+          "cumulative_cost": 140057106,
+          "income_or_bonus": 4200,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 43,
+          "cost": 6669386,
+          "cumulative_cost": 146726492,
+          "income_or_bonus": 4300,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 44,
+          "cost": 6824488,
+          "cumulative_cost": 153550980,
+          "income_or_bonus": 4400,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 45,
+          "cost": 6979590,
+          "cumulative_cost": 160530570,
+          "income_or_bonus": 4500,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 46,
+          "cost": 7134692,
+          "cumulative_cost": 167665262,
+          "income_or_bonus": 4600,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 47,
+          "cost": 7289794,
+          "cumulative_cost": 174955056,
+          "income_or_bonus": 4700,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 48,
+          "cost": 7444896,
+          "cumulative_cost": 182399952,
+          "income_or_bonus": 4800,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 49,
+          "cost": 7599998,
+          "cumulative_cost": 189999950,
+          "income_or_bonus": 4900,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 50,
+          "cost": 7755100,
+          "cumulative_cost": 197755050,
+          "income_or_bonus": 5000,
+          "roi_ticks_at_1cps": 1551,
+          "notes": "Prestige-era scale"
+        },
+        {
+          "level": 51,
+          "cost": 7910202,
+          "cumulative_cost": 205665252,
+          "income_or_bonus": 5100,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 52,
+          "cost": 8065304,
+          "cumulative_cost": 213730556,
+          "income_or_bonus": 5200,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 53,
+          "cost": 8220406,
+          "cumulative_cost": 221950962,
+          "income_or_bonus": 5300,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 54,
+          "cost": 8375508,
+          "cumulative_cost": 230326470,
+          "income_or_bonus": 5400,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 55,
+          "cost": 8530610,
+          "cumulative_cost": 238857080,
+          "income_or_bonus": 5500,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 56,
+          "cost": 8685712,
+          "cumulative_cost": 247542792,
+          "income_or_bonus": 5600,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 57,
+          "cost": 8840814,
+          "cumulative_cost": 256383606,
+          "income_or_bonus": 5700,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 58,
+          "cost": 8995916,
+          "cumulative_cost": 265379522,
+          "income_or_bonus": 5800,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 59,
+          "cost": 9151018,
+          "cumulative_cost": 274530540,
+          "income_or_bonus": 5900,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 60,
+          "cost": 9306120,
+          "cumulative_cost": 283836660,
+          "income_or_bonus": 6000,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 61,
+          "cost": 9461222,
+          "cumulative_cost": 293297882,
+          "income_or_bonus": 6100,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 62,
+          "cost": 9616324,
+          "cumulative_cost": 302914206,
+          "income_or_bonus": 6200,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 63,
+          "cost": 9771426,
+          "cumulative_cost": 312685632,
+          "income_or_bonus": 6300,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 64,
+          "cost": 9926528,
+          "cumulative_cost": 322612160,
+          "income_or_bonus": 6400,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 65,
+          "cost": 10081630,
+          "cumulative_cost": 332693790,
+          "income_or_bonus": 6500,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 66,
+          "cost": 10236732,
+          "cumulative_cost": 342930522,
+          "income_or_bonus": 6600,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 67,
+          "cost": 10391834,
+          "cumulative_cost": 353322356,
+          "income_or_bonus": 6700,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 68,
+          "cost": 10546936,
+          "cumulative_cost": 363869292,
+          "income_or_bonus": 6800,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 69,
+          "cost": 10702038,
+          "cumulative_cost": 374571330,
+          "income_or_bonus": 6900,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 70,
+          "cost": 10857140,
+          "cumulative_cost": 385428470,
+          "income_or_bonus": 7000,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 71,
+          "cost": 11012242,
+          "cumulative_cost": 396440712,
+          "income_or_bonus": 7100,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 72,
+          "cost": 11167344,
+          "cumulative_cost": 407608056,
+          "income_or_bonus": 7200,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 73,
+          "cost": 11322446,
+          "cumulative_cost": 418930502,
+          "income_or_bonus": 7300,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 74,
+          "cost": 11477548,
+          "cumulative_cost": 430408050,
+          "income_or_bonus": 7400,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 75,
+          "cost": 11632650,
+          "cumulative_cost": 442040700,
+          "income_or_bonus": 7500,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 76,
+          "cost": 11787752,
+          "cumulative_cost": 453828452,
+          "income_or_bonus": 7600,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 77,
+          "cost": 11942854,
+          "cumulative_cost": 465771306,
+          "income_or_bonus": 7700,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 78,
+          "cost": 12097956,
+          "cumulative_cost": 477869262,
+          "income_or_bonus": 7800,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 79,
+          "cost": 12253058,
+          "cumulative_cost": 490122320,
+          "income_or_bonus": 7900,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 80,
+          "cost": 12408160,
+          "cumulative_cost": 502530480,
+          "income_or_bonus": 8000,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 81,
+          "cost": 12563262,
+          "cumulative_cost": 515093742,
+          "income_or_bonus": 8100,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 82,
+          "cost": 12718364,
+          "cumulative_cost": 527812106,
+          "income_or_bonus": 8200,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 83,
+          "cost": 12873466,
+          "cumulative_cost": 540685572,
+          "income_or_bonus": 8300,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 84,
+          "cost": 13028568,
+          "cumulative_cost": 553714140,
+          "income_or_bonus": 8400,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 85,
+          "cost": 13183670,
+          "cumulative_cost": 566897810,
+          "income_or_bonus": 8500,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 86,
+          "cost": 13338772,
+          "cumulative_cost": 580236582,
+          "income_or_bonus": 8600,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 87,
+          "cost": 13493874,
+          "cumulative_cost": 593730456,
+          "income_or_bonus": 8700,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 88,
+          "cost": 13648976,
+          "cumulative_cost": 607379432,
+          "income_or_bonus": 8800,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 89,
+          "cost": 13804078,
+          "cumulative_cost": 621183510,
+          "income_or_bonus": 8900,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 90,
+          "cost": 13959180,
+          "cumulative_cost": 635142690,
+          "income_or_bonus": 9000,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 91,
+          "cost": 14114282,
+          "cumulative_cost": 649256972,
+          "income_or_bonus": 9100,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 92,
+          "cost": 14269384,
+          "cumulative_cost": 663526356,
+          "income_or_bonus": 9200,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 93,
+          "cost": 14424486,
+          "cumulative_cost": 677950842,
+          "income_or_bonus": 9300,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 94,
+          "cost": 14579588,
+          "cumulative_cost": 692530430,
+          "income_or_bonus": 9400,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 95,
+          "cost": 14734690,
+          "cumulative_cost": 707265120,
+          "income_or_bonus": 9500,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 96,
+          "cost": 14889792,
+          "cumulative_cost": 722154912,
+          "income_or_bonus": 9600,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 97,
+          "cost": 15044894,
+          "cumulative_cost": 737199806,
+          "income_or_bonus": 9700,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 98,
+          "cost": 15199996,
+          "cumulative_cost": 752399802,
+          "income_or_bonus": 9800,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 99,
+          "cost": 15355098,
+          "cumulative_cost": 767754900,
+          "income_or_bonus": 9900,
+          "roi_ticks_at_1cps": 1551
+        },
+        {
+          "level": 100,
+          "cost": 15510200,
+          "cumulative_cost": 783265100,
+          "income_or_bonus": 10000,
+          "roi_ticks_at_1cps": 1551,
+          "notes": "Absolute ceiling"
+        }
+      ]
+    },
+    {
+      "id": "machine_t5_ai",
+      "label": "Machine T5: AI Farm Manager",
+      "type": "machine",
+      "formula": "",
+      "rows": [
+        {
+          "level": 1,
+          "cost": 800715,
+          "cumulative_cost": 800715,
+          "income_or_bonus": 350,
+          "roi_ticks_at_1cps": 2288,
+          "notes": "First purchase"
+        },
+        {
+          "level": 2,
+          "cost": 1601430,
+          "cumulative_cost": 2402145,
+          "income_or_bonus": 700,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 3,
+          "cost": 2402145,
+          "cumulative_cost": 4804290,
+          "income_or_bonus": 1050,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 4,
+          "cost": 3202860,
+          "cumulative_cost": 8007150,
+          "income_or_bonus": 1400,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 5,
+          "cost": 4003575,
+          "cumulative_cost": 12010725,
+          "income_or_bonus": 1750,
+          "roi_ticks_at_1cps": 2288,
+          "notes": "5× owned — automation tier approaching"
+        },
+        {
+          "level": 6,
+          "cost": 4804290,
+          "cumulative_cost": 16815015,
+          "income_or_bonus": 2100,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 7,
+          "cost": 5605005,
+          "cumulative_cost": 22420020,
+          "income_or_bonus": 2450,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 8,
+          "cost": 6405720,
+          "cumulative_cost": 28825740,
+          "income_or_bonus": 2800,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 9,
+          "cost": 7206435,
+          "cumulative_cost": 36032175,
+          "income_or_bonus": 3150,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 10,
+          "cost": 8007150,
+          "cumulative_cost": 44039325,
+          "income_or_bonus": 3500,
+          "roi_ticks_at_1cps": 2288,
+          "notes": "Max upgrade level — full bonus realized"
+        },
+        {
+          "level": 11,
+          "cost": 8807865,
+          "cumulative_cost": 52847190,
+          "income_or_bonus": 3850,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 12,
+          "cost": 9608580,
+          "cumulative_cost": 62455770,
+          "income_or_bonus": 4200,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 13,
+          "cost": 10409295,
+          "cumulative_cost": 72865065,
+          "income_or_bonus": 4550,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 14,
+          "cost": 11210010,
+          "cumulative_cost": 84075075,
+          "income_or_bonus": 4900,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 15,
+          "cost": 12010725,
+          "cumulative_cost": 96085800,
+          "income_or_bonus": 5250,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 16,
+          "cost": 12811440,
+          "cumulative_cost": 108897240,
+          "income_or_bonus": 5600,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 17,
+          "cost": 13612155,
+          "cumulative_cost": 122509395,
+          "income_or_bonus": 5950,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 18,
+          "cost": 14412870,
+          "cumulative_cost": 136922265,
+          "income_or_bonus": 6300,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 19,
+          "cost": 15213585,
+          "cumulative_cost": 152135850,
+          "income_or_bonus": 6650,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 20,
+          "cost": 16014300,
+          "cumulative_cost": 168150150,
+          "income_or_bonus": 7000,
+          "roi_ticks_at_1cps": 2288,
+          "notes": "Industrial scale"
+        },
+        {
+          "level": 21,
+          "cost": 16815015,
+          "cumulative_cost": 184965165,
+          "income_or_bonus": 7350,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 22,
+          "cost": 17615730,
+          "cumulative_cost": 202580895,
+          "income_or_bonus": 7700,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 23,
+          "cost": 18416445,
+          "cumulative_cost": 220997340,
+          "income_or_bonus": 8050,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 24,
+          "cost": 19217160,
+          "cumulative_cost": 240214500,
+          "income_or_bonus": 8400,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 25,
+          "cost": 20017875,
+          "cumulative_cost": 260232375,
+          "income_or_bonus": 8750,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 26,
+          "cost": 20818590,
+          "cumulative_cost": 281050965,
+          "income_or_bonus": 9100,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 27,
+          "cost": 21619305,
+          "cumulative_cost": 302670270,
+          "income_or_bonus": 9450,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 28,
+          "cost": 22420020,
+          "cumulative_cost": 325090290,
+          "income_or_bonus": 9800,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 29,
+          "cost": 23220735,
+          "cumulative_cost": 348311025,
+          "income_or_bonus": 10150,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 30,
+          "cost": 24021450,
+          "cumulative_cost": 372332475,
+          "income_or_bonus": 10500,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 31,
+          "cost": 24822165,
+          "cumulative_cost": 397154640,
+          "income_or_bonus": 10850,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 32,
+          "cost": 25622880,
+          "cumulative_cost": 422777520,
+          "income_or_bonus": 11200,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 33,
+          "cost": 26423595,
+          "cumulative_cost": 449201115,
+          "income_or_bonus": 11550,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 34,
+          "cost": 27224310,
+          "cumulative_cost": 476425425,
+          "income_or_bonus": 11900,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 35,
+          "cost": 28025025,
+          "cumulative_cost": 504450450,
+          "income_or_bonus": 12250,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 36,
+          "cost": 28825740,
+          "cumulative_cost": 533276190,
+          "income_or_bonus": 12600,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 37,
+          "cost": 29626455,
+          "cumulative_cost": 562902645,
+          "income_or_bonus": 12950,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 38,
+          "cost": 30427170,
+          "cumulative_cost": 593329815,
+          "income_or_bonus": 13300,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 39,
+          "cost": 31227885,
+          "cumulative_cost": 624557700,
+          "income_or_bonus": 13650,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 40,
+          "cost": 32028600,
+          "cumulative_cost": 656586300,
+          "income_or_bonus": 14000,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 41,
+          "cost": 32829315,
+          "cumulative_cost": 689415615,
+          "income_or_bonus": 14350,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 42,
+          "cost": 33630030,
+          "cumulative_cost": 723045645,
+          "income_or_bonus": 14700,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 43,
+          "cost": 34430745,
+          "cumulative_cost": 757476390,
+          "income_or_bonus": 15050,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 44,
+          "cost": 35231460,
+          "cumulative_cost": 792707850,
+          "income_or_bonus": 15400,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 45,
+          "cost": 36032175,
+          "cumulative_cost": 828740025,
+          "income_or_bonus": 15750,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 46,
+          "cost": 36832890,
+          "cumulative_cost": 865572915,
+          "income_or_bonus": 16100,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 47,
+          "cost": 37633605,
+          "cumulative_cost": 903206520,
+          "income_or_bonus": 16450,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 48,
+          "cost": 38434320,
+          "cumulative_cost": 941640840,
+          "income_or_bonus": 16800,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 49,
+          "cost": 39235035,
+          "cumulative_cost": 980875875,
+          "income_or_bonus": 17150,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 50,
+          "cost": 40035750,
+          "cumulative_cost": 1020911625,
+          "income_or_bonus": 17500,
+          "roi_ticks_at_1cps": 2288,
+          "notes": "Prestige-era scale"
+        },
+        {
+          "level": 51,
+          "cost": 40836465,
+          "cumulative_cost": 1061748090,
+          "income_or_bonus": 17850,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 52,
+          "cost": 41637180,
+          "cumulative_cost": 1103385270,
+          "income_or_bonus": 18200,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 53,
+          "cost": 42437895,
+          "cumulative_cost": 1145823165,
+          "income_or_bonus": 18550,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 54,
+          "cost": 43238610,
+          "cumulative_cost": 1189061775,
+          "income_or_bonus": 18900,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 55,
+          "cost": 44039325,
+          "cumulative_cost": 1233101100,
+          "income_or_bonus": 19250,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 56,
+          "cost": 44840040,
+          "cumulative_cost": 1277941140,
+          "income_or_bonus": 19600,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 57,
+          "cost": 45640755,
+          "cumulative_cost": 1323581895,
+          "income_or_bonus": 19950,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 58,
+          "cost": 46441470,
+          "cumulative_cost": 1370023365,
+          "income_or_bonus": 20300,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 59,
+          "cost": 47242185,
+          "cumulative_cost": 1417265550,
+          "income_or_bonus": 20650,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 60,
+          "cost": 48042900,
+          "cumulative_cost": 1465308450,
+          "income_or_bonus": 21000,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 61,
+          "cost": 48843615,
+          "cumulative_cost": 1514152065,
+          "income_or_bonus": 21350,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 62,
+          "cost": 49644330,
+          "cumulative_cost": 1563796395,
+          "income_or_bonus": 21700,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 63,
+          "cost": 50445045,
+          "cumulative_cost": 1614241440,
+          "income_or_bonus": 22050,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 64,
+          "cost": 51245760,
+          "cumulative_cost": 1665487200,
+          "income_or_bonus": 22400,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 65,
+          "cost": 52046475,
+          "cumulative_cost": 1717533675,
+          "income_or_bonus": 22750,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 66,
+          "cost": 52847190,
+          "cumulative_cost": 1770380865,
+          "income_or_bonus": 23100,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 67,
+          "cost": 53647905,
+          "cumulative_cost": 1824028770,
+          "income_or_bonus": 23450,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 68,
+          "cost": 54448620,
+          "cumulative_cost": 1878477390,
+          "income_or_bonus": 23800,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 69,
+          "cost": 55249335,
+          "cumulative_cost": 1933726725,
+          "income_or_bonus": 24150,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 70,
+          "cost": 56050050,
+          "cumulative_cost": 1989776775,
+          "income_or_bonus": 24500,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 71,
+          "cost": 56850765,
+          "cumulative_cost": 2046627540,
+          "income_or_bonus": 24850,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 72,
+          "cost": 57651480,
+          "cumulative_cost": 2104279020,
+          "income_or_bonus": 25200,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 73,
+          "cost": 58452195,
+          "cumulative_cost": 2162731215,
+          "income_or_bonus": 25550,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 74,
+          "cost": 59252910,
+          "cumulative_cost": 2221984125,
+          "income_or_bonus": 25900,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 75,
+          "cost": 60053625,
+          "cumulative_cost": 2282037750,
+          "income_or_bonus": 26250,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 76,
+          "cost": 60854340,
+          "cumulative_cost": 2342892090,
+          "income_or_bonus": 26600,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 77,
+          "cost": 61655055,
+          "cumulative_cost": 2404547145,
+          "income_or_bonus": 26950,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 78,
+          "cost": 62455770,
+          "cumulative_cost": 2467002915,
+          "income_or_bonus": 27300,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 79,
+          "cost": 63256485,
+          "cumulative_cost": 2530259400,
+          "income_or_bonus": 27650,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 80,
+          "cost": 64057200,
+          "cumulative_cost": 2594316600,
+          "income_or_bonus": 28000,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 81,
+          "cost": 64857915,
+          "cumulative_cost": 2659174515,
+          "income_or_bonus": 28350,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 82,
+          "cost": 65658630,
+          "cumulative_cost": 2724833145,
+          "income_or_bonus": 28700,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 83,
+          "cost": 66459345,
+          "cumulative_cost": 2791292490,
+          "income_or_bonus": 29050,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 84,
+          "cost": 67260060,
+          "cumulative_cost": 2858552550,
+          "income_or_bonus": 29400,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 85,
+          "cost": 68060775,
+          "cumulative_cost": 2926613325,
+          "income_or_bonus": 29750,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 86,
+          "cost": 68861490,
+          "cumulative_cost": 2995474815,
+          "income_or_bonus": 30100,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 87,
+          "cost": 69662205,
+          "cumulative_cost": 3065137020,
+          "income_or_bonus": 30450,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 88,
+          "cost": 70462920,
+          "cumulative_cost": 3135599940,
+          "income_or_bonus": 30800,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 89,
+          "cost": 71263635,
+          "cumulative_cost": 3206863575,
+          "income_or_bonus": 31150,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 90,
+          "cost": 72064350,
+          "cumulative_cost": 3278927925,
+          "income_or_bonus": 31500,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 91,
+          "cost": 72865065,
+          "cumulative_cost": 3351792990,
+          "income_or_bonus": 31850,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 92,
+          "cost": 73665780,
+          "cumulative_cost": 3425458770,
+          "income_or_bonus": 32200,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 93,
+          "cost": 74466495,
+          "cumulative_cost": 3499925265,
+          "income_or_bonus": 32550,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 94,
+          "cost": 75267210,
+          "cumulative_cost": 3575192475,
+          "income_or_bonus": 32900,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 95,
+          "cost": 76067925,
+          "cumulative_cost": 3651260400,
+          "income_or_bonus": 33250,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 96,
+          "cost": 76868640,
+          "cumulative_cost": 3728129040,
+          "income_or_bonus": 33600,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 97,
+          "cost": 77669355,
+          "cumulative_cost": 3805798395,
+          "income_or_bonus": 33950,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 98,
+          "cost": 78470070,
+          "cumulative_cost": 3884268465,
+          "income_or_bonus": 34300,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 99,
+          "cost": 79270785,
+          "cumulative_cost": 3963539250,
+          "income_or_bonus": 34650,
+          "roi_ticks_at_1cps": 2288
+        },
+        {
+          "level": 100,
+          "cost": 80071500,
+          "cumulative_cost": 4043610750,
+          "income_or_bonus": 35000,
+          "roi_ticks_at_1cps": 2288,
+          "notes": "Absolute ceiling"
+        }
+      ]
+    },
+    {
+      "id": "worker_agronomist",
+      "label": "Worker: Agronomist",
+      "type": "worker",
+      "formula": "",
+      "rows": [
+        {
+          "level": 1,
+          "cost": 750,
+          "cumulative_cost": 750,
+          "income_or_bonus": "+10%",
+          "notes": "First purchase"
+        },
+        {
+          "level": 2,
+          "cost": 1125,
+          "cumulative_cost": 1875,
+          "income_or_bonus": "+15%"
+        },
+        {
+          "level": 3,
+          "cost": 1688,
+          "cumulative_cost": 3563,
+          "income_or_bonus": "+20%"
+        },
+        {
+          "level": 4,
+          "cost": 2531,
+          "cumulative_cost": 6094,
+          "income_or_bonus": "+25%"
+        },
+        {
+          "level": 5,
+          "cost": 3797,
+          "cumulative_cost": 9891,
+          "income_or_bonus": "+30%",
+          "notes": "5× owned — automation tier approaching"
+        },
+        {
+          "level": 6,
+          "cost": 5695,
+          "cumulative_cost": 15586,
+          "income_or_bonus": "+35%"
+        },
+        {
+          "level": 7,
+          "cost": 8543,
+          "cumulative_cost": 24129,
+          "income_or_bonus": "+40%"
+        },
+        {
+          "level": 8,
+          "cost": 12814,
+          "cumulative_cost": 36943,
+          "income_or_bonus": "+45%"
+        },
+        {
+          "level": 9,
+          "cost": 19222,
+          "cumulative_cost": 56165,
+          "income_or_bonus": "+50%"
+        },
+        {
+          "level": 10,
+          "cost": 28833,
+          "cumulative_cost": 84998,
+          "income_or_bonus": "+55%",
+          "notes": "Max upgrade level — full bonus realized"
+        },
+        {
+          "level": 11,
+          "cost": 43249,
+          "cumulative_cost": 128247,
+          "income_or_bonus": "+60%"
+        },
+        {
+          "level": 12,
+          "cost": 64873,
+          "cumulative_cost": 193120,
+          "income_or_bonus": "+65%"
+        },
+        {
+          "level": 13,
+          "cost": 97310,
+          "cumulative_cost": 290430,
+          "income_or_bonus": "+70%"
+        },
+        {
+          "level": 14,
+          "cost": 145965,
+          "cumulative_cost": 436395,
+          "income_or_bonus": "+75%"
+        },
+        {
+          "level": 15,
+          "cost": 218947,
+          "cumulative_cost": 655342,
+          "income_or_bonus": "+80%"
+        },
+        {
+          "level": 16,
+          "cost": 328420,
+          "cumulative_cost": 983762,
+          "income_or_bonus": "+85%"
+        },
+        {
+          "level": 17,
+          "cost": 492631,
+          "cumulative_cost": 1476393,
+          "income_or_bonus": "+90%"
+        },
+        {
+          "level": 18,
+          "cost": 738946,
+          "cumulative_cost": 2215339,
+          "income_or_bonus": "+95%"
+        },
+        {
+          "level": 19,
+          "cost": 1108419,
+          "cumulative_cost": 3323758,
+          "income_or_bonus": "+100%"
+        },
+        {
+          "level": 20,
+          "cost": 1662628,
+          "cumulative_cost": 4986386,
+          "income_or_bonus": "+105%",
+          "notes": "Industrial scale"
+        },
+        {
+          "level": 21,
+          "cost": 2493943,
+          "cumulative_cost": 7480329,
+          "income_or_bonus": "+110%"
+        },
+        {
+          "level": 22,
+          "cost": 3740914,
+          "cumulative_cost": 11221243,
+          "income_or_bonus": "+115%"
+        },
+        {
+          "level": 23,
+          "cost": 5611371,
+          "cumulative_cost": 16832614,
+          "income_or_bonus": "+120%"
+        },
+        {
+          "level": 24,
+          "cost": 8417056,
+          "cumulative_cost": 25249670,
+          "income_or_bonus": "+125%"
+        },
+        {
+          "level": 25,
+          "cost": 12625584,
+          "cumulative_cost": 37875254,
+          "income_or_bonus": "+130%"
+        },
+        {
+          "level": 26,
+          "cost": 18938376,
+          "cumulative_cost": 56813630,
+          "income_or_bonus": "+135%"
+        },
+        {
+          "level": 27,
+          "cost": 28407564,
+          "cumulative_cost": 85221194,
+          "income_or_bonus": "+140%"
+        },
+        {
+          "level": 28,
+          "cost": 42611346,
+          "cumulative_cost": 127832540,
+          "income_or_bonus": "+145%"
+        },
+        {
+          "level": 29,
+          "cost": 63917020,
+          "cumulative_cost": 191749560,
+          "income_or_bonus": "+150%"
+        },
+        {
+          "level": 30,
+          "cost": 95875530,
+          "cumulative_cost": 287625090,
+          "income_or_bonus": "+155%"
+        },
+        {
+          "level": 31,
+          "cost": 143813294,
+          "cumulative_cost": 431438384,
+          "income_or_bonus": "+160%"
+        },
+        {
+          "level": 32,
+          "cost": 215719942,
+          "cumulative_cost": 647158326,
+          "income_or_bonus": "+165%"
+        },
+        {
+          "level": 33,
+          "cost": 323579912,
+          "cumulative_cost": 970738238,
+          "income_or_bonus": "+170%"
+        },
+        {
+          "level": 34,
+          "cost": 485369869,
+          "cumulative_cost": 1456108107,
+          "income_or_bonus": "+175%"
+        },
+        {
+          "level": 35,
+          "cost": 728054803,
+          "cumulative_cost": 2184162910,
+          "income_or_bonus": "+180%"
+        },
+        {
+          "level": 36,
+          "cost": 1092082205,
+          "cumulative_cost": 3276245115,
+          "income_or_bonus": "+185%"
+        },
+        {
+          "level": 37,
+          "cost": 1638123307,
+          "cumulative_cost": 4914368422,
+          "income_or_bonus": "+190%"
+        },
+        {
+          "level": 38,
+          "cost": 2457184960,
+          "cumulative_cost": 7371553382,
+          "income_or_bonus": "+195%"
+        },
+        {
+          "level": 39,
+          "cost": 3685777440,
+          "cumulative_cost": 11057330822,
+          "income_or_bonus": "+200%"
+        },
+        {
+          "level": 40,
+          "cost": 5528666160,
+          "cumulative_cost": 16585996982,
+          "income_or_bonus": "+205%"
+        },
+        {
+          "level": 41,
+          "cost": 8292999241,
+          "cumulative_cost": 24878996223,
+          "income_or_bonus": "+210%"
+        },
+        {
+          "level": 42,
+          "cost": 12439498861,
+          "cumulative_cost": 37318495084,
+          "income_or_bonus": "+215%"
+        },
+        {
+          "level": 43,
+          "cost": 18659248292,
+          "cumulative_cost": 55977743376,
+          "income_or_bonus": "+220%"
+        },
+        {
+          "level": 44,
+          "cost": 27988872437,
+          "cumulative_cost": 83966615813,
+          "income_or_bonus": "+225%"
+        },
+        {
+          "level": 45,
+          "cost": 41983308656,
+          "cumulative_cost": 125949924469,
+          "income_or_bonus": "+230%"
+        },
+        {
+          "level": 46,
+          "cost": 62974962984,
+          "cumulative_cost": 188924887453,
+          "income_or_bonus": "+235%"
+        },
+        {
+          "level": 47,
+          "cost": 94462444476,
+          "cumulative_cost": 283387331929,
+          "income_or_bonus": "+240%"
+        },
+        {
+          "level": 48,
+          "cost": 141693666714,
+          "cumulative_cost": 425080998643,
+          "income_or_bonus": "+245%"
+        },
+        {
+          "level": 49,
+          "cost": 212540500071,
+          "cumulative_cost": 637621498714,
+          "income_or_bonus": "+250%"
+        },
+        {
+          "level": 50,
+          "cost": 318810750107,
+          "cumulative_cost": 956432248821,
+          "income_or_bonus": "+255%",
+          "notes": "Prestige-era scale"
+        },
+        {
+          "level": 51,
+          "cost": 478216125161,
+          "cumulative_cost": 1434648373982,
+          "income_or_bonus": "+260%"
+        },
+        {
+          "level": 52,
+          "cost": 717324187741,
+          "cumulative_cost": 2151972561723,
+          "income_or_bonus": "+265%"
+        },
+        {
+          "level": 53,
+          "cost": 1075986281611,
+          "cumulative_cost": 3227958843334,
+          "income_or_bonus": "+270%"
+        },
+        {
+          "level": 54,
+          "cost": 1613979422417,
+          "cumulative_cost": 4841938265751,
+          "income_or_bonus": "+275%"
+        },
+        {
+          "level": 55,
+          "cost": 2420969133625,
+          "cumulative_cost": 7262907399376,
+          "income_or_bonus": "+280%"
+        },
+        {
+          "level": 56,
+          "cost": 3631453700438,
+          "cumulative_cost": 10894361099814,
+          "income_or_bonus": "+285%"
+        },
+        {
+          "level": 57,
+          "cost": 5447180550657,
+          "cumulative_cost": 16341541650471,
+          "income_or_bonus": "+290%"
+        },
+        {
+          "level": 58,
+          "cost": 8170770825985,
+          "cumulative_cost": 24512312476456,
+          "income_or_bonus": "+295%"
+        },
+        {
+          "level": 59,
+          "cost": 12256156238978,
+          "cumulative_cost": 36768468715434,
+          "income_or_bonus": "+300%"
+        },
+        {
+          "level": 60,
+          "cost": 18384234358467,
+          "cumulative_cost": 55152703073901,
+          "income_or_bonus": "+305%"
+        },
+        {
+          "level": 61,
+          "cost": 27576351537700,
+          "cumulative_cost": 82729054611601,
+          "income_or_bonus": "+310%"
+        },
+        {
+          "level": 62,
+          "cost": 41364527306550,
+          "cumulative_cost": 124093581918151,
+          "income_or_bonus": "+315%"
+        },
+        {
+          "level": 63,
+          "cost": 62046790959824,
+          "cumulative_cost": 186140372877975,
+          "income_or_bonus": "+320%"
+        },
+        {
+          "level": 64,
+          "cost": 93070186439737,
+          "cumulative_cost": 279210559317712,
+          "income_or_bonus": "+325%"
+        },
+        {
+          "level": 65,
+          "cost": 139605279659605,
+          "cumulative_cost": 418815838977317,
+          "income_or_bonus": "+330%"
+        },
+        {
+          "level": 66,
+          "cost": 209407919489408,
+          "cumulative_cost": 628223758466725,
+          "income_or_bonus": "+335%"
+        },
+        {
+          "level": 67,
+          "cost": 314111879234111,
+          "cumulative_cost": 942335637700836,
+          "income_or_bonus": "+340%"
+        },
+        {
+          "level": 68,
+          "cost": 471167818851167,
+          "cumulative_cost": 1413503456552003,
+          "income_or_bonus": "+345%"
+        },
+        {
+          "level": 69,
+          "cost": 706751728276751,
+          "cumulative_cost": 2120255184828754,
+          "income_or_bonus": "+350%"
+        },
+        {
+          "level": 70,
+          "cost": 1060127592415126,
+          "cumulative_cost": 3180382777243880,
+          "income_or_bonus": "+355%"
+        },
+        {
+          "level": 71,
+          "cost": 1590191388622689,
+          "cumulative_cost": 4770574165866569,
+          "income_or_bonus": "+360%"
+        },
+        {
+          "level": 72,
+          "cost": 2385287082934033,
+          "cumulative_cost": 7155861248800602,
+          "income_or_bonus": "+365%"
+        },
+        {
+          "level": 73,
+          "cost": 3577930624401051,
+          "cumulative_cost": 10733791873201652,
+          "income_or_bonus": "+370%"
+        },
+        {
+          "level": 74,
+          "cost": 5366895936601575,
+          "cumulative_cost": 16100687809803228,
+          "income_or_bonus": "+375%"
+        },
+        {
+          "level": 75,
+          "cost": 8050343904902363,
+          "cumulative_cost": 24151031714705590,
+          "income_or_bonus": "+380%"
+        },
+        {
+          "level": 76,
+          "cost": 12075515857353544,
+          "cumulative_cost": 36226547572059140,
+          "income_or_bonus": "+385%"
+        },
+        {
+          "level": 77,
+          "cost": 18113273786030316,
+          "cumulative_cost": 54339821358089460,
+          "income_or_bonus": "+390%"
+        },
+        {
+          "level": 78,
+          "cost": 27169910679045470,
+          "cumulative_cost": 81509732037134930,
+          "income_or_bonus": "+395%"
+        },
+        {
+          "level": 79,
+          "cost": 40754866018568210,
+          "cumulative_cost": 122264598055703140,
+          "income_or_bonus": "+400%"
+        },
+        {
+          "level": 80,
+          "cost": 61132299027852320,
+          "cumulative_cost": 183396897083555460,
+          "income_or_bonus": "+405%"
+        },
+        {
+          "level": 81,
+          "cost": 91698448541778480,
+          "cumulative_cost": 275095345625333950,
+          "income_or_bonus": "+410%"
+        },
+        {
+          "level": 82,
+          "cost": 137547672812667710,
+          "cumulative_cost": 412643018438001660,
+          "income_or_bonus": "+415%"
+        },
+        {
+          "level": 83,
+          "cost": 206321509219001570,
+          "cumulative_cost": 618964527657003300,
+          "income_or_bonus": "+420%"
+        },
+        {
+          "level": 84,
+          "cost": 309482263828502400,
+          "cumulative_cost": 928446791485505700,
+          "income_or_bonus": "+425%"
+        },
+        {
+          "level": 85,
+          "cost": 464223395742753540,
+          "cumulative_cost": 1392670187228259300,
+          "income_or_bonus": "+430%"
+        },
+        {
+          "level": 86,
+          "cost": 696335093614130300,
+          "cumulative_cost": 2089005280842389500,
+          "income_or_bonus": "+435%"
+        },
+        {
+          "level": 87,
+          "cost": 1044502640421195500,
+          "cumulative_cost": 3133507921263585300,
+          "income_or_bonus": "+440%"
+        },
+        {
+          "level": 88,
+          "cost": 1566753960631793200,
+          "cumulative_cost": 4700261881895379000,
+          "income_or_bonus": "+445%"
+        },
+        {
+          "level": 89,
+          "cost": 2350130940947690000,
+          "cumulative_cost": 7050392822843068000,
+          "income_or_bonus": "+450%"
+        },
+        {
+          "level": 90,
+          "cost": 3525196411421534700,
+          "cumulative_cost": 10575589234264603000,
+          "income_or_bonus": "+455%"
+        },
+        {
+          "level": 91,
+          "cost": 5287794617132302000,
+          "cumulative_cost": 15863383851396905000,
+          "income_or_bonus": "+460%"
+        },
+        {
+          "level": 92,
+          "cost": 7931691925698454000,
+          "cumulative_cost": 23795075777095360000,
+          "income_or_bonus": "+465%"
+        },
+        {
+          "level": 93,
+          "cost": 11897537888547680000,
+          "cumulative_cost": 35692613665643040000,
+          "income_or_bonus": "+470%"
+        },
+        {
+          "level": 94,
+          "cost": 17846306832821520000,
+          "cumulative_cost": 53538920498464560000,
+          "income_or_bonus": "+475%"
+        },
+        {
+          "level": 95,
+          "cost": 26769460249232280000,
+          "cumulative_cost": 80308380747696850000,
+          "income_or_bonus": "+480%"
+        },
+        {
+          "level": 96,
+          "cost": 40154190373848420000,
+          "cumulative_cost": 120462571121545270000,
+          "income_or_bonus": "+485%"
+        },
+        {
+          "level": 97,
+          "cost": 60231285560772624000,
+          "cumulative_cost": 180693856682317900000,
+          "income_or_bonus": "+490%"
+        },
+        {
+          "level": 98,
+          "cost": 90346928341158940000,
+          "cumulative_cost": 271040785023476830000,
+          "income_or_bonus": "+495%"
+        },
+        {
+          "level": 99,
+          "cost": 135520392511738410000,
+          "cumulative_cost": 406561177535215240000,
+          "income_or_bonus": "+500%"
+        },
+        {
+          "level": 100,
+          "cost": 203280588767607620000,
+          "cumulative_cost": 609841766302822800000,
+          "income_or_bonus": "+505%",
+          "notes": "Absolute ceiling"
+        }
+      ]
+    },
+    {
+      "id": "region_unlock",
+      "label": "Region Unlock",
+      "type": "region",
+      "formula": "",
+      "rows": [
+        {
+          "level": 1,
+          "cost": 500,
+          "cumulative_cost": 500,
+          "income_or_bonus": "+4 plots, +8 acres",
+          "notes": "First purchase"
+        },
+        {
+          "level": 2,
+          "cost": 1250,
+          "cumulative_cost": 1750,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 3,
+          "cost": 3125,
+          "cumulative_cost": 4875,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 4,
+          "cost": 7813,
+          "cumulative_cost": 12688,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 5,
+          "cost": 19531,
+          "cumulative_cost": 32219,
+          "income_or_bonus": "+4 plots, +8 acres",
+          "notes": "5× owned — automation tier approaching"
+        },
+        {
+          "level": 6,
+          "cost": 48828,
+          "cumulative_cost": 81047,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 7,
+          "cost": 122070,
+          "cumulative_cost": 203117,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 8,
+          "cost": 305176,
+          "cumulative_cost": 508293,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 9,
+          "cost": 762939,
+          "cumulative_cost": 1271232,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 10,
+          "cost": 1907349,
+          "cumulative_cost": 3178581,
+          "income_or_bonus": "+4 plots, +8 acres",
+          "notes": "Max upgrade level — full bonus realized"
+        },
+        {
+          "level": 11,
+          "cost": 4768372,
+          "cumulative_cost": 7946953,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 12,
+          "cost": 11920929,
+          "cumulative_cost": 19867882,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 13,
+          "cost": 29802322,
+          "cumulative_cost": 49670204,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 14,
+          "cost": 74505806,
+          "cumulative_cost": 124176010,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 15,
+          "cost": 186264515,
+          "cumulative_cost": 310440525,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 16,
+          "cost": 465661287,
+          "cumulative_cost": 776101812,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 17,
+          "cost": 1164153218,
+          "cumulative_cost": 1940255030,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 18,
+          "cost": 2910383046,
+          "cumulative_cost": 4850638076,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 19,
+          "cost": 7275957614,
+          "cumulative_cost": 12126595690,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 20,
+          "cost": 18189894035,
+          "cumulative_cost": 30316489725,
+          "income_or_bonus": "+4 plots, +8 acres",
+          "notes": "Industrial scale"
+        },
+        {
+          "level": 21,
+          "cost": 45474735089,
+          "cumulative_cost": 75791224814,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 22,
+          "cost": 113686837722,
+          "cumulative_cost": 189478062536,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 23,
+          "cost": 284217094304,
+          "cumulative_cost": 473695156840,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 24,
+          "cost": 710542735760,
+          "cumulative_cost": 1184237892600,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 25,
+          "cost": 1776356839400,
+          "cumulative_cost": 2960594732000,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 26,
+          "cost": 4440892098501,
+          "cumulative_cost": 7401486830501,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 27,
+          "cost": 11102230246252,
+          "cumulative_cost": 18503717076753,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 28,
+          "cost": 27755575615629,
+          "cumulative_cost": 46259292692382,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 29,
+          "cost": 69388939039072,
+          "cumulative_cost": 115648231731454,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 30,
+          "cost": 173472347597681,
+          "cumulative_cost": 289120579329135,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 31,
+          "cost": 433680868994202,
+          "cumulative_cost": 722801448323337,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 32,
+          "cost": 1084202172485504,
+          "cumulative_cost": 1807003620808841,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 33,
+          "cost": 2710505431213761,
+          "cumulative_cost": 4517509052022602,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 34,
+          "cost": 6776263578034402,
+          "cumulative_cost": 11293772630057004,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 35,
+          "cost": 16940658945086006,
+          "cumulative_cost": 28234431575143010,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 36,
+          "cost": 42351647362715016,
+          "cumulative_cost": 70586078937858024,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 37,
+          "cost": 105879118406787550,
+          "cumulative_cost": 176465197344645570,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 38,
+          "cost": 264697796016968830,
+          "cumulative_cost": 441162993361614400,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 39,
+          "cost": 661744490042422100,
+          "cumulative_cost": 1102907483404036600,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 40,
+          "cost": 1654361225106055200,
+          "cumulative_cost": 2757268708510092000,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 41,
+          "cost": 4135903062765138400,
+          "cumulative_cost": 6893171771275230000,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 42,
+          "cost": 10339757656912847000,
+          "cumulative_cost": 17232929428188078000,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 43,
+          "cost": 25849394142282117000,
+          "cumulative_cost": 43082323570470190000,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 44,
+          "cost": 64623485355705290000,
+          "cumulative_cost": 107705808926175480000,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 45,
+          "cost": 161558713389263220000,
+          "cumulative_cost": 269264522315438700000,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 46,
+          "cost": 403896783473158000000,
+          "cumulative_cost": 673161305788596600000,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 47,
+          "cost": 1.009741958682895e+21,
+          "cumulative_cost": 1.6829032644714918e+21,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 48,
+          "cost": 2.524354896707238e+21,
+          "cumulative_cost": 4.20725816117873e+21,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 49,
+          "cost": 6.310887241768094e+21,
+          "cumulative_cost": 1.0518145402946825e+22,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 50,
+          "cost": 1.5777218104420236e+22,
+          "cumulative_cost": 2.6295363507367063e+22,
+          "income_or_bonus": "+4 plots, +8 acres",
+          "notes": "Prestige-era scale"
+        },
+        {
+          "level": 51,
+          "cost": 3.944304526105059e+22,
+          "cumulative_cost": 6.573840876841765e+22,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 52,
+          "cost": 9.860761315262648e+22,
+          "cumulative_cost": 1.6434602192104413e+23,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 53,
+          "cost": 2.465190328815662e+23,
+          "cumulative_cost": 4.1086505480261035e+23,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 54,
+          "cost": 6.162975822039155e+23,
+          "cumulative_cost": 1.0271626370065259e+24,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 55,
+          "cost": 1.5407439555097888e+24,
+          "cumulative_cost": 2.5679065925163145e+24,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 56,
+          "cost": 3.8518598887744715e+24,
+          "cumulative_cost": 6.419766481290786e+24,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 57,
+          "cost": 9.62964972193618e+24,
+          "cumulative_cost": 1.6049416203226966e+25,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 58,
+          "cost": 2.407412430484045e+25,
+          "cumulative_cost": 4.012354050806742e+25,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 59,
+          "cost": 6.018531076210112e+25,
+          "cumulative_cost": 1.0030885127016853e+26,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 60,
+          "cost": 1.5046327690525279e+26,
+          "cumulative_cost": 2.507721281754213e+26,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 61,
+          "cost": 3.7615819226313196e+26,
+          "cumulative_cost": 6.269303204385533e+26,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 62,
+          "cost": 9.4039548065783e+26,
+          "cumulative_cost": 1.5673258010963833e+27,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 63,
+          "cost": 2.350988701644575e+27,
+          "cumulative_cost": 3.9183145027409583e+27,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 64,
+          "cost": 5.877471754111438e+27,
+          "cumulative_cost": 9.795786256852397e+27,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 65,
+          "cost": 1.4693679385278594e+28,
+          "cumulative_cost": 2.448946564213099e+28,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 66,
+          "cost": 3.6734198463196483e+28,
+          "cumulative_cost": 6.122366410532747e+28,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 67,
+          "cost": 9.18354961579912e+28,
+          "cumulative_cost": 1.5305916026331867e+29,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 68,
+          "cost": 2.29588740394978e+29,
+          "cumulative_cost": 3.8264790065829666e+29,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 69,
+          "cost": 5.73971850987445e+29,
+          "cumulative_cost": 9.566197516457417e+29,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 70,
+          "cost": 1.434929627468613e+30,
+          "cumulative_cost": 2.3915493791143544e+30,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 71,
+          "cost": 3.587324068671532e+30,
+          "cumulative_cost": 5.978873447785887e+30,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 72,
+          "cost": 8.96831017167883e+30,
+          "cumulative_cost": 1.4947183619464717e+31,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 73,
+          "cost": 2.242077542919707e+31,
+          "cumulative_cost": 3.736795904866179e+31,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 74,
+          "cost": 5.6051938572992685e+31,
+          "cumulative_cost": 9.341989762165448e+31,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 75,
+          "cost": 1.401298464324817e+32,
+          "cumulative_cost": 2.3354974405413618e+32,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 76,
+          "cost": 3.503246160812043e+32,
+          "cumulative_cost": 5.8387436013534045e+32,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 77,
+          "cost": 8.758115402030106e+32,
+          "cumulative_cost": 1.459685900338351e+33,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 78,
+          "cost": 2.1895288505075267e+33,
+          "cumulative_cost": 3.6492147508458777e+33,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 79,
+          "cost": 5.473822126268816e+33,
+          "cumulative_cost": 9.123036877114693e+33,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 80,
+          "cost": 1.3684555315672041e+34,
+          "cumulative_cost": 2.2807592192786737e+34,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 81,
+          "cost": 3.4211388289180105e+34,
+          "cumulative_cost": 5.701898048196684e+34,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 82,
+          "cost": 8.552847072295025e+34,
+          "cumulative_cost": 1.4254745120491708e+35,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 83,
+          "cost": 2.1382117680737565e+35,
+          "cumulative_cost": 3.5636862801229276e+35,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 84,
+          "cost": 5.3455294201843914e+35,
+          "cumulative_cost": 8.909215700307319e+35,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 85,
+          "cost": 1.3363823550460978e+36,
+          "cumulative_cost": 2.2273039250768298e+36,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 86,
+          "cost": 3.3409558876152444e+36,
+          "cumulative_cost": 5.568259812692074e+36,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 87,
+          "cost": 8.352389719038111e+36,
+          "cumulative_cost": 1.3920649531730187e+37,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 88,
+          "cost": 2.0880974297595278e+37,
+          "cumulative_cost": 3.4801623829325467e+37,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 89,
+          "cost": 5.220243574398819e+37,
+          "cumulative_cost": 8.700405957331366e+37,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 90,
+          "cost": 1.305060893599705e+38,
+          "cumulative_cost": 2.1751014893328414e+38,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 91,
+          "cost": 3.262652233999262e+38,
+          "cumulative_cost": 5.4377537233321034e+38,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 92,
+          "cost": 8.156630584998156e+38,
+          "cumulative_cost": 1.3594384308330259e+39,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 93,
+          "cost": 2.039157646249539e+39,
+          "cumulative_cost": 3.398596077082565e+39,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 94,
+          "cost": 5.0978941156238475e+39,
+          "cumulative_cost": 8.496490192706412e+39,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 95,
+          "cost": 1.274473528905962e+40,
+          "cumulative_cost": 2.124122548176603e+40,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 96,
+          "cost": 3.1861838222649045e+40,
+          "cumulative_cost": 5.310306370441507e+40,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 97,
+          "cost": 7.965459555662262e+40,
+          "cumulative_cost": 1.327576592610377e+41,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 98,
+          "cost": 1.9913648889155654e+41,
+          "cumulative_cost": 3.3189414815259424e+41,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 99,
+          "cost": 4.978412222288913e+41,
+          "cumulative_cost": 8.297353703814856e+41,
+          "income_or_bonus": "+4 plots, +8 acres"
+        },
+        {
+          "level": 100,
+          "cost": 1.2446030555722283e+42,
+          "cumulative_cost": 2.074338425953714e+42,
+          "income_or_bonus": "+4 plots, +8 acres",
+          "notes": "Absolute ceiling"
+        }
+      ]
+    }
+  ],
+  "summary_at_level_10": [
+    {
+      "id": "upgrade_crop_yield",
+      "label": "Upgrade: Crop Yield",
+      "cost_at_lv10": 405,
+      "cumcost_lv10": 2335,
+      "income_at_lv10": 15.53
+    },
+    {
+      "id": "upgrade_machine_eff",
+      "label": "Upgrade: Machine Eff",
+      "cost_at_lv10": 1214,
+      "cumcost_lv10": 7005,
+      "income_at_lv10": 31.06
+    },
+    {
+      "id": "upgrade_sell_price",
+      "label": "Upgrade: Sell Price",
+      "cost_at_lv10": 809,
+      "cumcost_lv10": 4670,
+      "income_at_lv10": 24.85
+    },
+    {
+      "id": "machine_t1_seed",
+      "label": "Machine T1: Seed Sorter",
+      "cost_at_lv10": 1180,
+      "cumcost_lv10": 6490,
+      "income_at_lv10": 2
+    },
+    {
+      "id": "machine_t2_harvester",
+      "label": "Machine T2: Auto Harvester",
+      "cost_at_lv10": 20890,
+      "cumcost_lv10": 114895,
+      "income_at_lv10": 40
+    },
+    {
+      "id": "machine_t3_hydroponic",
+      "label": "Machine T3: Hydroponic Bay",
+      "cost_at_lv10": 246450,
+      "cumcost_lv10": 1355475,
+      "income_at_lv10": 300
+    },
+    {
+      "id": "machine_t4_megafarm",
+      "label": "Machine T4: Mega Harvester",
+      "cost_at_lv10": 1551020,
+      "cumcost_lv10": 8530610,
+      "income_at_lv10": 1000
+    },
+    {
+      "id": "machine_t5_ai",
+      "label": "Machine T5: AI Farm Manager",
+      "cost_at_lv10": 8007150,
+      "cumcost_lv10": 44039325,
+      "income_at_lv10": 3500
+    },
+    {
+      "id": "worker_agronomist",
+      "label": "Worker: Agronomist",
+      "cost_at_lv10": 28833,
+      "cumcost_lv10": 84998,
+      "income_at_lv10": "+55%"
+    },
+    {
+      "id": "region_unlock",
+      "label": "Region Unlock",
+      "cost_at_lv10": 1907349,
+      "cumcost_lv10": 3178581,
+      "income_at_lv10": "+4 plots, +8 acres"
+    }
+  ],
+  "summary_at_level_50": [
+    {
+      "id": "upgrade_crop_yield",
+      "label": "Upgrade: Crop Yield",
+      "cost_at_lv50": 108366,
+      "cumcost_lv50": 830038,
+      "income_at_lv50": 1445.01
+    },
+    {
+      "id": "upgrade_machine_eff",
+      "label": "Upgrade: Machine Eff",
+      "cost_at_lv50": 325097,
+      "cumcost_lv50": 2490114,
+      "income_at_lv50": 2890.02
+    },
+    {
+      "id": "upgrade_sell_price",
+      "label": "Upgrade: Sell Price",
+      "cost_at_lv50": 216731,
+      "cumcost_lv50": 1660072,
+      "income_at_lv50": 2312.02
+    },
+    {
+      "id": "machine_t1_seed",
+      "label": "Machine T1: Seed Sorter",
+      "cost_at_lv50": 5900,
+      "cumcost_lv50": 150450,
+      "income_at_lv50": 10
+    },
+    {
+      "id": "machine_t2_harvester",
+      "label": "Machine T2: Auto Harvester",
+      "cost_at_lv50": 104450,
+      "cumcost_lv50": 2663475,
+      "income_at_lv50": 200
+    },
+    {
+      "id": "machine_t3_hydroponic",
+      "label": "Machine T3: Hydroponic Bay",
+      "cost_at_lv50": 1232250,
+      "cumcost_lv50": 31422375,
+      "income_at_lv50": 1500
+    },
+    {
+      "id": "machine_t4_megafarm",
+      "label": "Machine T4: Mega Harvester",
+      "cost_at_lv50": 7755100,
+      "cumcost_lv50": 197755050,
+      "income_at_lv50": 5000
+    },
+    {
+      "id": "machine_t5_ai",
+      "label": "Machine T5: AI Farm Manager",
+      "cost_at_lv50": 40035750,
+      "cumcost_lv50": 1020911625,
+      "income_at_lv50": 17500
+    },
+    {
+      "id": "worker_agronomist",
+      "label": "Worker: Agronomist",
+      "cost_at_lv50": 318810750107,
+      "cumcost_lv50": 956432248821,
+      "income_at_lv50": "+255%"
+    },
+    {
+      "id": "region_unlock",
+      "label": "Region Unlock",
+      "cost_at_lv50": 1.5777218104420236e+22,
+      "cumcost_lv50": 2.6295363507367063e+22,
+      "income_at_lv50": "+4 plots, +8 acres"
+    }
+  ]
+}

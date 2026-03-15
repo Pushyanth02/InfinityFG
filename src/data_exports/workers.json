@@ -1,0 +1,362 @@
+[
+  {
+    "id": "worker_001",
+    "name": "Trainee Intern",
+    "role": "intern",
+    "tier": "trainee",
+    "hire_cost": 500,
+    "efficiency_bonus": 0.05,
+    "description": "A skilled Trainee Intern ready to boost your operations by 5%."
+  },
+  {
+    "id": "worker_002",
+    "name": "Trainee Farmhand",
+    "role": "farmhand",
+    "tier": "trainee",
+    "hire_cost": 500,
+    "efficiency_bonus": 0.07,
+    "description": "A skilled Trainee Farmhand ready to boost your operations by 7%."
+  },
+  {
+    "id": "worker_003",
+    "name": "Trainee Harvester",
+    "role": "harvester",
+    "tier": "trainee",
+    "hire_cost": 500,
+    "efficiency_bonus": 0.09,
+    "description": "A skilled Trainee Harvester ready to boost your operations by 9%."
+  },
+  {
+    "id": "worker_004",
+    "name": "Trainee Planter",
+    "role": "planter",
+    "tier": "trainee",
+    "hire_cost": 500,
+    "efficiency_bonus": 0.11,
+    "description": "A skilled Trainee Planter ready to boost your operations by 11%."
+  },
+  {
+    "id": "worker_005",
+    "name": "Trainee Waterer",
+    "role": "waterer",
+    "tier": "trainee",
+    "hire_cost": 500,
+    "efficiency_bonus": 0.13,
+    "description": "A skilled Trainee Waterer ready to boost your operations by 13%."
+  },
+  {
+    "id": "worker_006",
+    "name": "Trainee Mechanic",
+    "role": "mechanic",
+    "tier": "trainee",
+    "hire_cost": 1100,
+    "efficiency_bonus": 0.15,
+    "description": "A skilled Trainee Mechanic ready to boost your operations by 15%."
+  },
+  {
+    "id": "worker_007",
+    "name": "Trainee Engineer",
+    "role": "engineer",
+    "tier": "trainee",
+    "hire_cost": 1100,
+    "efficiency_bonus": 0.17,
+    "description": "A skilled Trainee Engineer ready to boost your operations by 17%."
+  },
+  {
+    "id": "worker_008",
+    "name": "Trainee Scientist",
+    "role": "scientist",
+    "tier": "trainee",
+    "hire_cost": 1100,
+    "efficiency_bonus": 0.19,
+    "description": "A skilled Trainee Scientist ready to boost your operations by 19%."
+  },
+  {
+    "id": "worker_009",
+    "name": "Trainee Geneticist",
+    "role": "geneticist",
+    "tier": "trainee",
+    "hire_cost": 1100,
+    "efficiency_bonus": 0.21,
+    "description": "A skilled Trainee Geneticist ready to boost your operations by 21%."
+  },
+  {
+    "id": "worker_010",
+    "name": "Trainee Manager",
+    "role": "manager",
+    "tier": "trainee",
+    "hire_cost": 1100,
+    "efficiency_bonus": 0.23,
+    "description": "A skilled Trainee Manager ready to boost your operations by 23%."
+  },
+  {
+    "id": "worker_011",
+    "name": "Trainee Supervisor",
+    "role": "supervisor",
+    "tier": "trainee",
+    "hire_cost": 2420,
+    "efficiency_bonus": 0.25,
+    "description": "A skilled Trainee Supervisor ready to boost your operations by 25%."
+  },
+  {
+    "id": "worker_012",
+    "name": "Trainee Logistics expert",
+    "role": "logistics expert",
+    "tier": "trainee",
+    "hire_cost": 2420,
+    "efficiency_bonus": 0.27,
+    "description": "A skilled Trainee Logistics expert ready to boost your operations by 27%."
+  },
+  {
+    "id": "worker_013",
+    "name": "Trainee Market Analyst",
+    "role": "market analyst",
+    "tier": "trainee",
+    "hire_cost": 2420,
+    "efficiency_bonus": 0.29,
+    "description": "A skilled Trainee Market Analyst ready to boost your operations by 28%."
+  },
+  {
+    "id": "worker_014",
+    "name": "Trainee Drone Pilot",
+    "role": "drone pilot",
+    "tier": "trainee",
+    "hire_cost": 2420,
+    "efficiency_bonus": 0.31,
+    "description": "A skilled Trainee Drone Pilot ready to boost your operations by 31%."
+  },
+  {
+    "id": "worker_015",
+    "name": "Trainee Bio-hacker",
+    "role": "bio-hacker",
+    "tier": "trainee",
+    "hire_cost": 2420,
+    "efficiency_bonus": 0.33,
+    "description": "A skilled Trainee Bio-hacker ready to boost your operations by 33%."
+  },
+  {
+    "id": "worker_016",
+    "name": "Trainee Botanist",
+    "role": "botanist",
+    "tier": "trainee",
+    "hire_cost": 5324,
+    "efficiency_bonus": 0.35,
+    "description": "A skilled Trainee Botanist ready to boost your operations by 35%."
+  },
+  {
+    "id": "worker_017",
+    "name": "Junior Intern",
+    "role": "intern",
+    "tier": "junior",
+    "hire_cost": 5324,
+    "efficiency_bonus": 0.37,
+    "description": "A skilled Junior Intern ready to boost your operations by 37%."
+  },
+  {
+    "id": "worker_018",
+    "name": "Junior Farmhand",
+    "role": "farmhand",
+    "tier": "junior",
+    "hire_cost": 5324,
+    "efficiency_bonus": 0.39,
+    "description": "A skilled Junior Farmhand ready to boost your operations by 39%."
+  },
+  {
+    "id": "worker_019",
+    "name": "Junior Harvester",
+    "role": "harvester",
+    "tier": "junior",
+    "hire_cost": 5324,
+    "efficiency_bonus": 0.41,
+    "description": "A skilled Junior Harvester ready to boost your operations by 41%."
+  },
+  {
+    "id": "worker_020",
+    "name": "Junior Planter",
+    "role": "planter",
+    "tier": "junior",
+    "hire_cost": 5324,
+    "efficiency_bonus": 0.43,
+    "description": "A skilled Junior Planter ready to boost your operations by 43%."
+  },
+  {
+    "id": "worker_021",
+    "name": "Junior Waterer",
+    "role": "waterer",
+    "tier": "junior",
+    "hire_cost": 11712,
+    "efficiency_bonus": 0.45,
+    "description": "A skilled Junior Waterer ready to boost your operations by 45%."
+  },
+  {
+    "id": "worker_022",
+    "name": "Junior Mechanic",
+    "role": "mechanic",
+    "tier": "junior",
+    "hire_cost": 11712,
+    "efficiency_bonus": 0.47,
+    "description": "A skilled Junior Mechanic ready to boost your operations by 47%."
+  },
+  {
+    "id": "worker_023",
+    "name": "Junior Engineer",
+    "role": "engineer",
+    "tier": "junior",
+    "hire_cost": 11712,
+    "efficiency_bonus": 0.49,
+    "description": "A skilled Junior Engineer ready to boost your operations by 49%."
+  },
+  {
+    "id": "worker_024",
+    "name": "Junior Scientist",
+    "role": "scientist",
+    "tier": "junior",
+    "hire_cost": 11712,
+    "efficiency_bonus": 0.51,
+    "description": "A skilled Junior Scientist ready to boost your operations by 51%."
+  },
+  {
+    "id": "worker_025",
+    "name": "Junior Geneticist",
+    "role": "geneticist",
+    "tier": "junior",
+    "hire_cost": 11712,
+    "efficiency_bonus": 0.53,
+    "description": "A skilled Junior Geneticist ready to boost your operations by 53%."
+  },
+  {
+    "id": "worker_026",
+    "name": "Junior Manager",
+    "role": "manager",
+    "tier": "junior",
+    "hire_cost": 25768,
+    "efficiency_bonus": 0.55,
+    "description": "A skilled Junior Manager ready to boost your operations by 55%."
+  },
+  {
+    "id": "worker_027",
+    "name": "Junior Supervisor",
+    "role": "supervisor",
+    "tier": "junior",
+    "hire_cost": 25768,
+    "efficiency_bonus": 0.57,
+    "description": "A skilled Junior Supervisor ready to boost your operations by 57%."
+  },
+  {
+    "id": "worker_028",
+    "name": "Junior Logistics expert",
+    "role": "logistics expert",
+    "tier": "junior",
+    "hire_cost": 25768,
+    "efficiency_bonus": 0.59,
+    "description": "A skilled Junior Logistics expert ready to boost your operations by 59%."
+  },
+  {
+    "id": "worker_029",
+    "name": "Junior Market Analyst",
+    "role": "market analyst",
+    "tier": "junior",
+    "hire_cost": 25768,
+    "efficiency_bonus": 0.61,
+    "description": "A skilled Junior Market Analyst ready to boost your operations by 61%."
+  },
+  {
+    "id": "worker_030",
+    "name": "Junior Drone Pilot",
+    "role": "drone pilot",
+    "tier": "junior",
+    "hire_cost": 25768,
+    "efficiency_bonus": 0.63,
+    "description": "A skilled Junior Drone Pilot ready to boost your operations by 63%."
+  },
+  {
+    "id": "worker_031",
+    "name": "Junior Bio-hacker",
+    "role": "bio-hacker",
+    "tier": "junior",
+    "hire_cost": 56689,
+    "efficiency_bonus": 0.65,
+    "description": "A skilled Junior Bio-hacker ready to boost your operations by 65%."
+  },
+  {
+    "id": "worker_032",
+    "name": "Junior Botanist",
+    "role": "botanist",
+    "tier": "junior",
+    "hire_cost": 56689,
+    "efficiency_bonus": 0.67,
+    "description": "A skilled Junior Botanist ready to boost your operations by 67%."
+  },
+  {
+    "id": "worker_033",
+    "name": "Senior Intern",
+    "role": "intern",
+    "tier": "senior",
+    "hire_cost": 56689,
+    "efficiency_bonus": 0.69,
+    "description": "A skilled Senior Intern ready to boost your operations by 69%."
+  },
+  {
+    "id": "worker_034",
+    "name": "Senior Farmhand",
+    "role": "farmhand",
+    "tier": "senior",
+    "hire_cost": 56689,
+    "efficiency_bonus": 0.71,
+    "description": "A skilled Senior Farmhand ready to boost your operations by 71%."
+  },
+  {
+    "id": "worker_035",
+    "name": "Senior Harvester",
+    "role": "harvester",
+    "tier": "senior",
+    "hire_cost": 56689,
+    "efficiency_bonus": 0.73,
+    "description": "A skilled Senior Harvester ready to boost your operations by 73%."
+  },
+  {
+    "id": "worker_036",
+    "name": "Senior Planter",
+    "role": "planter",
+    "tier": "senior",
+    "hire_cost": 124717,
+    "efficiency_bonus": 0.75,
+    "description": "A skilled Senior Planter ready to boost your operations by 75%."
+  },
+  {
+    "id": "worker_037",
+    "name": "Senior Waterer",
+    "role": "waterer",
+    "tier": "senior",
+    "hire_cost": 124717,
+    "efficiency_bonus": 0.77,
+    "description": "A skilled Senior Waterer ready to boost your operations by 77%."
+  },
+  {
+    "id": "worker_038",
+    "name": "Senior Mechanic",
+    "role": "mechanic",
+    "tier": "senior",
+    "hire_cost": 124717,
+    "efficiency_bonus": 0.79,
+    "description": "A skilled Senior Mechanic ready to boost your operations by 79%."
+  },
+  {
+    "id": "worker_039",
+    "name": "Senior Engineer",
+    "role": "engineer",
+    "tier": "senior",
+    "hire_cost": 124717,
+    "efficiency_bonus": 0.81,
+    "description": "A skilled Senior Engineer ready to boost your operations by 81%."
+  },
+  {
+    "id": "worker_040",
+    "name": "Senior Scientist",
+    "role": "scientist",
+    "tier": "senior",
+    "hire_cost": 124717,
+    "efficiency_bonus": 0.83,
+    "description": "A skilled Senior Scientist ready to boost your operations by 83%."
+  }
+]

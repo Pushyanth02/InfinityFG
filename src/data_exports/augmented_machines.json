@@ -1,0 +1,2614 @@
+[
+  {
+    "machine_id": "mach_plan_1_00",
+    "name": "Root-Bot Mk 1",
+    "category": "planter",
+    "tier": 1,
+    "base_cost": 13,
+    "production_rate": {
+      "crops_per_min": 2
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.7,
+      "level_10": 2.7
+    },
+    "maintenance_cost_per_hour": 1,
+    "overclockable": true,
+    "overclock_effects": {
+      "speed_multiplier": 1.6,
+      "wear_rate_multiplier": 2.3
+    },
+    "description": "Automates seed sowing. Tier 1 technology. Supports dangerous overclocking.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 15,
+        "cost_formula": "base_cost * (1.313 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 15,
+        "cost_formula": "base_cost * (1.260 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 15,
+        "cost_formula": "base_cost * (1.208 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 1,
+    "compatible_modules": [
+      "precision_laser"
+    ],
+    "cosmetic_skins": [
+      "skin_planter_gold",
+      "skin_planter_rusty"
+    ]
+  },
+  {
+    "machine_id": "mach_plan_1_01",
+    "name": "Terra-Core 100",
+    "category": "planter",
+    "tier": 1,
+    "base_cost": 14,
+    "production_rate": {
+      "crops_per_min": 2
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.9,
+      "level_10": 3
+    },
+    "maintenance_cost_per_hour": 1,
+    "overclockable": false,
+    "description": "Automates seed sowing. Tier 1 technology. Stable design, cannot be overclocked.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 15,
+        "cost_formula": "base_cost * (1.313 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 15,
+        "cost_formula": "base_cost * (1.260 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 15,
+        "cost_formula": "base_cost * (1.208 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 1,
+    "compatible_modules": [
+      "seed_hopper_ext"
+    ],
+    "cosmetic_skins": [
+      "skin_planter_gold",
+      "skin_planter_rusty"
+    ]
+  },
+  {
+    "machine_id": "mach_plan_1_02",
+    "name": "Furrow-Matic 100",
+    "category": "planter",
+    "tier": 1,
+    "base_cost": 14,
+    "production_rate": {
+      "crops_per_min": 2
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.6,
+      "level_10": 2.7
+    },
+    "maintenance_cost_per_hour": 1,
+    "overclockable": false,
+    "description": "Automates seed sowing. Tier 1 technology. Stable design, cannot be overclocked.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 15,
+        "cost_formula": "base_cost * (1.313 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 15,
+        "cost_formula": "base_cost * (1.260 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 15,
+        "cost_formula": "base_cost * (1.208 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 1,
+    "compatible_modules": [
+      "soil_sensor"
+    ],
+    "cosmetic_skins": [
+      "skin_planter_holo",
+      "skin_planter_rusty"
+    ]
+  },
+  {
+    "machine_id": "mach_plan_1_03",
+    "name": "Root-Tech v1.0",
+    "category": "planter",
+    "tier": 1,
+    "base_cost": 35,
+    "production_rate": {
+      "crops_per_min": 2
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.9,
+      "level_10": 2.5
+    },
+    "maintenance_cost_per_hour": 1,
+    "overclockable": false,
+    "description": "Automates seed sowing. Tier 1 technology. Stable design, cannot be overclocked.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 15,
+        "cost_formula": "base_cost * (1.313 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 15,
+        "cost_formula": "base_cost * (1.260 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 15,
+        "cost_formula": "base_cost * (1.208 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 1,
+    "compatible_modules": [
+      "precision_laser"
+    ],
+    "cosmetic_skins": [
+      "skin_planter_rusty",
+      "skin_planter_neon"
+    ]
+  },
+  {
+    "machine_id": "mach_plan_1_04",
+    "name": "Soil-Bot v1.0",
+    "category": "planter",
+    "tier": 1,
+    "base_cost": 17,
+    "production_rate": {
+      "crops_per_min": 2
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.6,
+      "level_10": 2.5
+    },
+    "maintenance_cost_per_hour": 1,
+    "overclockable": false,
+    "description": "Automates seed sowing. Tier 1 technology. Stable design, cannot be overclocked.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 15,
+        "cost_formula": "base_cost * (1.313 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 15,
+        "cost_formula": "base_cost * (1.260 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 15,
+        "cost_formula": "base_cost * (1.208 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 1,
+    "compatible_modules": [
+      "precision_laser"
+    ],
+    "cosmetic_skins": [
+      "skin_planter_steampunk",
+      "skin_planter_rusty",
+      "skin_planter_neon"
+    ]
+  },
+  {
+    "machine_id": "mach_plan_1_05",
+    "name": "Seed-Max 1000",
+    "category": "planter",
+    "tier": 1,
+    "base_cost": 26,
+    "production_rate": {
+      "crops_per_min": 3
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.6,
+      "level_10": 2.2
+    },
+    "maintenance_cost_per_hour": 1,
+    "overclockable": true,
+    "overclock_effects": {
+      "speed_multiplier": 1.3,
+      "wear_rate_multiplier": 1.7
+    },
+    "description": "Automates seed sowing. Tier 1 technology. Supports dangerous overclocking.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 15,
+        "cost_formula": "base_cost * (1.313 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 15,
+        "cost_formula": "base_cost * (1.260 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 15,
+        "cost_formula": "base_cost * (1.208 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 1,
+    "compatible_modules": [
+      "seed_hopper_ext"
+    ],
+    "cosmetic_skins": [
+      "skin_planter_rusty",
+      "skin_planter_steampunk"
+    ]
+  },
+  {
+    "machine_id": "mach_plan_1_06",
+    "name": "Seed-Matic 1000",
+    "category": "planter",
+    "tier": 1,
+    "base_cost": 15,
+    "production_rate": {
+      "crops_per_min": 2
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.8,
+      "level_10": 2.9
+    },
+    "maintenance_cost_per_hour": 1,
+    "overclockable": true,
+    "overclock_effects": {
+      "speed_multiplier": 1.7,
+      "wear_rate_multiplier": 2.6
+    },
+    "description": "Automates seed sowing. Tier 1 technology. Supports dangerous overclocking.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 15,
+        "cost_formula": "base_cost * (1.313 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 15,
+        "cost_formula": "base_cost * (1.260 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 15,
+        "cost_formula": "base_cost * (1.208 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 1,
+    "compatible_modules": [
+      "precision_laser"
+    ],
+    "cosmetic_skins": [
+      "skin_planter_gold",
+      "skin_planter_neon",
+      "skin_planter_steampunk"
+    ]
+  },
+  {
+    "machine_id": "mach_plan_1_07",
+    "name": "Seed-Forge Mk 1",
+    "category": "planter",
+    "tier": 1,
+    "base_cost": 43,
+    "production_rate": {
+      "crops_per_min": 2
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.8,
+      "level_10": 3.1
+    },
+    "maintenance_cost_per_hour": 1,
+    "overclockable": true,
+    "overclock_effects": {
+      "speed_multiplier": 1.7,
+      "wear_rate_multiplier": 2.7
+    },
+    "description": "Automates seed sowing. Tier 1 technology. Supports dangerous overclocking.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 15,
+        "cost_formula": "base_cost * (1.313 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 15,
+        "cost_formula": "base_cost * (1.260 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 15,
+        "cost_formula": "base_cost * (1.208 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 1,
+    "compatible_modules": [
+      "soil_sensor"
+    ],
+    "cosmetic_skins": [
+      "skin_planter_neon",
+      "skin_planter_steampunk"
+    ]
+  },
+  {
+    "machine_id": "mach_plan_1_08",
+    "name": "Soil-Tron v1.0",
+    "category": "planter",
+    "tier": 1,
+    "base_cost": 19,
+    "production_rate": {
+      "crops_per_min": 2
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.7,
+      "level_10": 2.6
+    },
+    "maintenance_cost_per_hour": 1,
+    "overclockable": true,
+    "overclock_effects": {
+      "speed_multiplier": 2,
+      "wear_rate_multiplier": 3.2
+    },
+    "description": "Automates seed sowing. Tier 1 technology. Supports dangerous overclocking.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 15,
+        "cost_formula": "base_cost * (1.313 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 15,
+        "cost_formula": "base_cost * (1.260 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 15,
+        "cost_formula": "base_cost * (1.208 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 1,
+    "compatible_modules": [
+      "seed_hopper_ext"
+    ],
+    "cosmetic_skins": [
+      "skin_planter_neon",
+      "skin_planter_holo"
+    ]
+  },
+  {
+    "machine_id": "mach_plan_1_09",
+    "name": "Terra-Tron 100",
+    "category": "planter",
+    "tier": 1,
+    "base_cost": 34,
+    "production_rate": {
+      "crops_per_min": 3
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.7,
+      "level_10": 2.9
+    },
+    "maintenance_cost_per_hour": 1,
+    "overclockable": true,
+    "overclock_effects": {
+      "speed_multiplier": 1.4,
+      "wear_rate_multiplier": 1.8
+    },
+    "description": "Automates seed sowing. Tier 1 technology. Supports dangerous overclocking.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 15,
+        "cost_formula": "base_cost * (1.313 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 15,
+        "cost_formula": "base_cost * (1.260 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 15,
+        "cost_formula": "base_cost * (1.208 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 1,
+    "compatible_modules": [
+      "precision_laser"
+    ],
+    "cosmetic_skins": [
+      "skin_planter_gold"
+    ]
+  },
+  {
+    "machine_id": "mach_wate_2_00",
+    "name": "Irrig-Tron X2",
+    "category": "waterer",
+    "tier": 2,
+    "base_cost": 270,
+    "production_rate": {
+      "crops_per_min": 5
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.7,
+      "level_10": 2.6
+    },
+    "maintenance_cost_per_hour": 6,
+    "overclockable": true,
+    "overclock_effects": {
+      "speed_multiplier": 1.6,
+      "wear_rate_multiplier": 2.6
+    },
+    "description": "Maintains optimal soil moisture. Tier 2 technology. Supports dangerous overclocking.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 20,
+        "cost_formula": "base_cost * (1.375 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 20,
+        "cost_formula": "base_cost * (1.320 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 20,
+        "cost_formula": "base_cost * (1.265 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 2,
+    "compatible_modules": [
+      "leak_detector"
+    ],
+    "cosmetic_skins": [
+      "skin_waterer_neon",
+      "skin_waterer_gold"
+    ]
+  },
+  {
+    "machine_id": "mach_wate_2_01",
+    "name": "Mist-Forge 2000",
+    "category": "waterer",
+    "tier": 2,
+    "base_cost": 76,
+    "production_rate": {
+      "crops_per_min": 4
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.5,
+      "level_10": 2.5
+    },
+    "maintenance_cost_per_hour": 1,
+    "overclockable": true,
+    "overclock_effects": {
+      "speed_multiplier": 1.7,
+      "wear_rate_multiplier": 2.6
+    },
+    "description": "Maintains optimal soil moisture. Tier 2 technology. Supports dangerous overclocking.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 20,
+        "cost_formula": "base_cost * (1.375 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 20,
+        "cost_formula": "base_cost * (1.320 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 20,
+        "cost_formula": "base_cost * (1.265 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 2,
+    "compatible_modules": [
+      "high_pressure_nozzle"
+    ],
+    "cosmetic_skins": [
+      "skin_waterer_neon",
+      "skin_waterer_rusty",
+      "skin_waterer_holo"
+    ]
+  },
+  {
+    "machine_id": "mach_wate_2_02",
+    "name": "Irrig-Sync v2.0",
+    "category": "waterer",
+    "tier": 2,
+    "base_cost": 230,
+    "production_rate": {
+      "crops_per_min": 5
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.5,
+      "level_10": 2.3
+    },
+    "maintenance_cost_per_hour": 6,
+    "overclockable": false,
+    "description": "Maintains optimal soil moisture. Tier 2 technology. Stable design, cannot be overclocked.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 20,
+        "cost_formula": "base_cost * (1.375 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 20,
+        "cost_formula": "base_cost * (1.320 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 20,
+        "cost_formula": "base_cost * (1.265 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 2,
+    "compatible_modules": [
+      "mineral_infuser",
+      "high_pressure_nozzle"
+    ],
+    "cosmetic_skins": [
+      "skin_waterer_holo"
+    ]
+  },
+  {
+    "machine_id": "mach_wate_2_03",
+    "name": "Aqua-Max X2",
+    "category": "waterer",
+    "tier": 2,
+    "base_cost": 430,
+    "production_rate": {
+      "crops_per_min": 5
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.5,
+      "level_10": 2.3
+    },
+    "maintenance_cost_per_hour": 8,
+    "overclockable": true,
+    "overclock_effects": {
+      "speed_multiplier": 1.9,
+      "wear_rate_multiplier": 2.7
+    },
+    "description": "Maintains optimal soil moisture. Tier 2 technology. Supports dangerous overclocking.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 20,
+        "cost_formula": "base_cost * (1.375 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 20,
+        "cost_formula": "base_cost * (1.320 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 20,
+        "cost_formula": "base_cost * (1.265 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 2,
+    "compatible_modules": [
+      "leak_detector",
+      "mineral_infuser"
+    ],
+    "cosmetic_skins": [
+      "skin_waterer_steampunk",
+      "skin_waterer_holo",
+      "skin_waterer_rusty"
+    ]
+  },
+  {
+    "machine_id": "mach_wate_2_04",
+    "name": "Irrig-Max Pro",
+    "category": "waterer",
+    "tier": 2,
+    "base_cost": 340,
+    "production_rate": {
+      "crops_per_min": 5
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.9,
+      "level_10": 2.5
+    },
+    "maintenance_cost_per_hour": 4,
+    "overclockable": true,
+    "overclock_effects": {
+      "speed_multiplier": 1.5,
+      "wear_rate_multiplier": 1.8
+    },
+    "description": "Maintains optimal soil moisture. Tier 2 technology. Supports dangerous overclocking.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 20,
+        "cost_formula": "base_cost * (1.375 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 20,
+        "cost_formula": "base_cost * (1.320 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 20,
+        "cost_formula": "base_cost * (1.265 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 2,
+    "compatible_modules": [
+      "mineral_infuser",
+      "leak_detector"
+    ],
+    "cosmetic_skins": [
+      "skin_waterer_gold",
+      "skin_waterer_holo"
+    ]
+  },
+  {
+    "machine_id": "mach_wate_2_05",
+    "name": "Flow-Matic 200",
+    "category": "waterer",
+    "tier": 2,
+    "base_cost": 97,
+    "production_rate": {
+      "crops_per_min": 4
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.6,
+      "level_10": 2.7
+    },
+    "maintenance_cost_per_hour": 1,
+    "overclockable": true,
+    "overclock_effects": {
+      "speed_multiplier": 1.5,
+      "wear_rate_multiplier": 2.5
+    },
+    "description": "Maintains optimal soil moisture. Tier 2 technology. Supports dangerous overclocking.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 20,
+        "cost_formula": "base_cost * (1.375 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 20,
+        "cost_formula": "base_cost * (1.320 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 20,
+        "cost_formula": "base_cost * (1.265 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 2,
+    "compatible_modules": [
+      "mineral_infuser",
+      "high_pressure_nozzle"
+    ],
+    "cosmetic_skins": [
+      "skin_waterer_steampunk"
+    ]
+  },
+  {
+    "machine_id": "mach_wate_2_06",
+    "name": "Flow-Matic 2000",
+    "category": "waterer",
+    "tier": 2,
+    "base_cost": 390,
+    "production_rate": {
+      "crops_per_min": 5
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.4,
+      "level_10": 2.4
+    },
+    "maintenance_cost_per_hour": 9,
+    "overclockable": true,
+    "overclock_effects": {
+      "speed_multiplier": 1.7,
+      "wear_rate_multiplier": 2.7
+    },
+    "description": "Maintains optimal soil moisture. Tier 2 technology. Supports dangerous overclocking.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 20,
+        "cost_formula": "base_cost * (1.375 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 20,
+        "cost_formula": "base_cost * (1.320 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 20,
+        "cost_formula": "base_cost * (1.265 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 2,
+    "compatible_modules": [
+      "high_pressure_nozzle",
+      "leak_detector"
+    ],
+    "cosmetic_skins": [
+      "skin_waterer_neon",
+      "skin_waterer_steampunk",
+      "skin_waterer_holo"
+    ]
+  },
+  {
+    "machine_id": "mach_wate_2_07",
+    "name": "Aqua-Sync 2000",
+    "category": "waterer",
+    "tier": 2,
+    "base_cost": 58,
+    "production_rate": {
+      "crops_per_min": 5
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.6,
+      "level_10": 2.5
+    },
+    "maintenance_cost_per_hour": 1,
+    "overclockable": true,
+    "overclock_effects": {
+      "speed_multiplier": 1.6,
+      "wear_rate_multiplier": 2.9
+    },
+    "description": "Maintains optimal soil moisture. Tier 2 technology. Supports dangerous overclocking.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 20,
+        "cost_formula": "base_cost * (1.375 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 20,
+        "cost_formula": "base_cost * (1.320 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 20,
+        "cost_formula": "base_cost * (1.265 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 2,
+    "compatible_modules": [
+      "mineral_infuser",
+      "high_pressure_nozzle"
+    ],
+    "cosmetic_skins": [
+      "skin_waterer_holo"
+    ]
+  },
+  {
+    "machine_id": "mach_wate_2_08",
+    "name": "Hydro-Core Pro",
+    "category": "waterer",
+    "tier": 2,
+    "base_cost": 250,
+    "production_rate": {
+      "crops_per_min": 5
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.6,
+      "level_10": 2.2
+    },
+    "maintenance_cost_per_hour": 6,
+    "overclockable": false,
+    "description": "Maintains optimal soil moisture. Tier 2 technology. Stable design, cannot be overclocked.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 20,
+        "cost_formula": "base_cost * (1.375 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 20,
+        "cost_formula": "base_cost * (1.320 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 20,
+        "cost_formula": "base_cost * (1.265 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 2,
+    "compatible_modules": [
+      "high_pressure_nozzle"
+    ],
+    "cosmetic_skins": [
+      "skin_waterer_steampunk"
+    ]
+  },
+  {
+    "machine_id": "mach_wate_2_09",
+    "name": "Irrig-Max Mk 2",
+    "category": "waterer",
+    "tier": 2,
+    "base_cost": 250,
+    "production_rate": {
+      "crops_per_min": 4
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.5,
+      "level_10": 2.3
+    },
+    "maintenance_cost_per_hour": 4,
+    "overclockable": true,
+    "overclock_effects": {
+      "speed_multiplier": 1.6,
+      "wear_rate_multiplier": 2.8
+    },
+    "description": "Maintains optimal soil moisture. Tier 2 technology. Supports dangerous overclocking.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 20,
+        "cost_formula": "base_cost * (1.375 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 20,
+        "cost_formula": "base_cost * (1.320 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 20,
+        "cost_formula": "base_cost * (1.265 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 2,
+    "compatible_modules": [
+      "mineral_infuser",
+      "high_pressure_nozzle"
+    ],
+    "cosmetic_skins": [
+      "skin_waterer_neon"
+    ]
+  },
+  {
+    "machine_id": "mach_harv_3_00",
+    "name": "Gather-Matic v3.0",
+    "category": "harvester",
+    "tier": 3,
+    "base_cost": 2900,
+    "production_rate": {
+      "crops_per_min": 12
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.8,
+      "level_10": 3
+    },
+    "maintenance_cost_per_hour": 50,
+    "overclockable": true,
+    "overclock_effects": {
+      "speed_multiplier": 1.9,
+      "wear_rate_multiplier": 3.4
+    },
+    "description": "Harvests mature crops efficiently. Tier 3 technology. Supports dangerous overclocking.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.438 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.380 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.322 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 2,
+    "compatible_modules": [
+      "giga_scythe",
+      "auto_sorter"
+    ],
+    "cosmetic_skins": [
+      "skin_harvester_gold"
+    ]
+  },
+  {
+    "machine_id": "mach_harv_3_01",
+    "name": "Scythe-Sync v3.0",
+    "category": "harvester",
+    "tier": 3,
+    "base_cost": 4300,
+    "production_rate": {
+      "crops_per_min": 11
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.4,
+      "level_10": 2.2
+    },
+    "maintenance_cost_per_hour": 73,
+    "overclockable": true,
+    "overclock_effects": {
+      "speed_multiplier": 1.7,
+      "wear_rate_multiplier": 2.8
+    },
+    "description": "Harvests mature crops efficiently. Tier 3 technology. Supports dangerous overclocking.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.438 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.380 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.322 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 2,
+    "compatible_modules": [
+      "giga_scythe",
+      "payload_compactor"
+    ],
+    "cosmetic_skins": [
+      "skin_harvester_gold",
+      "skin_harvester_neon",
+      "skin_harvester_steampunk"
+    ]
+  },
+  {
+    "machine_id": "mach_harv_3_02",
+    "name": "Crop-Tron Pro",
+    "category": "harvester",
+    "tier": 3,
+    "base_cost": 2100,
+    "production_rate": {
+      "crops_per_min": 13
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.7,
+      "level_10": 2.9
+    },
+    "maintenance_cost_per_hour": 30,
+    "overclockable": true,
+    "overclock_effects": {
+      "speed_multiplier": 1.8,
+      "wear_rate_multiplier": 2.6
+    },
+    "description": "Harvests mature crops efficiently. Tier 3 technology. Supports dangerous overclocking.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.438 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.380 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.322 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 2,
+    "compatible_modules": [
+      "payload_compactor"
+    ],
+    "cosmetic_skins": [
+      "skin_harvester_gold",
+      "skin_harvester_neon"
+    ]
+  },
+  {
+    "machine_id": "mach_harv_3_03",
+    "name": "Yield-Bot v3.0",
+    "category": "harvester",
+    "tier": 3,
+    "base_cost": 5000,
+    "production_rate": {
+      "crops_per_min": 11
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.6,
+      "level_10": 2.2
+    },
+    "maintenance_cost_per_hour": 143,
+    "overclockable": true,
+    "overclock_effects": {
+      "speed_multiplier": 2,
+      "wear_rate_multiplier": 2.6
+    },
+    "description": "Harvests mature crops efficiently. Tier 3 technology. Supports dangerous overclocking.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.438 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.380 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.322 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 2,
+    "compatible_modules": [
+      "auto_sorter",
+      "payload_compactor"
+    ],
+    "cosmetic_skins": [
+      "skin_harvester_steampunk",
+      "skin_harvester_holo",
+      "skin_harvester_neon"
+    ]
+  },
+  {
+    "machine_id": "mach_harv_3_04",
+    "name": "Crop-Bot Mk 3",
+    "category": "harvester",
+    "tier": 3,
+    "base_cost": 4900,
+    "production_rate": {
+      "crops_per_min": 10
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.5,
+      "level_10": 2
+    },
+    "maintenance_cost_per_hour": 126,
+    "overclockable": true,
+    "overclock_effects": {
+      "speed_multiplier": 1.5,
+      "wear_rate_multiplier": 2.1
+    },
+    "description": "Harvests mature crops efficiently. Tier 3 technology. Supports dangerous overclocking.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.438 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.380 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.322 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 2,
+    "compatible_modules": [
+      "payload_compactor",
+      "giga_scythe"
+    ],
+    "cosmetic_skins": [
+      "skin_harvester_gold"
+    ]
+  },
+  {
+    "machine_id": "mach_harv_3_05",
+    "name": "Gather-Core Mk 3",
+    "category": "harvester",
+    "tier": 3,
+    "base_cost": 2400,
+    "production_rate": {
+      "crops_per_min": 10
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.8,
+      "level_10": 2.5
+    },
+    "maintenance_cost_per_hour": 37,
+    "overclockable": false,
+    "description": "Harvests mature crops efficiently. Tier 3 technology. Stable design, cannot be overclocked.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.438 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.380 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.322 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 2,
+    "compatible_modules": [
+      "payload_compactor",
+      "auto_sorter"
+    ],
+    "cosmetic_skins": [
+      "skin_harvester_rusty"
+    ]
+  },
+  {
+    "machine_id": "mach_harv_3_06",
+    "name": "Crop-Bot Pro",
+    "category": "harvester",
+    "tier": 3,
+    "base_cost": 700,
+    "production_rate": {
+      "crops_per_min": 10
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.7,
+      "level_10": 2.6
+    },
+    "maintenance_cost_per_hour": 16,
+    "overclockable": true,
+    "overclock_effects": {
+      "speed_multiplier": 1.5,
+      "wear_rate_multiplier": 2.7
+    },
+    "description": "Harvests mature crops efficiently. Tier 3 technology. Supports dangerous overclocking.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.438 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.380 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.322 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 2,
+    "compatible_modules": [
+      "auto_sorter",
+      "payload_compactor"
+    ],
+    "cosmetic_skins": [
+      "skin_harvester_rusty",
+      "skin_harvester_gold"
+    ]
+  },
+  {
+    "machine_id": "mach_harv_3_07",
+    "name": "Crop-Bot X3",
+    "category": "harvester",
+    "tier": 3,
+    "base_cost": 2500,
+    "production_rate": {
+      "crops_per_min": 10
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.8,
+      "level_10": 2.7
+    },
+    "maintenance_cost_per_hour": 55,
+    "overclockable": true,
+    "overclock_effects": {
+      "speed_multiplier": 1.9,
+      "wear_rate_multiplier": 2.5
+    },
+    "description": "Harvests mature crops efficiently. Tier 3 technology. Supports dangerous overclocking.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.438 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.380 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.322 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 2,
+    "compatible_modules": [
+      "payload_compactor"
+    ],
+    "cosmetic_skins": [
+      "skin_harvester_neon"
+    ]
+  },
+  {
+    "machine_id": "mach_harv_3_08",
+    "name": "Yield-Matic 300",
+    "category": "harvester",
+    "tier": 3,
+    "base_cost": 1600,
+    "production_rate": {
+      "crops_per_min": 13
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.8,
+      "level_10": 3
+    },
+    "maintenance_cost_per_hour": 39,
+    "overclockable": false,
+    "description": "Harvests mature crops efficiently. Tier 3 technology. Stable design, cannot be overclocked.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.438 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.380 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.322 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 2,
+    "compatible_modules": [
+      "auto_sorter",
+      "payload_compactor"
+    ],
+    "cosmetic_skins": [
+      "skin_harvester_neon",
+      "skin_harvester_holo",
+      "skin_harvester_gold"
+    ]
+  },
+  {
+    "machine_id": "mach_harv_3_09",
+    "name": "Yield-Tech v3.0",
+    "category": "harvester",
+    "tier": 3,
+    "base_cost": 2600,
+    "production_rate": {
+      "crops_per_min": 9
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.7,
+      "level_10": 2.3
+    },
+    "maintenance_cost_per_hour": 68,
+    "overclockable": false,
+    "description": "Harvests mature crops efficiently. Tier 3 technology. Stable design, cannot be overclocked.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.438 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.380 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.322 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 2,
+    "compatible_modules": [
+      "giga_scythe",
+      "payload_compactor"
+    ],
+    "cosmetic_skins": [
+      "skin_harvester_holo"
+    ]
+  },
+  {
+    "machine_id": "mach_proc_3_00",
+    "name": "Mill-Forge v3.0",
+    "category": "processor",
+    "tier": 3,
+    "base_cost": 4300,
+    "production_rate": {
+      "crops_per_min": 12
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.7,
+      "level_10": 2.4
+    },
+    "maintenance_cost_per_hour": 109,
+    "overclockable": true,
+    "overclock_effects": {
+      "speed_multiplier": 1.6,
+      "wear_rate_multiplier": 2.3
+    },
+    "description": "Converts raw crops into high-value goods. Tier 3 technology. Supports dangerous overclocking.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.438 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.380 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.322 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 2,
+    "compatible_modules": [
+      "heat_sink"
+    ],
+    "cosmetic_skins": [
+      "skin_processor_neon"
+    ]
+  },
+  {
+    "machine_id": "mach_proc_3_01",
+    "name": "Synth-Tech 300",
+    "category": "processor",
+    "tier": 3,
+    "base_cost": 2300,
+    "production_rate": {
+      "crops_per_min": 12
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.4,
+      "level_10": 2.1
+    },
+    "maintenance_cost_per_hour": 37,
+    "overclockable": true,
+    "overclock_effects": {
+      "speed_multiplier": 1.3,
+      "wear_rate_multiplier": 1.8
+    },
+    "description": "Converts raw crops into high-value goods. Tier 3 technology. Supports dangerous overclocking.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.438 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.380 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.322 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 2,
+    "compatible_modules": [
+      "purity_filter",
+      "overclock_chip"
+    ],
+    "cosmetic_skins": [
+      "skin_processor_gold"
+    ]
+  },
+  {
+    "machine_id": "mach_proc_3_02",
+    "name": "Mill-Tron X3",
+    "category": "processor",
+    "tier": 3,
+    "base_cost": 4800,
+    "production_rate": {
+      "crops_per_min": 12
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.8,
+      "level_10": 2.4
+    },
+    "maintenance_cost_per_hour": 113,
+    "overclockable": true,
+    "overclock_effects": {
+      "speed_multiplier": 1.5,
+      "wear_rate_multiplier": 2.6
+    },
+    "description": "Converts raw crops into high-value goods. Tier 3 technology. Supports dangerous overclocking.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.438 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.380 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.322 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 2,
+    "compatible_modules": [
+      "purity_filter"
+    ],
+    "cosmetic_skins": [
+      "skin_processor_steampunk"
+    ]
+  },
+  {
+    "machine_id": "mach_proc_3_03",
+    "name": "Mill-Bot Pro",
+    "category": "processor",
+    "tier": 3,
+    "base_cost": 4100,
+    "production_rate": {
+      "crops_per_min": 11
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.7,
+      "level_10": 2.5
+    },
+    "maintenance_cost_per_hour": 60,
+    "overclockable": true,
+    "overclock_effects": {
+      "speed_multiplier": 1.6,
+      "wear_rate_multiplier": 2.4
+    },
+    "description": "Converts raw crops into high-value goods. Tier 3 technology. Supports dangerous overclocking.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.438 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.380 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.322 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 2,
+    "compatible_modules": [
+      "heat_sink",
+      "purity_filter"
+    ],
+    "cosmetic_skins": [
+      "skin_processor_holo",
+      "skin_processor_steampunk",
+      "skin_processor_rusty"
+    ]
+  },
+  {
+    "machine_id": "mach_proc_3_04",
+    "name": "Refine-Sync Pro",
+    "category": "processor",
+    "tier": 3,
+    "base_cost": 1100,
+    "production_rate": {
+      "crops_per_min": 10
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.6,
+      "level_10": 2.1
+    },
+    "maintenance_cost_per_hour": 24,
+    "overclockable": false,
+    "description": "Converts raw crops into high-value goods. Tier 3 technology. Stable design, cannot be overclocked.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.438 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.380 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 25,
+        "cost_formula": "base_cost * (1.322 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 2,
+    "compatible_modules": [
+      "overclock_chip"
+    ],
+    "cosmetic_skins": [
+      "skin_processor_gold",
+      "skin_processor_holo"
+    ]
+  },
+  {
+    "machine_id": "mach_proc_4_05",
+    "name": "Refine-Core 4000",
+    "category": "processor",
+    "tier": 4,
+    "base_cost": 19000,
+    "production_rate": {
+      "crops_per_min": 23
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.5,
+      "level_10": 2.2
+    },
+    "maintenance_cost_per_hour": 367,
+    "overclockable": false,
+    "description": "Converts raw crops into high-value goods. Tier 4 technology. Stable design, cannot be overclocked.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 30,
+        "cost_formula": "base_cost * (1.500 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 30,
+        "cost_formula": "base_cost * (1.440 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 30,
+        "cost_formula": "base_cost * (1.380 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 3,
+    "compatible_modules": [
+      "overclock_chip",
+      "heat_sink",
+      "purity_filter"
+    ],
+    "cosmetic_skins": [
+      "skin_processor_steampunk"
+    ]
+  },
+  {
+    "machine_id": "mach_proc_4_06",
+    "name": "Mill-Sync Pro",
+    "category": "processor",
+    "tier": 4,
+    "base_cost": 31000,
+    "production_rate": {
+      "crops_per_min": 22
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.7,
+      "level_10": 2.8
+    },
+    "maintenance_cost_per_hour": 685,
+    "overclockable": true,
+    "overclock_effects": {
+      "speed_multiplier": 1.9,
+      "wear_rate_multiplier": 2.3
+    },
+    "description": "Converts raw crops into high-value goods. Tier 4 technology. Supports dangerous overclocking.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 30,
+        "cost_formula": "base_cost * (1.500 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 30,
+        "cost_formula": "base_cost * (1.440 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 30,
+        "cost_formula": "base_cost * (1.380 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 3,
+    "compatible_modules": [
+      "purity_filter",
+      "heat_sink"
+    ],
+    "cosmetic_skins": [
+      "skin_processor_holo"
+    ]
+  },
+  {
+    "machine_id": "mach_proc_4_07",
+    "name": "Refine-Max v4.0",
+    "category": "processor",
+    "tier": 4,
+    "base_cost": 21000,
+    "production_rate": {
+      "crops_per_min": 20
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.8,
+      "level_10": 3.1
+    },
+    "maintenance_cost_per_hour": 447,
+    "overclockable": true,
+    "overclock_effects": {
+      "speed_multiplier": 1.7,
+      "wear_rate_multiplier": 2.8
+    },
+    "description": "Converts raw crops into high-value goods. Tier 4 technology. Supports dangerous overclocking.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 30,
+        "cost_formula": "base_cost * (1.500 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 30,
+        "cost_formula": "base_cost * (1.440 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 30,
+        "cost_formula": "base_cost * (1.380 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 3,
+    "compatible_modules": [
+      "overclock_chip",
+      "purity_filter"
+    ],
+    "cosmetic_skins": [
+      "skin_processor_holo"
+    ]
+  },
+  {
+    "machine_id": "mach_proc_4_08",
+    "name": "Blend-Tech X4",
+    "category": "processor",
+    "tier": 4,
+    "base_cost": 5800,
+    "production_rate": {
+      "crops_per_min": 25
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 2,
+      "level_10": 2.7
+    },
+    "maintenance_cost_per_hour": 157,
+    "overclockable": true,
+    "overclock_effects": {
+      "speed_multiplier": 1.4,
+      "wear_rate_multiplier": 2.2
+    },
+    "description": "Converts raw crops into high-value goods. Tier 4 technology. Supports dangerous overclocking.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 30,
+        "cost_formula": "base_cost * (1.500 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 30,
+        "cost_formula": "base_cost * (1.440 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 30,
+        "cost_formula": "base_cost * (1.380 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 3,
+    "compatible_modules": [
+      "overclock_chip",
+      "purity_filter"
+    ],
+    "cosmetic_skins": [
+      "skin_processor_neon",
+      "skin_processor_steampunk"
+    ]
+  },
+  {
+    "machine_id": "mach_proc_4_09",
+    "name": "Synth-Tron Pro",
+    "category": "processor",
+    "tier": 4,
+    "base_cost": 41000,
+    "production_rate": {
+      "crops_per_min": 22
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 2,
+      "level_10": 3.2
+    },
+    "maintenance_cost_per_hour": 632,
+    "overclockable": true,
+    "overclock_effects": {
+      "speed_multiplier": 1.9,
+      "wear_rate_multiplier": 2.8
+    },
+    "description": "Converts raw crops into high-value goods. Tier 4 technology. Supports dangerous overclocking.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 30,
+        "cost_formula": "base_cost * (1.500 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 30,
+        "cost_formula": "base_cost * (1.440 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 30,
+        "cost_formula": "base_cost * (1.380 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 3,
+    "compatible_modules": [
+      "purity_filter",
+      "overclock_chip"
+    ],
+    "cosmetic_skins": [
+      "skin_processor_steampunk",
+      "skin_processor_rusty"
+    ]
+  },
+  {
+    "machine_id": "mach_dron_4_00",
+    "name": "Aero-Sync Mk 4",
+    "category": "drone",
+    "tier": 4,
+    "base_cost": 32000,
+    "production_rate": {
+      "crops_per_min": 9
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.9,
+      "level_10": 3.2
+    },
+    "maintenance_cost_per_hour": 612,
+    "overclockable": true,
+    "overclock_effects": {
+      "speed_multiplier": 1.9,
+      "wear_rate_multiplier": 3.3
+    },
+    "description": "Autonomous aerial farm maintenance. Tier 4 technology. Supports dangerous overclocking.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 30,
+        "cost_formula": "base_cost * (1.500 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 30,
+        "cost_formula": "base_cost * (1.440 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 30,
+        "cost_formula": "base_cost * (1.380 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 3,
+    "compatible_modules": [
+      "ai_pathfinder",
+      "aero_battery",
+      "cargo_net"
+    ],
+    "cosmetic_skins": [
+      "skin_drone_holo",
+      "skin_drone_rusty",
+      "skin_drone_steampunk"
+    ]
+  },
+  {
+    "machine_id": "mach_dron_4_01",
+    "name": "Swift-Tech 4000",
+    "category": "drone",
+    "tier": 4,
+    "base_cost": 11000,
+    "production_rate": {
+      "crops_per_min": 10
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.5,
+      "level_10": 2
+    },
+    "maintenance_cost_per_hour": 265,
+    "overclockable": false,
+    "description": "Autonomous aerial farm maintenance. Tier 4 technology. Stable design, cannot be overclocked.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 30,
+        "cost_formula": "base_cost * (1.500 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 30,
+        "cost_formula": "base_cost * (1.440 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 30,
+        "cost_formula": "base_cost * (1.380 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 3,
+    "compatible_modules": [
+      "ai_pathfinder",
+      "cargo_net",
+      "aero_battery"
+    ],
+    "cosmetic_skins": [
+      "skin_drone_holo"
+    ]
+  },
+  {
+    "machine_id": "mach_dron_4_02",
+    "name": "Opti-Matic 4000",
+    "category": "drone",
+    "tier": 4,
+    "base_cost": 43000,
+    "production_rate": {
+      "crops_per_min": 9
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.9,
+      "level_10": 2.6
+    },
+    "maintenance_cost_per_hour": 657,
+    "overclockable": false,
+    "description": "Autonomous aerial farm maintenance. Tier 4 technology. Stable design, cannot be overclocked.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 30,
+        "cost_formula": "base_cost * (1.500 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 30,
+        "cost_formula": "base_cost * (1.440 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 30,
+        "cost_formula": "base_cost * (1.380 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 3,
+    "compatible_modules": [
+      "cargo_net",
+      "aero_battery"
+    ],
+    "cosmetic_skins": [
+      "skin_drone_steampunk",
+      "skin_drone_neon"
+    ]
+  },
+  {
+    "machine_id": "mach_dron_4_03",
+    "name": "Sky-Sync X4",
+    "category": "drone",
+    "tier": 4,
+    "base_cost": 41000,
+    "production_rate": {
+      "crops_per_min": 12
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.6,
+      "level_10": 2.4
+    },
+    "maintenance_cost_per_hour": 529,
+    "overclockable": true,
+    "overclock_effects": {
+      "speed_multiplier": 1.3,
+      "wear_rate_multiplier": 2.1
+    },
+    "description": "Autonomous aerial farm maintenance. Tier 4 technology. Supports dangerous overclocking.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 30,
+        "cost_formula": "base_cost * (1.500 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 30,
+        "cost_formula": "base_cost * (1.440 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 30,
+        "cost_formula": "base_cost * (1.380 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 3,
+    "compatible_modules": [
+      "ai_pathfinder",
+      "cargo_net",
+      "aero_battery"
+    ],
+    "cosmetic_skins": [
+      "skin_drone_rusty",
+      "skin_drone_gold"
+    ]
+  },
+  {
+    "machine_id": "mach_dron_4_04",
+    "name": "Sky-Tech v4.0",
+    "category": "drone",
+    "tier": 4,
+    "base_cost": 20000,
+    "production_rate": {
+      "crops_per_min": 14
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.8,
+      "level_10": 2.5
+    },
+    "maintenance_cost_per_hour": 566,
+    "overclockable": false,
+    "description": "Autonomous aerial farm maintenance. Tier 4 technology. Stable design, cannot be overclocked.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 30,
+        "cost_formula": "base_cost * (1.500 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 30,
+        "cost_formula": "base_cost * (1.440 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 30,
+        "cost_formula": "base_cost * (1.380 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 3,
+    "compatible_modules": [
+      "aero_battery",
+      "ai_pathfinder"
+    ],
+    "cosmetic_skins": [
+      "skin_drone_steampunk"
+    ]
+  },
+  {
+    "machine_id": "mach_dron_5_05",
+    "name": "Aero-Sync 5000",
+    "category": "drone",
+    "tier": 5,
+    "base_cost": 100000,
+    "production_rate": {
+      "crops_per_min": 28
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.4,
+      "level_10": 2.2
+    },
+    "maintenance_cost_per_hour": 1778,
+    "overclockable": false,
+    "description": "Autonomous aerial farm maintenance. Tier 5 technology. Stable design, cannot be overclocked.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 35,
+        "cost_formula": "base_cost * (1.563 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 35,
+        "cost_formula": "base_cost * (1.500 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 35,
+        "cost_formula": "base_cost * (1.438 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 3,
+    "compatible_modules": [
+      "aero_battery",
+      "cargo_net",
+      "ai_pathfinder"
+    ],
+    "cosmetic_skins": [
+      "skin_drone_holo",
+      "skin_drone_neon"
+    ]
+  },
+  {
+    "machine_id": "mach_dron_5_06",
+    "name": "Sky-Tron 500",
+    "category": "drone",
+    "tier": 5,
+    "base_cost": 200000,
+    "production_rate": {
+      "crops_per_min": 29
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.7,
+      "level_10": 2.3
+    },
+    "maintenance_cost_per_hour": 5040,
+    "overclockable": true,
+    "overclock_effects": {
+      "speed_multiplier": 2,
+      "wear_rate_multiplier": 3.4
+    },
+    "description": "Autonomous aerial farm maintenance. Tier 5 technology. Supports dangerous overclocking.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 35,
+        "cost_formula": "base_cost * (1.563 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 35,
+        "cost_formula": "base_cost * (1.500 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 35,
+        "cost_formula": "base_cost * (1.438 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 3,
+    "compatible_modules": [
+      "aero_battery",
+      "ai_pathfinder"
+    ],
+    "cosmetic_skins": [
+      "skin_drone_gold",
+      "skin_drone_steampunk",
+      "skin_drone_holo"
+    ]
+  },
+  {
+    "machine_id": "mach_dron_5_07",
+    "name": "Sky-Tron Mk 5",
+    "category": "drone",
+    "tier": 5,
+    "base_cost": 330000,
+    "production_rate": {
+      "crops_per_min": 23
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.5,
+      "level_10": 2.5
+    },
+    "maintenance_cost_per_hour": 7237,
+    "overclockable": false,
+    "description": "Autonomous aerial farm maintenance. Tier 5 technology. Stable design, cannot be overclocked.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 35,
+        "cost_formula": "base_cost * (1.563 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 35,
+        "cost_formula": "base_cost * (1.500 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 35,
+        "cost_formula": "base_cost * (1.438 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 3,
+    "compatible_modules": [
+      "cargo_net"
+    ],
+    "cosmetic_skins": [
+      "skin_drone_rusty",
+      "skin_drone_steampunk"
+    ]
+  },
+  {
+    "machine_id": "mach_dron_5_08",
+    "name": "Aero-Forge Pro",
+    "category": "drone",
+    "tier": 5,
+    "base_cost": 360000,
+    "production_rate": {
+      "crops_per_min": 28
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.8,
+      "level_10": 2.6
+    },
+    "maintenance_cost_per_hour": 4296,
+    "overclockable": true,
+    "overclock_effects": {
+      "speed_multiplier": 1.5,
+      "wear_rate_multiplier": 2.2
+    },
+    "description": "Autonomous aerial farm maintenance. Tier 5 technology. Supports dangerous overclocking.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 35,
+        "cost_formula": "base_cost * (1.563 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 35,
+        "cost_formula": "base_cost * (1.500 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 35,
+        "cost_formula": "base_cost * (1.438 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 3,
+    "compatible_modules": [
+      "cargo_net",
+      "aero_battery",
+      "ai_pathfinder"
+    ],
+    "cosmetic_skins": [
+      "skin_drone_neon",
+      "skin_drone_holo"
+    ]
+  },
+  {
+    "machine_id": "mach_dron_5_09",
+    "name": "Swift-Max v5.0",
+    "category": "drone",
+    "tier": 5,
+    "base_cost": 460000,
+    "production_rate": {
+      "crops_per_min": 28
+    },
+    "efficiency_curve": {
+      "level_1": 1,
+      "level_5": 1.7,
+      "level_10": 2.6
+    },
+    "maintenance_cost_per_hour": 5319,
+    "overclockable": false,
+    "description": "Autonomous aerial farm maintenance. Tier 5 technology. Stable design, cannot be overclocked.",
+    "upgrades": [
+      {
+        "branch": "speed",
+        "levels": 35,
+        "cost_formula": "base_cost * (1.563 ^ level)",
+        "effect_per_level": "+{val}% Production Speed",
+        "max_effect_val": 100
+      },
+      {
+        "branch": "yield",
+        "levels": 35,
+        "cost_formula": "base_cost * (1.500 ^ level)",
+        "effect_per_level": "+{val}% Output Yield",
+        "max_effect_val": 50
+      },
+      {
+        "branch": "durability",
+        "levels": 35,
+        "cost_formula": "base_cost * (1.438 ^ level)",
+        "effect_per_level": "-{val}% Wear Rate",
+        "max_effect_val": 75
+      }
+    ],
+    "module_slots": 3,
+    "compatible_modules": [
+      "cargo_net",
+      "ai_pathfinder"
+    ],
+    "cosmetic_skins": [
+      "skin_drone_neon",
+      "skin_drone_gold",
+      "skin_drone_holo"
+    ]
+  }
+]

@@ -1,0 +1,257 @@
+{
+  "_meta": {
+    "schema_version": "1.0.2",
+    "game": "AgriEmpire",
+    "issued_by": "SimulationQA_AI",
+    "timestamp": "2026-03-15T09:55:00Z",
+    "notes": "Master machine-readable configuration for all tunables. Every field marked with 'tunable' must follow the safe_range contract before shipping. Changes require a ParameterPatch record in /patches/."
+  },
+
+  "economy": {
+    "_comment": "Core revenue and cost scaling formulas",
+
+    "revenue_formula": {
+      "expression": "crop_value * yield * farm_multiplier * machine_multiplier",
+      "tunables": [
+        {
+          "knob": "base_crop_value_scalar",
+          "current": 1.0,
+          "safe_range": [0.5, 3.0],
+          "provenance": "Stardew Valley baseline — 5c for Wheat maps to ~1min active time. Scalar lets live-ops adjust without rewriting crop table.",
+          "notes": "Values >3.0 cause prestige to unlock in <10min, breaking retention loop."
+        },
+        {
+          "knob": "farm_multiplier_cap",
+          "current": 10.0,
+          "safe_range": [5.0, 50.0],
+          "provenance": "Cookie Clicker research: building multipliers plateau around 50x before players feel diminishing returns.",
+          "notes": "Hard cap prevents hyperinflation past the T5 machine era."
+        },
+        {
+          "knob": "machine_multiplier_per_unit",
+          "current": 0.08,
+          "safe_range": [0.05, 0.25],
+          "provenance": "0.08 chosen after sim v1.0.2 to slightly boost early-game CPS scalar.",
+          "notes": "Values >0.25 make first Auto Harvester feel like a mandatory purchase, hurting early retention."
+        }
+      ]
+    },
+
+    "upgrade_cost_scaling": {
+      "expression": "baseCost * (scale_factor ^ level)",
+      "tunables": [
+        {
+          "knob": "scale_factor",
+          "current": 1.15,
+          "safe_range": [1.08, 1.35],
+          "provenance": "1.15 is the idle-game industry standard (AdVenture Capitalist, Realm Grinder). Below 1.08 players max all upgrades too fast; above 1.35 creates a 'wall' around level 5.",
+          "notes": "Test in sim at 1.10, 1.15, 1.25 before changing."
+        },
+        {
+          "knob": "base_cost_by_category",
+          "current": { "farming": 100, "automation": 300, "economy": 200, "prestige": 1000 },
+          "safe_range": { "min_ratio_automation_to_farming": 2.0, "max_ratio": 15.0 },
+          "provenance": "Automation must feel premium vs farming but not gated until 30min in.",
+          "notes": "Ratio farming:automation should stay near 1:3 for pacing."
+        },
+        {
+          "knob": "max_purchasable_level",
+          "current": 10,
+          "safe_range": [5, 20],
+          "provenance": "10 levels keeps ARPU curve smooth over a 20h session. More levels push monetization pressure.",
+          "notes": "If you extend to 20, recalibrate base costs downward by ~30%."
+        }
+      ]
+    },
+
+    "machine_cost_scaling": {
+      "expression": "baseCost * (1.18 ^ tier)",
+      "tunables": [
+        {
+          "knob": "tier_exponent",
+          "current": 1.18,
+          "safe_range": [1.10, 1.30],
+          "provenance": "1.18 from Idle Miner Tycoon mine-shaft cost progression. Targets 10x cost between T1 and T5.",
+          "notes": "At 1.10 all tiers feel cheap; at 1.30 T4+ machines are gated behind prestige which breaks Roblox-flow."
+        },
+        {
+          "knob": "production_rate_per_tier_multiplier",
+          "current": 2.0,
+          "safe_range": [1.5, 4.0],
+          "provenance": "Each tier should double base CPS contribution for clear power fantasy.",
+          "notes": "Never let T5 be >100x T1 or economy inflates past prestige formula ceiling."
+        },
+        {
+          "knob": "machine_unlock_coin_threshold_scalar",
+          "current": 1.0,
+          "safe_range": [0.5, 2.0],
+          "provenance": "Unlock thresholds set relative to expected coins at each progression stage. Sim validates.",
+          "notes": "Reduce to 0.7 during new-player campaign; revert after 30 days."
+        }
+      ]
+    },
+
+    "automation_bonus": {
+      "expression": "1 + (automation_level * automation_slope)",
+      "tunables": [
+        {
+          "knob": "automation_slope",
+          "current": 0.12,
+          "safe_range": [0.05, 0.20],
+          "provenance": "0.12 means 10-level automation = 2.2x income — matches Factorio belt-chain satisfaction target.",
+          "notes": "Values >0.20 make idle income too dominant; players stop actively playing."
+        },
+        {
+          "knob": "auto_harvest_trigger_threshold",
+          "current": 4,
+          "safe_range": [1, 10],
+          "provenance": "Lowered from 6 to 4 after SimulationQA reported p50 automation took 72min. Goal is 40min.",
+          "notes": "Setting to 1 makes the game fully idle immediately. Setting to 10 gates it behind mid-game."
+        },
+        {
+          "knob": "idle_income_cap_ratio",
+          "current": 0.8,
+          "safe_range": [0.5, 0.95],
+          "provenance": "Max 80% of income should come from idle sources. Preserves active play loop.",
+          "notes": "Above 0.95 players close the tab and return hours later, destroying session length metrics."
+        }
+      ]
+    },
+
+    "prestige_formula": {
+      "expression": "sqrt(lifetime_coins / prestige_divisor)",
+      "tunables": [
+        {
+          "knob": "prestige_divisor",
+          "current": 8000000,
+          "safe_range": [500000, 10000000],
+          "provenance": "Raised to 8M after SimulationQA showed Casual players rushing prestige 96% of the time. 8M forces longer sessions before reset.",
+          "notes": "Lowering to 500k speeds prestige but may cause players to reset before experiencing industrial farming."
+        },
+        {
+          "knob": "permanent_bonus_slope_machine_eff",
+          "current": 0.02,
+          "safe_range": [0.005, 0.05],
+          "provenance": "0.02 → 10 prestiges = 20% machine efficiency bonus. Keeps prestige feeling meaningful without trivialing content.",
+          "notes": "Cap enforced separately at 50%; changing slope without adjusting cap can break high-prestige runs."
+        },
+        {
+          "knob": "prestige_point_gem_ratio",
+          "current": 1.0,
+          "safe_range": [0.5, 5.0],
+          "provenance": "1 prestige point = 1 gem. Gems are cosmetic-only currency. Ratio controls gem inflation.",
+          "notes": "Do NOT lower below 0.5 — gems buy QOL items only (not power); this is our P2W firewall."
+        }
+      ]
+    }
+  },
+
+  "weather": {
+    "_comment": "Dynamic weather events affecting crop growth and yields",
+    "events": [
+      {
+        "id": "sunny",
+        "weight": 40,
+        "duration_seconds": 120,
+        "growth_speed_mod": 1.0,
+        "yield_mod": 1.0,
+        "loc_key": "weather.sunny",
+        "default_en": "Clear skies. Normal conditions.",
+        "tunable_weight_safe_range": [20, 60],
+        "notes": "Baseline state. Weight should remain dominant to avoid 'every event is special' fatigue."
+      },
+      {
+        "id": "rainstorm",
+        "weight": 20,
+        "duration_seconds": 60,
+        "growth_speed_mod": 2.0,
+        "yield_mod": 1.0,
+        "loc_key": "weather.rainstorm",
+        "default_en": "Rainstorm! Crop growth speed 2× for 60s.",
+        "tunable_weight_safe_range": [10, 35],
+        "tunable_growth_speed_mod_safe_range": [1.5, 3.0],
+        "notes": "growth_speed_mod=3.0 causes visual overlap of multiple harvests in one tick — test in sim."
+      },
+      {
+        "id": "drought",
+        "weight": 15,
+        "duration_seconds": 90,
+        "growth_speed_mod": 0.5,
+        "yield_mod": 0.5,
+        "loc_key": "weather.drought",
+        "default_en": "Drought! Yields halved for 90s.",
+        "tunable_weight_safe_range": [5, 25],
+        "tunable_yield_mod_safe_range": [0.3, 0.7],
+        "notes": "Never drop yield_mod below 0.3 — playtesters report frustration that breaks session at that level."
+      },
+      {
+        "id": "fertile",
+        "weight": 15,
+        "duration_seconds": 120,
+        "growth_speed_mod": 1.0,
+        "yield_mod": 1.5,
+        "loc_key": "weather.fertile",
+        "default_en": "Fertile Season! All yields +50% for 120s.",
+        "tunable_weight_safe_range": [5, 25],
+        "tunable_yield_mod_safe_range": [1.2, 2.5],
+        "notes": "This is a positive event — weight should be lower than sunny to preserve perceived rarity."
+      },
+      {
+        "id": "pest",
+        "weight": 10,
+        "duration_seconds": 30,
+        "growth_speed_mod": 1.0,
+        "yield_mod": 0.3,
+        "loc_key": "weather.pest",
+        "default_en": "Pest Attack! Crop yield severely reduced for 30s.",
+        "tunable_weight_safe_range": [3, 15],
+        "tunable_yield_mod_safe_range": [0.1, 0.6],
+        "notes": "Short duration is intentional — punishing but recoverable. Weight >15 creates hostile game feel."
+      }
+    ]
+  },
+
+  "workers": {
+    "bonus_formula": {
+      "expression": "base_bonus + (level * level_bonus_per_step)",
+      "tunables": [
+        {
+          "knob": "level_bonus_per_step",
+          "current": 0.05,
+          "safe_range": [0.02, 0.15],
+          "provenance": "0.05 per level → max level 10 worker provides +50% bonus. Mirrors RPG stat curves.",
+          "notes": "Values >0.15 make worker leveling feel better than building machines — breaks machine economy."
+        },
+        {
+          "knob": "level_up_cost_exponent",
+          "current": 1.5,
+          "safe_range": [1.2, 2.5],
+          "provenance": "Exponential level-up cost prevents workers from being a coin sink with infinite returns.",
+          "notes": "At 2.5, leveling past Lv5 becomes prohibitively expensive for mid-game; cap at Lv10 in that case."
+        },
+        {
+          "knob": "hire_cost_to_base_bonus_ratio",
+          "current": 2000,
+          "safe_range": [500, 10000],
+          "provenance": "hire_cost / base_bonus should be ~2000 coins per 1% bonus. Comparable to Upgrade IV purchase.",
+          "notes": "If ratio <500, workers outvalue upgrades entirely. Rebalance both in tandem."
+        }
+      ]
+    }
+  },
+
+  "processing_chains": {
+    "value_multiplier_per_stage": {
+      "current": 2.3,
+      "safe_range": [1.5, 4.0],
+      "provenance": "2.3x from Factorio beacon math: each productive module costs ~40s of throughput delay for 2.3x output. Justified by processing machine cost.",
+      "notes": "Values >4.0 make processed goods so valuable that raw crop selling becomes obsolete entirely."
+    },
+    "max_stages": {
+      "current": 4,
+      "safe_range": [2, 6],
+      "provenance": "4 stages (raw → processed → refined → luxury → export) mirrors manufacturing games. Beyond 6 becomes cognitively overwhelming for casual players.",
+      "notes": "Each stage needs a dedicated processing machine. Adding stages requires adding machines first."
+    }
+  }
+}

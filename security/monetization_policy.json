@@ -1,0 +1,148 @@
+{
+  "schema": "agriempire-monetization-policy/v1",
+  "issued_by": "antigravity",
+  "timestamp": "2026-03-15T08:23:07Z",
+  "notes": "Security & fairness policy per Standard S7. This document is the authoritative definition of what gem purchases are allowed. Any GemShop feature not listed in 'allowed' is forbidden by default.",
+  "loc_key": "std.S7.description",
+  "default_en": "No pay-to-win. Gems are for cosmetics and convenience only.",
+
+  "currency_design": {
+    "gems": {
+      "description": "Premium soft currency earned through prestige (1 gem per prestige point) or optionally purchased. Gems purchase quality-of-life and aesthetic items ONLY.",
+      "earn_free": true,
+      "earn_rate_free": "~5 gems per prestige (first prestige at 20h)",
+      "purchase_option": true,
+      "purchase_note": "Optional direct purchase purely cosmetic — no gameplay advantage",
+      "p2w_firewall_audit": "Automated CI scan for patterns: coins += gem, yield *= gem, prestige_points += gem"
+    },
+    "coins": {
+      "description": "Primary gameplay currency. Earned through harvesting, machine production, and worker bonuses. Never sold directly.",
+      "purchasable": false,
+      "notes": "Allowing direct coin purchase would constitute pay-to-win equivalent to the Clash of Clans resource purchase pattern — FORBIDDEN."
+    }
+  },
+
+  "allowed_gem_purchases": [
+    {
+      "id": "farm_skin_meadow",
+      "name": "Meadow Dream Skin",
+      "cost_gems": 5,
+      "effect": "Cosmetic: replaces plot background with animated flower field",
+      "gameplay_impact": "none",
+      "loc_key": "shop.skin.meadow_dream",
+      "default_en": "Meadow Dream Skin — purely cosmetic"
+    },
+    {
+      "id": "extra_save_slot",
+      "name": "Extra Save Slot",
+      "cost_gems": 3,
+      "effect": "Adds one additional save file (QoL: family sharing, alt runs)",
+      "gameplay_impact": "none — same rules apply per-save",
+      "loc_key": "shop.qol.extra_save",
+      "default_en": "Extra Save Slot — play a second run"
+    },
+    {
+      "id": "offline_income_extension",
+      "name": "Extended Offline Income",
+      "cost_gems": 2,
+      "effect": "Extends offline income collection from 4h to 8h max",
+      "gameplay_impact": "convenience: 4h extra idle cap. Free players collect up to 4h, gem users up to 8h.",
+      "p2w_risk": "LOW — time advantage is bounded (8h cap). Free players can still match by playing more often.",
+      "balance_note": "The 8h max must be enforced. If removed, 24h offline cap gives gem users 6x daily income advantage — that IS pay-to-win.",
+      "loc_key": "shop.qol.offline_income",
+      "default_en": "Extended Offline Income — collect up to 8 hours while away"
+    },
+    {
+      "id": "expanded_crop_grid",
+      "name": "Expanded Crop Browser",
+      "cost_gems": 2,
+      "effect": "Expands crop selection grid from 2-col to 3-col for easier browsing",
+      "gameplay_impact": "none — all crops visible to free players, just fewer per scroll",
+      "loc_key": "shop.qol.crop_grid",
+      "default_en": "Expanded Crop Browser — see more crops at once"
+    },
+    {
+      "id": "farm_name_plate",
+      "name": "Custom Farm Name",
+      "cost_gems": 1,
+      "effect": "Allows player to name their farm (displayed on stats bar)",
+      "gameplay_impact": "none",
+      "loc_key": "shop.cosmetic.farm_name",
+      "default_en": "Name your farm — pure expression"
+    },
+    {
+      "id": "weather_forecast",
+      "name": "Weather Forecast",
+      "cost_gems": 4,
+      "effect": "Shows next 3 weather events in event feed before they occur",
+      "gameplay_impact": "information advantage — allows timing of planting for fertile seasons",
+      "p2w_risk": "LOW — information, not power. Free players can still react to weather as it happens. Gem users plan ahead but the same crops and yields are available.",
+      "balance_note": "Must NOT provide a yield multiplier or coin bonus — only visibility.",
+      "loc_key": "shop.qol.weather_forecast",
+      "default_en": "Weather Forecast — see what's coming next"
+    },
+    {
+      "id": "event_feed_archive",
+      "name": "Event Feed Archive",
+      "cost_gems": 2,
+      "effect": "Expands event feed scroll history from 20 to 100 events",
+      "gameplay_impact": "none",
+      "loc_key": "shop.qol.event_archive",
+      "default_en": "Extended event history — never miss what happened"
+    }
+  ],
+
+  "forbidden_gem_purchases": [
+    {
+      "id": "direct_coins",
+      "reason": "Direct coins purchase is pay-to-win equivalent. Violates S7.",
+      "alternative": "Players earn coins through gameplay. Gem → coin conversion is forbidden at any ratio."
+    },
+    {
+      "id": "coin_multiplier",
+      "reason": "A gem-purchased multiplier on coin income gives paying players indefinitely compounding advantage.",
+      "alternative": "Prestige bonuses (earned, not purchased) provide permanent multipliers to all players equally."
+    },
+    {
+      "id": "yield_booster",
+      "reason": "Crop yield beyond what prestige earns must remain equal for all players.",
+      "alternative": "Skill tree nodes provide yield boosts to all players who invest coins."
+    },
+    {
+      "id": "prestige_point_purchase",
+      "reason": "Prestige points directly scale permanent bonuses. Selling them means paying players gain permanent power.",
+      "alternative": "More prestigious farm display badges (cosmetic) allowed."
+    },
+    {
+      "id": "exclusive_machines",
+      "reason": "Machines that are gem-exclusive and not earnable by free players create a power ceiling only paying players can reach.",
+      "alternative": "Cosmetic machine skins (same stats, different appearance) are allowed."
+    },
+    {
+      "id": "growth_timer_skip",
+      "reason": "Unlimited growth-time reduction is equivalent to infinite free coins per hour.",
+      "alternative": "The offline income extension (8h cap) provides pacing convenience without power."
+    }
+  ],
+
+  "monetization_alternatives_to_p2w": [
+    {
+      "pattern": "Battle Pass / Season Pass",
+      "description": "Timed cosmetic tracks: each agricultural season (30 days) offers a track of farm skins, name plates, and harvest animations. Free track includes 3 cosmetics; paid track includes 15.",
+      "revenue_model": "Flat purchase, ~$4.99/season",
+      "p2w_risk": "none — all items cosmetic"
+    },
+    {
+      "pattern": "Creator / Supporter Badge",
+      "description": "One-time purchase badge that displays on the farm stats bar. No gameplay bonus.",
+      "revenue_model": "$2.99 one-time",
+      "p2w_risk": "none"
+    },
+    {
+      "pattern": "Cosmetic Machine Skins",
+      "description": "Gem-purchased visual alternatives for machines (golden tractor, neon harvester, etc.) with identical production stats.",
+      "revenue_model": "2-5 gems per skin",
+      "p2w_risk": "none — same numbers, different looks"
+    }
+  ]
+}

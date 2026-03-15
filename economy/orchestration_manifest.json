@@ -1,0 +1,69 @@
+{
+  "version": "1.0.0",
+  "timestamp": "2026-03-15T10:25:54.814Z",
+  "pipeline": [
+    {
+      "step": "generate_crops",
+      "cmd": "npx tsx economy/generate_crops.ts",
+      "artifact": "crop_catalog.json"
+    },
+    {
+      "step": "generate_machines",
+      "cmd": "npx tsx economy/generate_machines.ts",
+      "artifact": "machine_catalog.json"
+    },
+    {
+      "step": "generate_upgrades",
+      "cmd": "npx tsx economy/generate_machine_upgrades.ts",
+      "artifact": "augmented_machines.json"
+    },
+    {
+      "step": "generate_progression",
+      "cmd": "npx tsx economy/generate_progression.ts",
+      "artifact": "progression_model.json"
+    },
+    {
+      "step": "generate_world",
+      "cmd": "npx tsx economy/generate_workers_regions.ts",
+      "artifact": "workers.json"
+    },
+    {
+      "step": "generate_narrative",
+      "cmd": "npx tsx economy/generate_content.ts",
+      "artifact": "narrative_content.json"
+    },
+    {
+      "step": "run_roi_validation",
+      "cmd": "npx tsx simulation/machine_roi_sim.ts",
+      "artifact": "stdout"
+    },
+    {
+      "step": "run_pacing_validation",
+      "cmd": "npx tsx simulation/progression_sim.ts",
+      "artifact": "stdout"
+    },
+    {
+      "step": "run_simulation_qa",
+      "cmd": "npx tsx simulation/qa_runner.ts --sessions 1000",
+      "artifact": "sim_report"
+    }
+  ],
+  "api_contracts": [
+    {
+      "name": "EconomyAPI",
+      "endpoint": "static/economy_model.json",
+      "schema": "Ref(game_config)"
+    },
+    {
+      "name": "AutomationAPI",
+      "endpoint": "static/automation_api.json",
+      "schema": "Ref(AutomationSystem)"
+    },
+    {
+      "name": "LiveOpsAPI",
+      "endpoint": "static/live_ops_rules.json",
+      "schema": "Ref(LiveOpsGatekeeper)"
+    }
+  ],
+  "status": "SUCCESS"
+}

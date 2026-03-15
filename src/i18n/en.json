@@ -1,0 +1,204 @@
+{
+  "_meta": {
+    "schema": "agriempire-i18n/en/v1",
+    "locale": "en",
+    "issued_by": "antigravity",
+    "timestamp": "2026-03-15T08:23:07Z",
+    "notes": "Default English localization strings for AgriEmpire. All player-facing text must have a loc_key referencing this file. Format: { loc_key: default_en_string }. Keys follow the pattern: {domain}.{subdomain}.{identifier}"
+  },
+
+  "ui": {
+    "stats_bar": {
+      "coins":          "💰 Coins",
+      "cps":            "⚡ /sec",
+      "gems":           "💎 Gems",
+      "land":           "🏞️ Land (acres)",
+      "machines":       "⚙️ Machines",
+      "workers":        "👷 Workers",
+      "weather":        "🌤️ Weather",
+      "time_played":    "⏱️ Time"
+    },
+    "sidebar": {
+      "farm":           "🌾 Farm",
+      "machines":       "⚙️ Machines",
+      "workers":        "👷 Workers",
+      "skills":         "🧠 Skills",
+      "upgrades":       "📈 Upgrades",
+      "market":         "🛒 Market",
+      "regions":        "🗺️ Regions",
+      "prestige":       "⭐ Prestige",
+      "achievements":   "🏆 Achievements"
+    },
+    "buttons": {
+      "plant":          "🌱 Plant",
+      "harvest":        "✂️ Harvest",
+      "harvest_all":    "⚡ Harvest All",
+      "build":          "🔨 Build",
+      "hire":           "👷 Hire",
+      "level_up":       "↑ Level Up",
+      "unlock":         "🔓 Unlock",
+      "buy":            "💰 Buy",
+      "prestige":       "🌟 Trigger Agricultural Revolution",
+      "locked":         "🔒 Locked"
+    },
+    "labels": {
+      "ready":          "✅ READY",
+      "growing":        "🌱 Growing",
+      "owned":          "✅ OWNED",
+      "need_coins":     "Need {amount} 💰",
+      "remaining":      "{time}s remaining",
+      "avg_level":      "Avg Lv {level}",
+      "bonus":          "Bonus: +{pct}%"
+    },
+    "placeholders": {
+      "empty_plots":    "No crops growing. Go plant something!",
+      "no_events":      "No events yet...",
+      "no_machines":    "No machines owned yet. Build your first machine!",
+      "no_workers":     "No workers hired yet."
+    }
+  },
+
+  "panels": {
+    "farm": {
+      "title":              "🌾 Farm Overview",
+      "plots_tab":          "📋 Growing Plots",
+      "plant_tab":          "🌱 Plant Crops",
+      "plots_count":        "Plots: {used}/{total}",
+      "filter_all":         "All Regions",
+      "filter_rarity":      "All Rarities",
+      "harvest_value":      "+{value} 💰"
+    },
+    "machines": {
+      "title":              "⚙️ Machine Workshop",
+      "owned_header":       "🔧 Owned Machines",
+      "production_rate":    "Production: {rate}/s",
+      "tier_label":         "Tier {n}",
+      "automation_level":   "Automation Lv {n}"
+    },
+    "workers": {
+      "title":              "👷 Workforce",
+      "total_employees":    "Total employees: {n}",
+      "level_note":         "Workers level up for greater bonuses",
+      "active_header":      "Active Workforce",
+      "level_up_prefix":    "↑ Cost: {cost}"
+    },
+    "skills": {
+      "title":              "🧠 Skill Trees",
+      "unlocked_count":     "Unlocked: {n}/{total}",
+      "trees": {
+        "farming":          "🌱 Farming",
+        "automation":       "🤖 Automation",
+        "economy":          "📈 Economy"
+      },
+      "requires":           "🔒 Requires: {name}",
+      "effect_label":       "Effect: +{pct}% {effect}"
+    },
+    "upgrades": {
+      "title":              "📈 Upgrades",
+      "purchased_count":    "{n}/{total} purchased",
+      "subtitle":           "Permanent bonuses to your empire",
+      "effect_label":       "Effect: +{pct}% {effect}",
+      "buy_label":          "⬆️ Buy — {cost} 💰"
+    },
+    "market": {
+      "title":              "🛒 Global Market",
+      "revenue_sec":        "Revenue/sec",
+      "lifetime":           "Lifetime Earnings",
+      "price_mod":          "Price Modifier",
+      "chains_header":      "⛓️ Processing Chains (×{mult} per stage)",
+      "prices_header":      "📋 Current Crop Prices",
+      "col_crop":           "Crop",
+      "col_base":           "Base",
+      "col_current":        "Current",
+      "col_yield":          "Yield",
+      "col_revenue":        "Revenue"
+    },
+    "regions": {
+      "title":              "🗺️ Farm Regions",
+      "land_owned":         "Land owned: {n} acres",
+      "unlocked_count":     "Regions unlocked: {n}/{total}",
+      "soil_label":         "Soil: {type}",
+      "weather_mult":       "Weather: ×{n}",
+      "crop_mult":          "Crop Mult: ×{n}",
+      "new_plots":          "+4 new plots",
+      "unlock_label":       "🗺️ Unlock — {cost} 💰",
+      "starting_region":    "✅ Starting Region"
+    },
+    "prestige": {
+      "title":              "⭐ Agricultural Revolution",
+      "subtitle":           "Reset your empire for permanent bonuses",
+      "prestige_count":     "Prestige count: {n}",
+      "bonuses_header":     "⭐ Prestige Bonuses Active",
+      "machine_eff":        "Machine Efficiency",
+      "crop_speed":         "Crop Speed",
+      "rare_chance":        "Rare Crop Chance",
+      "all_income":         "All Income",
+      "revolution_title":   "Agricultural Revolution",
+      "revolution_desc":    "Reset all coins, machines, workers, crops, and upgrades. Keep prestige bonuses and gems earned.",
+      "lifetime_coins":     "Total Lifetime Coins",
+      "preview_pts":        "Prestige Points Preview",
+      "total_after":        "Total Points After",
+      "required":           "Required",
+      "progress_label":     "Progress to Prestige",
+      "trigger_button":     "🌟 TRIGGER AGRICULTURAL REVOLUTION",
+      "needs_coins":        "🔒 Need {amount} lifetime coins",
+      "formula_header":     "📐 Prestige Formula",
+      "formula_points":     "Points = √(lifetime_coins / {divisor})"
+    },
+    "achievements": {
+      "title":              "🏆 Achievements",
+      "unlocked_count":     "{n}/{total} unlocked",
+      "filter_all":         "all",
+      "filter_unlocked":    "unlocked",
+      "filter_locked":      "locked",
+      "reward_label":       "🎁 Reward: {value} {type}",
+      "progress_label":     "{current} / {target} ({pct}%)"
+    }
+  },
+
+  "weather": {
+    "sunny":      "☀️ Clear skies. Normal conditions.",
+    "rainstorm":  "🌧️ Rainstorm! Crop growth speed 2× for 60s.",
+    "drought":    "🏜️ Drought! Yields halved for 90s.",
+    "fertile":    "🌿 Fertile Season! All yields +50% for 120s.",
+    "pest":       "🐛 Pest Attack! Crop yield severely reduced for 30s.",
+    "price_up":   "📈 Prices +50% (Fertile Season)!",
+    "price_down": "📉 Prices -20% (Drought)",
+    "price_warn": "⚠️ Market nervous (Pest Attack)",
+    "price_stable":"📊 Market stable"
+  },
+
+  "events": {
+    "welcome":       "Welcome to AgriEmpire! Plant your first crop.",
+    "harvested":     "Harvested {crop}! +{value} coins",
+    "built_machine": "Built {machine}! Production increased.",
+    "region_unlock": "✅ Unlocked {region}! +4 plots available.",
+    "achievement":   "Achievement: {name}!",
+    "prestige":      "🌟 Agricultural Revolution! +{pts} Prestige Points!"
+  },
+
+  "rarities": {
+    "common":    "Common",
+    "uncommon":  "Uncommon",
+    "rare":      "Rare",
+    "epic":      "Epic",
+    "legendary": "Legendary",
+    "mythic":    "Mythic"
+  },
+
+  "machine_categories": {
+    "farming":    "Farming",
+    "processing": "Processing",
+    "industrial": "Industrial"
+  },
+
+  "std": {
+    "S1": { "description": "All game config changes must ship as machine-readable JSON artifacts." },
+    "S2": { "description": "Every formula must document 3 tunable knobs with safe ranges." },
+    "S3": { "description": "No anonymous numeric constants. All must be named with provenance." },
+    "S4": { "description": "All balance changes must be validated by the Monte Carlo simulation first." },
+    "S5": { "description": "Every parameter patch must include rollback conditions and simulation evidence." },
+    "S6": { "description": "All player-facing text must use loc_keys from the i18n system." },
+    "S7": { "description": "No pay-to-win. Gems are for cosmetics and convenience only." }
+  }
+}

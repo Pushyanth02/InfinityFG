@@ -1,0 +1,110 @@
+[
+  {
+    "id": "region_01",
+    "name": "Green Meadows",
+    "unlock_cost": 1000,
+    "multiplier": 1,
+    "weather_affinity": "rain",
+    "description": "The Green Meadows, where the rain never seems to end. Productivity multiplier: 1x.",
+    "available_slots": 10
+  },
+  {
+    "id": "region_02",
+    "name": "Riverlands",
+    "unlock_cost": 10000,
+    "multiplier": 1.5,
+    "weather_affinity": "sun",
+    "description": "The Riverlands, where the sun never seems to end. Productivity multiplier: 1.5x.",
+    "available_slots": 15
+  },
+  {
+    "id": "region_03",
+    "name": "Sunny Plateau",
+    "unlock_cost": 100000,
+    "multiplier": 2,
+    "weather_affinity": "wind",
+    "description": "The Sunny Plateau, where the wind never seems to end. Productivity multiplier: 2x.",
+    "available_slots": 20
+  },
+  {
+    "id": "region_04",
+    "name": "Dusty Mesa",
+    "unlock_cost": 1000000,
+    "multiplier": 2.5,
+    "weather_affinity": "fog",
+    "description": "The Dusty Mesa, where the fog never seems to end. Productivity multiplier: 2.5x.",
+    "available_slots": 25
+  },
+  {
+    "id": "region_05",
+    "name": "Rainy Basin",
+    "unlock_cost": 10000000,
+    "multiplier": 3,
+    "weather_affinity": "snow",
+    "description": "The Rainy Basin, where the snow never seems to end. Productivity multiplier: 3x.",
+    "available_slots": 30
+  },
+  {
+    "id": "region_06",
+    "name": "Frost Peaks",
+    "unlock_cost": 100000000,
+    "multiplier": 3.5,
+    "weather_affinity": "rain",
+    "description": "The Frost Peaks, where the rain never seems to end. Productivity multiplier: 3.5x.",
+    "available_slots": 35
+  },
+  {
+    "id": "region_07",
+    "name": "Volcanic Ridge",
+    "unlock_cost": 1000000000,
+    "multiplier": 4,
+    "weather_affinity": "sun",
+    "description": "The Volcanic Ridge, where the sun never seems to end. Productivity multiplier: 4x.",
+    "available_slots": 40
+  },
+  {
+    "id": "region_08",
+    "name": "Crystal Valley",
+    "unlock_cost": 10000000000,
+    "multiplier": 4.5,
+    "weather_affinity": "wind",
+    "description": "The Crystal Valley, where the wind never seems to end. Productivity multiplier: 4.5x.",
+    "available_slots": 45
+  },
+  {
+    "id": "region_09",
+    "name": "Floating Isles",
+    "unlock_cost": 100000000000,
+    "multiplier": 5,
+    "weather_affinity": "fog",
+    "description": "The Floating Isles, where the fog never seems to end. Productivity multiplier: 5x.",
+    "available_slots": 50
+  },
+  {
+    "id": "region_10",
+    "name": "Lunar Crater",
+    "unlock_cost": 1000000000000,
+    "multiplier": 5.5,
+    "weather_affinity": "snow",
+    "description": "The Lunar Crater, where the snow never seems to end. Productivity multiplier: 5.5x.",
+    "available_slots": 55
+  },
+  {
+    "id": "region_11",
+    "name": "Neon Megalopolis",
+    "unlock_cost": 10000000000000,
+    "multiplier": 6,
+    "weather_affinity": "rain",
+    "description": "The Neon Megalopolis, where the rain never seems to end. Productivity multiplier: 6x.",
+    "available_slots": 60
+  },
+  {
+    "id": "region_12",
+    "name": "Agri-Prime Core",
+    "unlock_cost": 100000000000000,
+    "multiplier": 6.5,
+    "weather_affinity": "sun",
+    "description": "The Agri-Prime Core, where the sun never seems to end. Productivity multiplier: 6.5x.",
+    "available_slots": 65
+  }
+]

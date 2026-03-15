@@ -1,0 +1,120 @@
+{
+  "schema": "agriempire-sim-report/v1",
+  "issued_by": "antigravity",
+  "timestamp": "2026-03-15T09:16:33.852Z",
+  "config": {
+    "base_crop_value_scalar": 1,
+    "farm_multiplier_cap": 10,
+    "machine_multiplier_per_unit": 0.07,
+    "upgrade_scale_factor": 1.15,
+    "machine_tier_exponent": 1.18,
+    "automation_slope": 0.12,
+    "auto_harvest_trigger_threshold": 6,
+    "prestige_divisor": 5000000,
+    "processing_value_multiplier": 2.3,
+    "num_sessions": 1000,
+    "session_max_seconds": 72000,
+    "tick_seconds": 10,
+    "target_first_harvest_seconds": 60,
+    "target_first_automation_seconds": 1800,
+    "target_prestige_seconds": 72000,
+    "target_cps_at_1h": 50
+  },
+  "notes": "Monte Carlo balance simulation. Results validate pacing targets from engineering_standards.json S4.",
+  "summary": {
+    "total_sessions": 1000,
+    "sessions_reached_first_harvest": 1000,
+    "sessions_reached_automation": 1000,
+    "sessions_reached_prestige": 500
+  },
+  "pacing_validation": {
+    "first_harvest": {
+      "target_seconds": 60,
+      "actual_stats_seconds": {
+        "mean": 50,
+        "median": 50,
+        "p10": 50,
+        "p90": 50,
+        "stddev": 0
+      },
+      "target_minutes": 1,
+      "actual_mean_minutes": 0.8333333333333334,
+      "status": "PASS"
+    },
+    "first_automation": {
+      "target_seconds": 1800,
+      "actual_stats_seconds": {
+        "mean": 390,
+        "median": 380,
+        "p10": 380,
+        "p90": 420,
+        "stddev": 17
+      },
+      "target_minutes": 30,
+      "actual_mean_minutes": 6.5,
+      "status": "FAIL"
+    },
+    "prestige": {
+      "target_seconds": 72000,
+      "actual_stats_seconds": {
+        "mean": 7335,
+        "median": 7370,
+        "p10": 7300,
+        "p90": 7370,
+        "stddev": 35
+      },
+      "target_hours": 20,
+      "actual_mean_hours": 2.0375,
+      "status": "FAIL"
+    },
+    "cps_at_1h": {
+      "target": 50,
+      "actual_stats": {
+        "mean": 62,
+        "median": 112,
+        "p10": 3,
+        "p90": 112,
+        "stddev": 51
+      },
+      "status": "PASS"
+    }
+  },
+  "by_strategy": [
+    {
+      "strategy": "balanced",
+      "count": 250,
+      "avg_machines": 8,
+      "avg_lifetime_coins": 139571628,
+      "avg_cps_1h": 112.4,
+      "prestige_rate_pct": 100
+    },
+    {
+      "strategy": "machine_first",
+      "count": 250,
+      "avg_machines": 8,
+      "avg_lifetime_coins": 139720151,
+      "avg_cps_1h": 112.4,
+      "prestige_rate_pct": 100
+    },
+    {
+      "strategy": "crop_grinder",
+      "count": 250,
+      "avg_machines": 3,
+      "avg_lifetime_coins": 648301,
+      "avg_cps_1h": 2.6,
+      "prestige_rate_pct": 0
+    },
+    {
+      "strategy": "prestige_rusher",
+      "count": 250,
+      "avg_machines": 5,
+      "avg_lifetime_coins": 2030906,
+      "avg_cps_1h": 20.7,
+      "prestige_rate_pct": 0
+    }
+  ],
+  "recommendations": [
+    "Automation unlock too slow/fast. Check auto_harvest_trigger_threshold and machine costs.",
+    "Prestige pacing off. Adjust prestige_divisor within safe_range [500000, 10000000]."
+  ]
+}

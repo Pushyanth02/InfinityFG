@@ -1,0 +1,81 @@
+{
+  "system_description": "Live Operations & Analytics Gatekeeper. Listens to telemetry and applies safe, reversible parameter adjustments to maintain economy balance.",
+  "metrics_monitored": [
+    "DAU",
+    "D1_retention",
+    "avg_session_length_minutes",
+    "inflation_index",
+    "avg_coins_earned_per_day",
+    "prestige_rate_daily"
+  ],
+  "alert_thresholds": {
+    "inflation_index_high": 25,
+    "inflation_index_critical": 35,
+    "D1_retention_low": 0.35,
+    "prestige_rate_high": 0.05
+  },
+  "live_rules": [
+    {
+      "rule_id": "rule_inflation_brake_1",
+      "condition": "inflation_index > 25",
+      "action": {
+        "type": "parameter_nudge",
+        "target": "crop_yield_multiplier",
+        "adjustment": "-5%",
+        "reason": "Inflation crossing safe bounds. Soft nerf to yield."
+      },
+      "rollback_condition": "auto_rollback_after_24h_if: inflation_index < 20",
+      "volatility_rating": "LOW"
+    },
+    {
+      "rule_id": "rule_retention_boost_1",
+      "condition": "D1_retention < 0.35",
+      "action": {
+        "type": "event_trigger",
+        "target": "evt_spring_bloom",
+        "reason": "D1 retention dipping. Fire a positive seasonal event to re-engage casuals."
+      },
+      "rollback_condition": "auto_end_event_after_48h",
+      "volatility_rating": "LOW"
+    },
+    {
+      "rule_id": "rule_prestige_throttle_1",
+      "condition": "prestige_rate_daily > 0.05",
+      "action": {
+        "type": "parameter_nudge",
+        "target": "prestige_divisor",
+        "adjustment": "+20%",
+        "reason": "Whale players prestiging too fast. Increase the coin requirement."
+      },
+      "rollback_condition": "manual_review_required",
+      "volatility_rating": "MEDIUM"
+    }
+  ],
+  "ab_testing": {
+    "active_experiments": [
+      {
+        "experiment_id": "exp_machine_cost_v2",
+        "variants": {
+          "control": { "weight": 0.5, "parameter_overrides": {} },
+          "variant_a": { "weight": 0.5, "parameter_overrides": { "machine_cost_base_multiplier": 0.9 } }
+        },
+        "success_metric": "D1_retention"
+      }
+    ]
+  },
+  "patch_schema": {
+    "patch_id": "string",
+    "issued_by": "string (System/Admin)",
+    "timestamp": "ISO8601",
+    "reason": "string",
+    "changes": [
+      {
+        "path": "json_path",
+        "old_value": "any",
+        "new_value": "any"
+      }
+    ],
+    "rollback_conditions": ["string"],
+    "approved_by": "string"
+  }
+}

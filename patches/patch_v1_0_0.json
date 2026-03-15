@@ -1,0 +1,27 @@
+{
+  "patch_id": "patch_v1_0_0",
+  "issued_by": "System",
+  "timestamp": "2026-03-15T10:00:00.000Z",
+  "reason": "Initial economy bounds established from Simulation QA.",
+  "changes": [
+    {
+      "path": "machine_multiplier_per_unit",
+      "old_value": null,
+      "new_value": 0.08
+    },
+    {
+      "path": "auto_harvest_trigger_threshold",
+      "old_value": null,
+      "new_value": 4
+    },
+    {
+      "path": "prestige_divisor",
+      "old_value": null,
+      "new_value": 8000000
+    }
+  ],
+  "rollback_conditions": [
+    "manual_review_required"
+  ],
+  "approved_by": "Admin"
+}
