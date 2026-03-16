@@ -42,16 +42,37 @@ export interface ChapterBoss {
   };
 }
 
+// ─── Story Book Page Types ────────────────────────────────────────
+// The Story Book renders each chapter as a set of typed pages.
+// Pages are data-driven: the generic StoryBookPage component renders
+// any page based on its pageType field.
+export type StoryPageType =
+  | 'chapter_intro'       // Chapter overview and synopsis
+  | 'exploration_quest'   // Active quest list for this chapter
+  | 'merchant_page'       // Narrative market / merchant ledger
+  | 'crafting_page'       // Recipe and crafting flow
+  | 'worker_story'        // Worker background and personal quests
+  | 'boss_prelude'        // Vague boss weakness hints
+  | 'boss_page'           // Full boss fight + weapon deploy
+  | 'resolution_page'     // Post-defeat celebration page
+  | 'festival_page';      // Prestige / Great Harvest festival
+
 export interface StoryPage {
   id: string;
+  /** Determines how the page is rendered. */
+  pageType: StoryPageType;
+  chapterId: string;
   title: string;
-  content: string;
-  unlocks: {
-    crops?: string[];
-    machines?: string[];
-    workers?: string[];
-    skills?: string[];
-  };
+  /** Narrative body text (may reference NPC dialogue or lore). */
+  body: string;
+  /** Emoji art asset reference shown as the page illustration. */
+  art?: string;
+  /** Worker ID — required for worker_story pages. */
+  workerId?: string;
+  /** Weapon ID — required for boss_page and crafting_page. */
+  weaponId?: string;
+  /** Completion reward (coins, items) applied when player marks the page done. */
+  onComplete?: { rewards?: { coins?: number } };
 }
 
 export interface Chapter {
@@ -426,26 +447,203 @@ const CHAPTER_DEFINITIONS: Omit<Chapter, 'unlockMetadata' | 'pages'>[] = [
   },
 ];
 
-export const CHAPTERS: Chapter[] = CHAPTER_DEFINITIONS.map((chapter, idx) => ({
-  ...chapter,
-  unlockMetadata: idx === 0 ? ALWAYS_UNLOCKED : chapterGated(chapter.number),
-  pages: [
+// ─── Per-chapter extra page definitions ──────────────────────────
+// Merchant pages, worker stories and resolution text are chapter-specific.
+// Keys match chapter.id.
+const CHAPTER_MERCHANT_PAGES: Record<string, { title: string; body: string; art: string }> = {
+  ch_01: {
+    title: 'Kurei the Caravan — Meadow Visit',
+    art: '🛒',
+    body: 'Kurei has rolled his creaking wagon into Meadow Fields. He needs fresh wheat, crisp carrots and anything you can spare. "Fair weather means fair coin," he says — prices are up 24% until the rains return. Fulfil a Village Care Package and he\'ll pay double.',
+  },
+  ch_02: {
+    title: 'Riverside Trading Post',
+    art: '⚓',
+    body: 'The flood has opened a new river trade route. Tess has arranged a deal with the city merchants — they\'ll take all the rice and kale you can grow. Fill a Caravan order to unlock the River Fortune bonus.',
+  },
+  ch_03: {
+    title: 'Highland Market Fair',
+    art: '🏔️',
+    body: 'The mountain folk hold a seasonal fair. Potato bread and oat porridge are selling out by noon. Deliver a Highland Care Package to earn the Market Fair commendation and a Prestige fragment.',
+  },
+  ch_04: {
+    title: 'Desert Spice Exchange',
+    art: '🌶️',
+    body: 'The Oasis nomads value pepper and mango above all else. "Spice keeps the locust cloud away," says the elder merchant. Fill a Spice Caravan to receive double-coin for your next pepper harvest.',
+  },
+  ch_05: {
+    title: 'Canopy Fermentation Market',
+    art: '🍫',
+    body: 'The cacao and vanilla markets are at peak demand — city chocolatiers are paying a premium this season. A single Rainforest Crate earns three times the base price. Act before the season turns.',
+  },
+  ch_06: {
+    title: 'Volcanic Rare Goods Bazaar',
+    art: '🌋',
+    body: 'The volcanic bazaar opens only when the crater is dormant. Saffron and dragon fruit are the rarest goods on the market — Kurei will pay five times base value this cycle. There is a limited window.',
+  },
+  ch_07: {
+    title: 'Celestial Exchange',
+    art: '✨',
+    body: 'The last merchant stands at the edge of the known world. She trades only in legendary crops and Prestige Tokens. Fulfil the final Celestial Order to unlock the ultimate Crop Weapon.',
+  },
+};
+
+const CHAPTER_WORKER_PAGES: Record<string, { workerId: string; title: string; body: string; art: string }[]> = {
+  ch_01: [
     {
-      id: `${chapter.id}_overview`,
-      title: `${chapter.title} Field Notes`,
-      content: chapter.synopsis,
-      unlocks: {},
+      workerId: 'wf_lina_01',
+      title: 'Lina — The Herb Healer',
+      art: '🌿',
+      body: 'Lina grew up in Meadow Fields tending the healing herb beds her grandmother planted. She still knows every plant by name and can distil rare medicinal salves that boost crop growth speed. Hire her and she will restore the derelict herb garden near Plot 4 — completing her first personal quest unlocks the Seed Salve recipe.',
     },
     {
-      id: `${chapter.id}_boss_dossier`,
-      title: `${chapter.boss.name} Dossier`,
-      content: chapter.boss.flavor,
-      unlocks: {
-        crops: chapter.boss.weakCropIds,
-      },
+      workerId: 'wf_hired_hand',
+      title: 'Hired Hand — Field Worker',
+      art: '👷',
+      body: 'A willing pair of hands ready to help wherever needed. No signature skill, no dramatic backstory — just honest work and a warm smile. Hire multiple Hired Hands to keep every plot running at full speed without burning through skilled staff.',
     },
   ],
-}));
+  ch_02: [
+    {
+      workerId: 'wf_rook_01',
+      title: 'Rook — The River Engineer',
+      art: '⚙️',
+      body: 'Rook came to the Riverlands to rebuild the old watermill and never left. He understands machines the way most people understand breathing. Assign him to any Garden Helper and it gains 25% speed and reduced wear. His first personal quest — rebuilding the River Mill — unlocks the Precision Joint module.',
+    },
+    {
+      workerId: 'wf_tess_01',
+      title: 'Tess — The River Trader',
+      art: '💼',
+      body: 'Tess has bartered her way across every river town in the region. She always seems to know when a merchant is about to overpay and positions herself perfectly. Hire her and she generates one extra merchant fragment offer each chapter — invaluable for players who want to maximise market earnings.',
+    },
+  ],
+  ch_03: [
+    {
+      workerId: 'wf_maru_01',
+      title: 'Maru — The Highland Scientist',
+      art: '🔬',
+      body: 'Maru arrived at the Highlands clutching notebooks full of fungal research. She has been studying the Frost Mite Queen\'s spore patterns for two seasons. Assign her to a processor and you gain a 25% chance to discover rare processing outcomes. Her personal quest chain unlocks the Spore Filter recipe and eventually an antifungal breakthrough.',
+    },
+  ],
+};
+
+const CHAPTER_RESOLUTION_PAGES: Record<string, { title: string; body: string; art: string }> = {
+  ch_01: {
+    title: 'The Meadow Healed',
+    art: '🌸',
+    body: 'Crumblewort has retreated into the deep soil, its grey rot driven back by the abundance of your harvest. Thistlewick Village erupts in celebration. The elders present you with the Wheat Flail and a sealed map — the Riverlands lie to the east, waiting to be discovered.',
+  },
+  ch_02: {
+    title: 'The River Runs Clear',
+    art: '🌊',
+    body: 'The Swamp Mold has dissolved back into the flood mud. The river runs clear for the first time in three springs. Riverside villagers are rebuilding their farms and the Highland passes are opening. You have earned the Kale Staff and the gratitude of every fisherman on the river.',
+  },
+  ch_03: {
+    title: 'The Mountain Pass Opens',
+    art: '⛰️',
+    body: 'The Frost Mite Queen has been shattered by a concentrated burst of potato and oat energy. The highland passes are clear and the caravans are rolling again. You receive the Potato Mortar and a desert compass — the dunes are calling.',
+  },
+  ch_04: {
+    title: 'The Oasis at Peace',
+    art: '🏜️',
+    body: 'The Desert Locust cloud has broken apart, scattered by the pepper oil and mango acid. The oasis is safe once more and the nomads are celebrating around their first undisturbed fire in months. You have earned the Pepper Cannon and an invitation to the Rainforest Canopy.',
+  },
+  ch_05: {
+    title: 'The Canopy Breathes Again',
+    art: '🌿',
+    body: 'The Vine Strangler has been dissolved by the fermented cacao and cured vanilla compounds coursing through the canopy. Ancient trees are straightening as the vines fall away. The Cacao Potion is yours — and the volcanic plains glow on the horizon.',
+  },
+  ch_06: {
+    title: 'The Volcano Cools',
+    art: '🌋',
+    body: 'The Ember Blister Fungus has been extinguished by a torrential flood of saffron compounds and dragon fruit hydrating gel. The crater is cool and the volcanic soil is more fertile than ever. The Saffron Torch lights your way toward the Celestial Farm.',
+  },
+  ch_07: {
+    title: 'The Void Sealed — Great Harvest Complete!',
+    art: '🌟',
+    body: 'The Void Blight has been sealed away by the combined light of every legendary crop in existence. The Celestial Farm glows with the warmth of a thousand harvests. You have reached the pinnacle of gardening mastery. The Great Harvest awaits — a Prestige event that resets the world in your name.',
+  },
+};
+
+export const CHAPTERS: Chapter[] = CHAPTER_DEFINITIONS.map((chapter, idx) => {
+  const workerPages = (CHAPTER_WORKER_PAGES[chapter.id] ?? []).map(wp => ({
+    id: `${chapter.id}_worker_${wp.workerId}`,
+    pageType: 'worker_story' as StoryPageType,
+    chapterId: chapter.id,
+    title: wp.title,
+    body: wp.body,
+    art: wp.art,
+    workerId: wp.workerId,
+  }));
+
+  const merchantEntry = CHAPTER_MERCHANT_PAGES[chapter.id];
+  const merchantPage: StoryPage | null = merchantEntry
+    ? {
+        id: `${chapter.id}_market`,
+        pageType: 'merchant_page',
+        chapterId: chapter.id,
+        title: merchantEntry.title,
+        body: merchantEntry.body,
+        art: merchantEntry.art,
+      }
+    : null;
+
+  const resolutionEntry = CHAPTER_RESOLUTION_PAGES[chapter.id];
+  const resolutionPage: StoryPage | null = resolutionEntry
+    ? {
+        id: `${chapter.id}_resolution`,
+        pageType: chapter.id === 'ch_07' ? 'festival_page' : 'resolution_page',
+        chapterId: chapter.id,
+        title: resolutionEntry.title,
+        body: resolutionEntry.body,
+        art: resolutionEntry.art,
+      }
+    : null;
+
+  return {
+    ...chapter,
+    unlockMetadata: idx === 0 ? ALWAYS_UNLOCKED : chapterGated(chapter.number),
+    pages: [
+      {
+        id: `${chapter.id}_intro`,
+        pageType: 'chapter_intro' as StoryPageType,
+        chapterId: chapter.id,
+        title: `${chapter.title} — Field Notes`,
+        body: chapter.synopsis,
+        art: chapter.emoji,
+      },
+      {
+        id: `${chapter.id}_quests`,
+        pageType: 'exploration_quest' as StoryPageType,
+        chapterId: chapter.id,
+        title: 'Chapter Quests',
+        body: 'Complete each task below to progress the chapter and earn coin rewards.',
+        art: '📋',
+      },
+      ...(merchantPage ? [merchantPage] : []),
+      ...workerPages,
+      {
+        id: `${chapter.id}_boss_prep`,
+        pageType: 'boss_prelude' as StoryPageType,
+        chapterId: chapter.id,
+        title: `Threat Report: ${chapter.boss.name}`,
+        body: chapter.boss.flavor,
+        art: '⚠️',
+        weaponId: chapter.cropWeaponId,
+      },
+      {
+        id: `${chapter.id}_boss`,
+        pageType: 'boss_page' as StoryPageType,
+        chapterId: chapter.id,
+        title: `Boss Battle: ${chapter.boss.name}`,
+        body: chapter.boss.flavor,
+        art: chapter.boss.emoji,
+        weaponId: chapter.cropWeaponId,
+      },
+      ...(resolutionPage ? [resolutionPage] : []),
+    ] as StoryPage[],
+  };
+});
 
 /** Helper: get a chapter by ID */
 export const getChapter = (id: string): Chapter | undefined =>
