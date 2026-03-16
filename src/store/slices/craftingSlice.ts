@@ -118,6 +118,14 @@ export const createCraftingSlice: StateCreator<GameState, [], [], CraftingSlice>
     for (const q of done) {
       const recipe = STORY_RECIPES.find((r) => r.recipe_id === q.recipeId);
       if (!recipe) continue;
+
+      // Phase 2: emit CRAFT_COMPLETED — triggers unlock pipeline evaluation
+      eventBus.emit('CRAFT_COMPLETED', {
+        recipeId: recipe.recipe_id,
+        recipeName: recipe.name,
+        outputItem: recipe.output.item,
+      });
+
       eventBus.emit('CONTENT_UNLOCKED', {
         contentType: 'crafted_item',
         itemId: recipe.output.item,

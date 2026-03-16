@@ -663,12 +663,12 @@ export const getChapterForRegion = (regionId: string): Chapter | undefined =>
  */
 export const CHAPTER_UNLOCK_METADATA: Record<string, UnlockMetadata> = {
   ch_01: ALWAYS_UNLOCKED,
-  ch_02: chapterGated(1, 'teased', 'Chapter 2: The Riverlands awaits!'),
-  ch_03: chapterGated(2, 'teased', 'Chapter 3: Climb to the Highlands!'),
-  ch_04: chapterGated(3, 'teased', 'Chapter 4: The Desert Oasis beckons!'),
-  ch_05: chapterGated(4, 'teased', 'Chapter 5: Enter the Rainforest Depths!'),
-  ch_06: chapterGated(5, 'teased', 'Chapter 6: Brave the Volcanic Plains!'),
-  ch_07: chapterGated(6, 'teased', 'Chapter 7: The Final Chapter awaits!'),
+  ch_02: chapterGated(1, 'preview', 'Chapter 2: The Riverlands awaits!'),
+  ch_03: chapterGated(2, 'preview', 'Chapter 3: Climb to the Highlands!'),
+  ch_04: chapterGated(3, 'preview', 'Chapter 4: The Desert Oasis beckons!'),
+  ch_05: chapterGated(4, 'preview', 'Chapter 5: Enter the Rainforest Depths!'),
+  ch_06: chapterGated(5, 'preview', 'Chapter 6: Brave the Volcanic Plains!'),
+  ch_07: chapterGated(6, 'preview', 'Chapter 7: The Final Chapter awaits!'),
 };
 
 /**
@@ -734,7 +734,7 @@ export function getCropUnlockMetadata(cropId: string): UnlockMetadata {
       const chapterNum = parseInt(chapterId.replace('ch_0', ''), 10);
       return chapterGated(
         chapterNum - 1 || 1,
-        chapterNum === 1 ? 'unlocked' : 'teased',
+        chapterNum === 1 ? 'unlocked' : 'preview',
         `New crop from Chapter ${chapterNum}!`
       );
     }
@@ -751,7 +751,7 @@ export function getMachineUnlockMetadata(machineId: string): UnlockMetadata {
       const chapterNum = parseInt(chapterId.replace('ch_0', ''), 10);
       return chapterGated(
         chapterNum - 1 || 1,
-        chapterNum === 1 ? 'unlocked' : 'teased',
+        chapterNum === 1 ? 'unlocked' : 'preview',
         `New machine from Chapter ${chapterNum}!`
       );
     }
@@ -768,7 +768,7 @@ export function getWorkerUnlockMetadata(workerId: string): UnlockMetadata {
       const chapterNum = parseInt(chapterId.replace('ch_0', ''), 10);
       return chapterGated(
         chapterNum - 1 || 1,
-        chapterNum === 1 ? 'unlocked' : 'teased',
+        chapterNum === 1 ? 'unlocked' : 'preview',
         `New worker from Chapter ${chapterNum}!`
       );
     }
@@ -785,7 +785,7 @@ export function getSkillUnlockMetadata(skillId: string): UnlockMetadata {
       const chapterNum = parseInt(chapterId.replace('ch_0', ''), 10);
       return chapterGated(
         chapterNum - 1 || 1,
-        chapterNum === 1 ? 'unlocked' : 'revealed',
+        chapterNum === 1 ? 'unlocked' : 'available',
         `New skill available!`
       );
     }

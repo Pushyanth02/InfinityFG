@@ -230,6 +230,8 @@ export const createWorkerAssignmentSlice: StateCreator<
     const quest = folk.personalQuests.find((q) => q.id === questId);
     if (!quest) return;
 
+    const prevTrust = get().workerTrust[workerId] ?? 0;
+
     set((state) => {
       const currentTrust = state.workerTrust[workerId] ?? 0;
       const nextTrust = Math.min(100, currentTrust + quest.trustReward);
@@ -247,6 +249,11 @@ export const createWorkerAssignmentSlice: StateCreator<
     });
 
     const trustNow = get().workerTrust[workerId] ?? 0;
+    const trustDelta = trustNow - prevTrust;
+
+    // Phase 2: trigger unlock pipeline evaluation
+    eventBus.emit('WORKER_TRUST_UPDATED', { workerId, trust: trustNow, delta: trustDelta });
+
     for (const unlock of folk.trust_unlocks) {
       if (trustNow >= unlock.trustThreshold) {
         eventBus.emit('CONTENT_UNLOCKED', {

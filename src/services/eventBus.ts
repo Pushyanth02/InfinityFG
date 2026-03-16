@@ -17,8 +17,9 @@ export type GameEventType =
   | 'BOSS_DAMAGED'
   | 'BOSS_DEFEATED'
 
-  // Content unlocks
-  | 'CONTENT_UNLOCKED'
+  // Content unlocks — pipeline events (Phase 2)
+  | 'CONTENT_AVAILABLE'   // Requirements just became satisfied; player can now accept/spend
+  | 'CONTENT_UNLOCKED'    // Player confirmed unlock; item is now active
   | 'CROP_UNLOCKED'
   | 'MACHINE_UNLOCKED'
   | 'WORKER_UNLOCKED'
@@ -39,12 +40,20 @@ export type GameEventType =
   | 'WORKER_ASSIGNED'
   | 'WORKER_UNASSIGNED'
   | 'WORKER_LEVELED'
+  | 'WORKER_TRUST_UPDATED'  // Worker trust score changed (Phase 2 trigger)
 
-  // Market events
+  // Market / economy events
+  | 'COINS_CHANGED'           // Coin balance changed (Phase 2 trigger)
   | 'MERCHANT_OFFER_AVAILABLE'
   | 'MERCHANT_OFFER_ACCEPTED'
   | 'MERCHANT_OFFER_EXPIRED'
   | 'MARKET_PRICE_CHANGED'
+
+  // Crafting events
+  | 'CRAFT_COMPLETED'  // A recipe finished crafting (Phase 2 trigger)
+
+  // Region events
+  | 'REGION_REPUTATION_CHANGED'  // Region reputation delta applied (Phase 2 trigger)
 
   // System events
   | 'GAME_TICK'
@@ -78,6 +87,7 @@ export interface EventPayloads {
   BOSS_DAMAGED: { bossId: string; damage: number; remainingHp: number };
   BOSS_DEFEATED: { bossId: string; bossName: string; reward: number };
 
+  CONTENT_AVAILABLE: { contentType: string; itemId: string; announcementText?: string };
   CONTENT_UNLOCKED: { contentType: string; itemId: string; announcementText?: string };
   CROP_UNLOCKED: { cropId: string; cropName: string };
   MACHINE_UNLOCKED: { machineId: string; machineName: string };
@@ -97,11 +107,17 @@ export interface EventPayloads {
   WORKER_ASSIGNED: { instanceId: string; targetType: string; targetId: string };
   WORKER_UNASSIGNED: { instanceId: string };
   WORKER_LEVELED: { instanceId: string; newLevel: number };
+  WORKER_TRUST_UPDATED: { workerId: string; trust: number; delta: number };
 
+  COINS_CHANGED: { coins: number; delta: number; lifetimeCoins: number };
   MERCHANT_OFFER_AVAILABLE: { offerId: string; merchantName: string };
   MERCHANT_OFFER_ACCEPTED: { offerId: string };
   MERCHANT_OFFER_EXPIRED: { offerId: string };
   MARKET_PRICE_CHANGED: { cropId: string; oldMultiplier: number; newMultiplier: number };
+
+  CRAFT_COMPLETED: { recipeId: string; recipeName: string; outputItem: string };
+
+  REGION_REPUTATION_CHANGED: { regionId: string; reputation: number; delta: number };
 
   GAME_TICK: { delta: number; coins: number };
   GAME_SAVED: { timestamp: number };
@@ -251,6 +267,7 @@ const NEWSWORTHY_TYPES: GameEventType[] = [
   'CHAPTER_COMPLETED',
   'QUEST_COMPLETED',
   'BOSS_DEFEATED',
+  'CONTENT_AVAILABLE',    // Phase 2: item just became available (requirements met)
   'CONTENT_UNLOCKED',
   'CROP_UNLOCKED',
   'MACHINE_UNLOCKED',

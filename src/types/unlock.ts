@@ -46,11 +46,17 @@ export interface UnlockRequirement {
 /**
  * Visibility state for locked content.
  * Controls how locked items appear in UI.
+ *
+ * State machine: hidden → preview → available → unlocked
+ *   HIDDEN    — not listed anywhere
+ *   PREVIEW   — greyed teaser in "Future (Locked)" column; short description, no cost shown
+ *   AVAILABLE — shown in "Available Now" with exact requirements + Unlock button
+ *   UNLOCKED  — active and shown in Unlocked column; Village News announcement posted
  */
 export type VisibilityState =
   | 'hidden'     // Not shown at all in UI
-  | 'teased'     // Show silhouette/name only, no details
-  | 'revealed'   // Show full details but marked as locked
+  | 'preview'    // Greyed teaser; short description, no cost shown
+  | 'available'  // Requirements met; player can spend resource or accept to unlock
   | 'unlocked';  // Fully accessible
 
 /**
@@ -87,7 +93,7 @@ export const ALWAYS_UNLOCKED: UnlockMetadata = {
  */
 export function chapterGated(
   chapter: number,
-  visibility: VisibilityState = 'teased',
+  visibility: VisibilityState = 'preview',
   announcementText?: string
 ): UnlockMetadata {
   return {
@@ -102,7 +108,7 @@ export function chapterGated(
  */
 export function questGated(
   questId: string,
-  visibility: VisibilityState = 'teased',
+  visibility: VisibilityState = 'preview',
   announcementText?: string
 ): UnlockMetadata {
   return {
@@ -117,7 +123,7 @@ export function questGated(
  */
 export function coinsGated(
   amount: number,
-  visibility: VisibilityState = 'revealed',
+  visibility: VisibilityState = 'available',
   announcementText?: string
 ): UnlockMetadata {
   return {
@@ -133,7 +139,7 @@ export function coinsGated(
 export function reputationGated(
   regionId: string,
   amount: number,
-  visibility: VisibilityState = 'teased',
+  visibility: VisibilityState = 'preview',
   announcementText?: string
 ): UnlockMetadata {
   return {
