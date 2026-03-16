@@ -5,9 +5,14 @@
 
 import { Client, Account, Databases } from 'appwrite';
 
+const appwriteEndpoint =
+  import.meta.env.VITE_APPWRITE_ENDPOINT ?? 'https://cloud.appwrite.io/v1';
+const appwriteProjectId =
+  import.meta.env.VITE_APPWRITE_PROJECT_ID ?? 'infinity-fg';
+
 const client = new Client()
-  .setEndpoint('https://nyc.cloud.appwrite.io/v1')
-  .setProject('infinity-fg');
+  .setEndpoint(appwriteEndpoint)
+  .setProject(appwriteProjectId);
 
 const account = new Account(client);
 const databases = new Databases(client);
