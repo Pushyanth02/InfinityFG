@@ -69,6 +69,15 @@ function eventToNewsItem(event: GameEvent): NewsItem | null {
         detail: `${(event.payload as { bossName: string }).bossName} has been vanquished!`,
       };
 
+    case 'CONTENT_AVAILABLE':
+      return {
+        ...base,
+        type: 'unlock',
+        emoji: '🔔',
+        headline: 'Now Available!',
+        detail: (event.payload as { announcementText?: string }).announcementText ?? 'Check the Story Book!',
+      };
+
     case 'CONTENT_UNLOCKED':
       return {
         ...base,
