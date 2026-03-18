@@ -215,8 +215,8 @@ export function groupByVisibility<T extends { id: string; unlockMetadata?: Unloc
 ): Record<VisibilityState, T[]> {
   const result: Record<VisibilityState, T[]> = {
     hidden: [],
-    teased: [],
-    revealed: [],
+    preview: [],
+    available: [],
     unlocked: [],
   };
 
@@ -304,4 +304,72 @@ function conditionToText(
     default:
       return 'Unknown requirement';
   }
+}
+
+// ============================================================
+// Phase 2: Unlock Pipeline helpers
+// ============================================================
+
+/**
+ * Mutable tracked item for the unlock pipeline.
+ * Holds the last-known visibility state so transitions can be detected.
+ */
+export interface TrackedItem {
+  id: string;
+  unlockMetadata: UnlockMetadata;
+  /** Resolved visibility at last evaluation — mutated by evaluateUnlockTree */
+  visibilityState: VisibilityState;
+}
+
+/**
+ * Result of a single checkItem call.
+ * canUnlock: true when all conditions are currently satisfied.
+ * eta: human-readable estimate of what's still needed (empty when canUnlock is true).
+ */
+export interface CheckItemResult {
+  canUnlock: boolean;
+  eta: string;
+}
+
+/**
+ * Deterministic unlock evaluation matching the Phase 2 pseudocode.
+ *
+ * For every item that is not yet 'unlocked', checks whether its conditions
+ * are now satisfied. When they are and the item is not already 'available',
+ * the item's visibilityState is advanced to 'available' and a callback is
+ * invoked so the caller (UnlockPipeline) can emit CONTENT_AVAILABLE.
+ *
+ * Items already at 'unlocked' are skipped (they are managed externally).
+ *
+ * @param items   Mutable array of tracked items (visibilityState is updated in place)
+ * @param state   Current evaluation state
+ * @param onAvailable  Called for each item that transitions to 'available'
+ */
+export function evaluateUnlockTree(
+  items: TrackedItem[],
+  state: UnlockEvaluationState,
+  onAvailable: (item: TrackedItem) => void
+): void {
+  for (const item of items) {
+    if (item.visibilityState === 'unlocked') continue;
+
+    const ok = evaluateRequirement(item.unlockMetadata.requirement, state);
+    if (ok && item.visibilityState !== 'available') {
+      item.visibilityState = 'available';
+      onAvailable(item);
+    }
+  }
+}
+
+/**
+ * Checks a single item against current state and returns an unlock result
+ * with a deterministic boolean and an ETA description for UI hints.
+ */
+export function checkItem(
+  item: Pick<TrackedItem, 'unlockMetadata'>,
+  state: UnlockEvaluationState
+): CheckItemResult {
+  const canUnlock = evaluateRequirement(item.unlockMetadata.requirement, state);
+  const eta = canUnlock ? '' : getUnlockRequirementText(item.unlockMetadata, state);
+  return { canUnlock, eta };
 }

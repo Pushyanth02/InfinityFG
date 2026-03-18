@@ -2,14 +2,16 @@ import React from 'react';
 import { useGameStore } from '../store/gameStore';
 
 const navItems = [
-  { id: 'farm',       label: 'Garden Plots',    icon: '🪴' },
-  { id: 'machines',   label: 'Garden Helpers',  icon: '🤖' },
-  { id: 'workers',    label: 'Village Folk',    icon: '👨‍🌾' },
-  { id: 'upgrades',   label: 'Crafting Recipes',icon: '📖' },
-  { id: 'skills',     label: 'Skill Garden',    icon: '🌱' },
-  { id: 'regions',    label: 'World Discovery', icon: '🗺️' },
-  { id: 'prestige',   label: 'Great Harvest',   icon: '✨' },
-  { id: 'storybook',  label: 'Story Book',      icon: '📚' },
+  { id: 'farm',         label: 'Garden Plots',    icon: '🪴' },
+  { id: 'machines',     label: 'Garden Helpers',  icon: '🤖' },
+  { id: 'workers',      label: 'Village Folk',    icon: '👨‍🌾' },
+  { id: 'upgrades',     label: 'Crafting Recipes',icon: '📖' },
+  { id: 'skills',       label: 'Skill Garden',    icon: '🌱' },
+  { id: 'market',       label: 'Market Stall',    icon: '🛒' },
+  { id: 'regions',      label: 'World Discovery', icon: '🗺️' },
+  { id: 'prestige',     label: 'Great Harvest',   icon: '✨' },
+  { id: 'storybook',    label: 'Story Book',      icon: '📚' },
+  { id: 'achievements', label: 'Achievements',    icon: '🏆' },
 ];
 
 const Sidebar: React.FC = () => {

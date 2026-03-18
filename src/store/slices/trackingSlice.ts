@@ -133,6 +133,8 @@ export const createTrackingSlice: StateCreator<
 
   // ── updateReputation ─────────────────────────────────────
   updateReputation: (regionId, delta) => {
+    const prevRep = get().regionReputation[regionId] ?? 0;
+
     set((state) => {
       const current = state.regionReputation[regionId] ?? 0;
       const newRep = Math.max(
@@ -154,6 +156,10 @@ export const createTrackingSlice: StateCreator<
     [50, 100, 250, 500, 1000].forEach((threshold) => {
       get().checkMilestone(`reputation_${regionId}_${threshold}`, newRep, threshold);
     });
+
+    // Phase 2: trigger unlock pipeline evaluation (use actual applied delta)
+    const appliedDelta = newRep - prevRep;
+    eventBus.emit('REGION_REPUTATION_CHANGED', { regionId, reputation: newRep, delta: appliedDelta });
   },
 
   // ── decayReputation ──────────────────────────────────────

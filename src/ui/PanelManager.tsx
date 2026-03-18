@@ -7,6 +7,8 @@ import RegionPanel from './RegionPanel';
 import PrestigePanel from './PrestigePanel';
 import UpgradePanel from './UpgradePanel';
 import StoryBookPanel from './StoryBookPanel';
+import MarketPanel from './MarketPanel';
+import AchievementsPanel from './AchievementsPanel';
 
 interface PanelManagerProps {
   activePanel: string;
@@ -23,6 +25,8 @@ export const PanelManager: React.FC<PanelManagerProps> = ({ activePanel }) => {
       case 'upgrades':  return <UpgradePanel />;
       case 'prestige':  return <PrestigePanel />;
       case 'storybook': return <StoryBookPanel />;
+      case 'market':    return <MarketPanel />;
+      case 'achievements': return <AchievementsPanel />;
       default:          return <FarmPanel />;
     }
   }, [activePanel]);
