@@ -19,7 +19,7 @@ const Sidebar: React.FC = () => {
   const setPanel    = useGameStore((s) => s.setPanel);
 
   return (
-    <aside
+    <aside aria-label="Main sidebar navigation"
       style={{
         width: 200,
         minWidth: 200,
@@ -71,7 +71,7 @@ const Sidebar: React.FC = () => {
       </div>
 
       {/* Nav links */}
-      <nav
+      <nav aria-label="Sidebar navigation"
         style={{
           flex: 1,
           overflowY: 'auto',

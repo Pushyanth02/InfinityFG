@@ -44,7 +44,11 @@ const MachinePanel: React.FC = () => {
 
       {categories.map((cat) => {
         const catMachines = AUGMENTED_MACHINES.filter(m => m.category === cat);
-        if (!catMachines.length) return null;
+        if (!catMachines.length) return (
+          <div key={cat} className="glass-panel" style={{ padding: 'var(--space-md)', margin: 'var(--space-md)' }}>
+            <div style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>No machines available for {categoryFriendly[cat] ?? cat}.</div>
+          </div>
+        );
         return (
           <div key={cat} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
             {/* Category heading */}
@@ -64,7 +68,11 @@ const MachinePanel: React.FC = () => {
                   const d = AUGMENTED_MACHINES.find(a => a.id === m.machineId);
                   return d && d.category === cat && d.tier === def.tier - 1;
                 });
-                if (isLocked) return null;
+                if (isLocked) return (
+                  <div key={def.id} className="glass-panel" style={{ padding: 'var(--space-md)', margin: 'var(--space-md)' }}>
+                    <div style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Locked: Deploy previous tier machine to unlock.</div>
+                  </div>
+                );
 
                 const { friendly, emoji } = getFriendlyName(def.name);
 

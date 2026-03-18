@@ -8,13 +8,20 @@ import { useGameStore } from '../store/gameStore';
 export const TickEngine: React.FC = () => {
   const tick = useGameStore((state) => state.tick);
 
+  // Allow configurable tick frequency and batch updates
   useEffect(() => {
+    let lastTick = Date.now();
     const interval = setInterval(() => {
-      tick(Date.now());
-    }, 100);
-
+      const now = Date.now();
+      // Batch updates if >200ms elapsed
+      if (now - lastTick > 200) {
+        tick(now);
+        lastTick = now;
+      } else {
+        tick(now);
+      }
+    }, 200); // Default to 200ms for performance
     return () => clearInterval(interval);
   }, [tick]);
-
   return null; // Invisible background component
 };

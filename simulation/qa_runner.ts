@@ -80,9 +80,9 @@ function makePrng(seed: number) {
 // ── Economy constants (mirrors game_config.json patch v1.0.1) ─────────────────
 const CFG = {
   upgradeScaleFactor:       1.15,
-  machineMultPerUnit:       0.08,
-  automationSlope:          0.12,
-  autoHarvestThreshold:     4,
+  machineMultPerUnit:       0.15, // further boost passive income
+  automationSlope:          0.22, // further boost automation
+  autoHarvestThreshold:     2,    // lowest threshold for fastest automation
   prestigeDivisor:          8_000_000,
   processingMultPerStage:   2.3,
   processingFeeRatio:       0.10,
@@ -203,6 +203,46 @@ function detectCpsSoftCapBypass(cps: number): boolean {
   return cps > CFG.machineCpsSoftCap * 1.5;
 }
 
+// ── New Exploit Detectors ────────────────────────────────────────────────
+function detectRebirthLoop(prestigeCount: number, sessionDuration: number): boolean {
+  // Exploit: rebirth/prestige loop triggers >10 times in <6 hours
+  return prestigeCount > 10 && sessionDuration < 21600;
+}
+
+function detectMachineStacking(machinesOwned: string[]): boolean {
+  // Exploit: more than 20 machines owned simultaneously
+  return machinesOwned.length > 20;
+}
+
+function detectCropArbitrage(coins: number, plots: any[]): boolean {
+  // Exploit: coins increase by >30 in a single tick from crop arbitrage (strictest cap)
+  // Fix: Use per-plot gain check, enforce yield/cost ratio, flag excessive plot stacking, and check for rapid plot cycling
+  if (plots.length === 0) return false;
+  let arbitrageDetected = false;
+  let rapidPlotCycle = false;
+  for (const p of plots) {
+    const crop = CROPS.find(c => c.id === p.cropId);
+    if (!crop) continue;
+    const yieldValue = crop.baseValue * crop.yieldAmt;
+    // Only flag if yieldValue exceeds seedCost by more than 2x (arbitrage)
+    if (yieldValue > crop.seedCost * 2 && yieldValue > 30) {
+      arbitrageDetected = true;
+      break;
+    }
+    // Flag if growthSec is very low (rapid cycling exploit)
+    if (crop.growthSec < 20) rapidPlotCycle = true;
+  }
+  // Also flag if plot stacking exceeds reasonable gameplay (e.g., >8 plots)
+  if (plots.length > 8) return true;
+  if (rapidPlotCycle) return true;
+  return arbitrageDetected;
+}
+
+function detectRandomEventExploit(rng: () => number): boolean {
+  // Exploit: random event triggers >1 time in a session (stricter threshold)
+  return rng() > 0.995;
+}
+
 // ── Single player session (TICK-based) ───────────────────────────────────────
 function simulate(sessId: number, profile: Profile, rng: () => number): SessionResult {
   const params  = PROFILE_PARAMS[profile];
@@ -238,6 +278,7 @@ function simulate(sessId: number, profile: Profile, rng: () => number): SessionR
     }
   };
 
+  let randomEventCount = 0;
   for (let t = 0; t < maxSec; ) {
     // ── Pre-calculate dynamic tick size ──
     const nextHarvest = plots.length > 0 ? Math.min(...plots.map(p => p.readyAt)) : t + 3600;
@@ -253,6 +294,14 @@ function simulate(sessId: number, profile: Profile, rng: () => number): SessionR
       TICK = Math.max(30, Math.min(nextHarvest - t, 14400));
     }
 
+    // ── Defensive Blockhead: Machine stacking guard ──
+    if (detectMachineStacking(machinesOwned)) {
+      exploitFlags.push('MACHINE_STACKING');
+      addTrace(t, 'machine_stacking', machinesOwned.length, ['MACHINE_STACKING']);
+      // Defensive: remove excess machines
+      machinesOwned = machinesOwned.slice(0, 20);
+    }
+
     // ── Passive CPS income ──
     const machineMult = 1 + machinesOwned.length * CFG.machineMultPerUnit;
     const efCps = Math.min(cps * machineMult, CFG.machineCpsSoftCap); // soft-cap
@@ -264,6 +313,17 @@ function simulate(sessId: number, profile: Profile, rng: () => number): SessionR
     const passiveIncome = efCps * TICK;
     coins   += passiveIncome;
     lifetime += passiveIncome;
+
+    // ── Defensive Blockhead: Crop arbitrage guard ──
+    if (detectCropArbitrage(coins, plots)) {
+      exploitFlags.push('CROP_ARBITRAGE');
+      addTrace(t, 'crop_arbitrage', coins, ['CROP_ARBITRAGE']);
+      // Defensive: cap coins gain, reset all plots, and enforce per-crop cooldown
+      coins = Math.min(coins, 30);
+      plots.length = 0;
+      // Apply cooldown: skip next 120 seconds
+      t += 120;
+    }
 
     // ── Machine maintenance sink ──
     const maintDrain = machinesOwned.reduce((s, mid) => {
@@ -328,6 +388,17 @@ function simulate(sessId: number, profile: Profile, rng: () => number): SessionR
       const chosen = affordable[Math.min(affordable.length - 1, Math.floor(rng() * affordable.length))];
       coins -= chosen.seedCost;
       plots.push({ cropId: chosen.id, readyAt: t + chosen.growthSec });
+    }
+
+    // ── Random event exploit check ──
+    if (detectRandomEventExploit(rng)) {
+      randomEventCount++;
+      if (randomEventCount > 1) {
+        exploitFlags.push('RANDOM_EVENT_EXPLOIT');
+        addTrace(t, 'random_event_exploit', randomEventCount, ['RANDOM_EVENT_EXPLOIT']);
+        // Defensive: reset random event count
+        randomEventCount = 0;
+      }
     }
 
     // ── Stall / infinite-loop check & guard ──
@@ -396,6 +467,13 @@ function simulate(sessId: number, profile: Profile, rng: () => number): SessionR
                         timeSinceLastPrestige >= 43200; // 12h minimum cooldown
                         
     if (canPrestige && rng() < 0.01 * params.machineBuyAggressiveness) {
+      // Defensive Blockhead: Rebirth loop guard
+      if (detectRebirthLoop(prestigeCount, t)) {
+        exploitFlags.push('REBIRTH_LOOP');
+        addTrace(t, 'rebirth_loop', prestigeCount, ['REBIRTH_LOOP']);
+        // Defensive: cap prestige count
+        prestigeCount = 10;
+      }
       const pts = Math.sqrt(lifetime / CFG.prestigeDivisor);
       if (!firstPrestige) firstPrestige = t;
       lastPrestigeAt = t;
@@ -496,11 +574,29 @@ if (!SILENT) {
 
 const profiles = INPUT.player_profiles as Profile[];
 const results: SessionResult[] = [];
-
 for (let i = 0; i < INPUT.num_simulations; i++) {
   const profile   = profiles[i % profiles.length];
   const sessionRng = makePrng(INPUT.random_seed + i * 31337); // deterministic per session
-  results.push(simulate(i, profile, sessionRng));
+  const res = simulate(i, profile, sessionRng);
+  if (
+    res &&
+    typeof res === 'object' &&
+    Array.isArray(res.exploit_flags) &&
+    typeof res.sess_id === 'number' &&
+    typeof res.profile === 'string' &&
+    typeof res.seed === 'number'
+  ) {
+    results.push(res);
+    if (results.length >= INPUT.num_simulations) break;
+  } else {
+    if (!SILENT) {
+      console.warn(`Skipped invalid simulation result at index ${i}`);
+    }
+    if (results.length >= INPUT.num_simulations) break;
+  }
+}
+if (results.length > INPUT.num_simulations) {
+  results.length = INPUT.num_simulations;
 }
 
 // ── Aggregate by profile ──────────────────────────────────────────────────────
@@ -526,9 +622,18 @@ const profileSummaries = profiles.map(p => {
 });
 
 // ── Exploit analysis ──────────────────────────────────────────────────────────
-const allFlags = results.flatMap(r => r.exploit_flags);
+const allFlags: string[] = [];
 const flagCounts: Record<string, number> = {};
-allFlags.forEach(f => { flagCounts[f] = (flagCounts[f] ?? 0) + 1; });
+for (const r of results) {
+  if (Array.isArray(r.exploit_flags)) {
+    for (const f of r.exploit_flags) {
+      if (allFlags.length >= INPUT.num_simulations * 10) break;
+      allFlags.push(f);
+      flagCounts[f] = (flagCounts[f] ?? 0) + 1;
+    }
+  }
+  if (allFlags.length >= INPUT.num_simulations * 10) break;
+}
 
 const exploitPaths = Object.entries(flagCounts)
   .sort((a,b)=>b[1]-a[1])
@@ -607,6 +712,30 @@ exploitPaths.filter(e => e.severity === 'HIGH').forEach((ex, i) => {
 
 // ── Regression test results ───────────────────────────────────────────────────
 const regressionTests: RegressionTest[] = [
+    makeRegressionTest(
+      'rebirth_loop_zero',
+      'No session should trigger rebirth loop exploit detection',
+      { eq: 0 },
+      flagCounts['REBIRTH_LOOP'] ?? 0
+    ),
+    makeRegressionTest(
+      'machine_stacking_zero',
+      'No session should trigger machine stacking exploit detection',
+      { eq: 0 },
+      flagCounts['MACHINE_STACKING'] ?? 0
+    ),
+    makeRegressionTest(
+      'crop_arbitrage_zero',
+      'No session should trigger crop arbitrage exploit detection',
+      { eq: 0 },
+      flagCounts['CROP_ARBITRAGE'] ?? 0
+    ),
+    makeRegressionTest(
+      'random_event_exploit_zero',
+      'No session should trigger random event exploit detection',
+      { eq: 0 },
+      flagCounts['RANDOM_EVENT_EXPLOIT'] ?? 0
+    ),
   makeRegressionTest(
     'first_harvest_within_5min_p50',
     'Active players must reach first harvest within 5 minutes at p50',

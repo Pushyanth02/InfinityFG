@@ -25,7 +25,7 @@ const FarmPanel: React.FC = () => {
   const getPlotName = (idx: number) => plotNames[idx % plotNames.length];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)', maxWidth: 900, margin: '0 auto' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)', maxWidth: 900, margin: '0 auto' }} aria-label="Garden overview panel">
       {/* ── Header ── */}
       <div className="animate-in" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 'var(--space-md)' }}>
         <div>
@@ -36,7 +36,7 @@ const FarmPanel: React.FC = () => {
             Your cozy garden plots — tend, grow & harvest
           </p>
         </div>
-        <button
+        <button aria-label="Buy new garden bed"
           onClick={buyPlot}
           disabled={coins < nextPlotCost}
           className="btn-base btn-amber"

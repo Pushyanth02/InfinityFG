@@ -1,0 +1,519 @@
+{
+  "schema": "agriempire-qa-report/v1",
+  "issued_by": "SimulationQA_AI",
+  "timestamp": "2026-03-18T04:11:44.611Z",
+  "input": {
+    "num_simulations": 1000,
+    "player_profiles": [
+      "casual",
+      "active",
+      "whale_sim"
+    ],
+    "duration_hours": 720,
+    "random_seed": 20260315
+  },
+  "notes": "Deterministic simulation using Mulberry32 PRNG. Reproduce any session with --seed <seed> --sessions 1 and sessionSeed = seed + sessId * 31337.",
+  "summary": {
+    "total_sessions": 1000,
+    "median_automation_minutes": 30,
+    "p90_automation_minutes": 81,
+    "active_first_harvest_p50_sec": 35,
+    "active_first_harvest_p90_sec": 95,
+    "inflation_index": 2,
+    "exploit_paths_found": 2,
+    "high_severity_exploits": 2,
+    "exploit_sessions_pct": 100,
+    "processor_arbitrage_sessions_pct": 0,
+    "casual_prestige_rate_pct": 0,
+    "active_prestige_rate_pct": 100,
+    "regression_pass_rate_pct": 72.2,
+    "regression_all_pass": false,
+    "sanity_pass": true,
+    "strict_mode_enabled": true
+  },
+  "thresholds": {
+    "ACTIVE_FIRST_HARVEST_P50_SEC_MAX": 300,
+    "ACTIVE_FIRST_HARVEST_P90_SEC_MAX": 180,
+    "ACTIVE_AUTOMATION_P50_MIN_MAX": 40,
+    "ACTIVE_AUTOMATION_P90_MIN_MAX": 40,
+    "INFLATION_INDEX_MAX": 20,
+    "NO_NEGATIVE_COST_ITEMS_EQ": 0,
+    "INFINITE_LOOP_EQ": 0,
+    "CASUAL_PRESTIGE_RATE_MAX_PCT": 50,
+    "ACTIVE_PRESTIGE_RATE_MIN_PCT": 70,
+    "HIGH_EXPLOITS_EQ": 0,
+    "CPS_SOFTCAP_BYPASS_EQ": 0,
+    "PRESTIGE_ABUSE_EQ": 0,
+    "PROCESSOR_ARBITRAGE_MAX_PCT": 2,
+    "ANY_EXPLOIT_SESSIONS_MAX_PCT": 10
+  },
+  "profile_summaries": [
+    {
+      "profile": "casual",
+      "count": 334,
+      "first_harvest": {
+        "mean": 80,
+        "p10": 35,
+        "p50": 65,
+        "p90": 125,
+        "stddev": 38,
+        "pct_reached": 100
+      },
+      "first_auto": {
+        "mean": 112,
+        "p10": 26,
+        "p50": 89,
+        "p90": 228,
+        "stddev": 91,
+        "unit": "minutes",
+        "pct_reached": 100
+      },
+      "prestige": {
+        "mean": 0,
+        "p10": null,
+        "p50": null,
+        "p90": null,
+        "stddev": 0,
+        "unit": "hours",
+        "pct_reached": 0
+      },
+      "cps_at_1h": {
+        "mean": 1,
+        "p10": 0,
+        "p50": 0,
+        "p90": 1,
+        "stddev": 0
+      },
+      "avg_lifetime_coins": 9568879,
+      "avg_machines": 3,
+      "avg_resets": 0
+    },
+    {
+      "profile": "active",
+      "count": 333,
+      "first_harvest": {
+        "mean": 53,
+        "p10": 35,
+        "p50": 35,
+        "p90": 95,
+        "stddev": 21,
+        "pct_reached": 100
+      },
+      "first_auto": {
+        "mean": 40,
+        "p10": 11,
+        "p50": 30,
+        "p90": 81,
+        "stddev": 33,
+        "unit": "minutes",
+        "pct_reached": 100
+      },
+      "prestige": {
+        "mean": 609,
+        "p10": 607,
+        "p50": 609,
+        "p90": 612,
+        "stddev": 2,
+        "unit": "hours",
+        "pct_reached": 100
+      },
+      "cps_at_1h": {
+        "mean": 1,
+        "p10": 0,
+        "p50": 1,
+        "p90": 2,
+        "stddev": 1
+      },
+      "avg_lifetime_coins": 1456831,
+      "avg_machines": 3,
+      "avg_resets": 1
+    },
+    {
+      "profile": "whale_sim",
+      "count": 333,
+      "first_harvest": {
+        "mean": 43,
+        "p10": 35,
+        "p50": 35,
+        "p90": 65,
+        "stddev": 15,
+        "pct_reached": 100
+      },
+      "first_auto": {
+        "mean": 26,
+        "p10": 8,
+        "p50": 20,
+        "p90": 51,
+        "stddev": 23,
+        "unit": "minutes",
+        "pct_reached": 100
+      },
+      "prestige": {
+        "mean": 622,
+        "p10": 620,
+        "p50": 622,
+        "p90": 624,
+        "stddev": 2,
+        "unit": "hours",
+        "pct_reached": 100
+      },
+      "cps_at_1h": {
+        "mean": 1,
+        "p10": 1,
+        "p50": 1,
+        "p90": 2,
+        "stddev": 1
+      },
+      "avg_lifetime_coins": 1271889,
+      "avg_machines": 3,
+      "avg_resets": 1
+    }
+  ],
+  "regression_tests": [
+    {
+      "name": "rebirth_loop_zero",
+      "description": "No session should trigger rebirth loop exploit detection",
+      "threshold": {
+        "eq": 0
+      },
+      "actual": 0,
+      "status": "PASS ✅"
+    },
+    {
+      "name": "machine_stacking_zero",
+      "description": "No session should trigger machine stacking exploit detection",
+      "threshold": {
+        "eq": 0
+      },
+      "actual": 0,
+      "status": "PASS ✅"
+    },
+    {
+      "name": "crop_arbitrage_zero",
+      "description": "No session should trigger crop arbitrage exploit detection",
+      "threshold": {
+        "eq": 0
+      },
+      "actual": 9821,
+      "status": "FAIL ❌"
+    },
+    {
+      "name": "random_event_exploit_zero",
+      "description": "No session should trigger random event exploit detection",
+      "threshold": {
+        "eq": 0
+      },
+      "actual": 179,
+      "status": "FAIL ❌"
+    },
+    {
+      "name": "first_harvest_within_5min_p50",
+      "description": "Active players must reach first harvest within 5 minutes at p50",
+      "threshold": {
+        "lte": 300
+      },
+      "actual": 35,
+      "status": "PASS ✅"
+    },
+    {
+      "name": "first_harvest_within_3min_p90",
+      "description": "Active players should still hit first harvest quickly at p90",
+      "threshold": {
+        "lte": 180
+      },
+      "actual": 95,
+      "status": "PASS ✅"
+    },
+    {
+      "name": "automation_within_40min_p50",
+      "description": "Active players must reach automation within 40 minutes at p50",
+      "threshold": {
+        "lte": 40
+      },
+      "actual": 30,
+      "status": "PASS ✅"
+    },
+    {
+      "name": "automation_within_40min_p90",
+      "description": "Active players must reach automation within 40 minutes at p90",
+      "threshold": {
+        "lte": 40
+      },
+      "actual": 81,
+      "status": "FAIL ❌"
+    },
+    {
+      "name": "inflation_index_lte20",
+      "description": "Coin emission / coin sink ratio must stay <= 20 across the full simulation window",
+      "threshold": {
+        "lte": 20
+      },
+      "actual": 2,
+      "status": "PASS ✅"
+    },
+    {
+      "name": "no_negative_cost_items",
+      "description": "No machines, seeds, or upgrades should have zero or negative cost",
+      "threshold": {
+        "eq": 0
+      },
+      "actual": 0,
+      "status": "PASS ✅",
+      "details": []
+    },
+    {
+      "name": "no_infinite_loops",
+      "description": "No player session should trigger an infinite stall loop",
+      "threshold": {
+        "eq": 0
+      },
+      "actual": 0,
+      "status": "PASS ✅"
+    },
+    {
+      "name": "casual_prestige_rate_lte50pct",
+      "description": "Casual players should prestige at most 50% of the time",
+      "threshold": {
+        "lte": 50
+      },
+      "actual": 0,
+      "status": "PASS ✅"
+    },
+    {
+      "name": "active_prestige_rate_gte70pct",
+      "description": "Active players should still experience prestige in long simulations",
+      "threshold": {
+        "gte": 70
+      },
+      "actual": 100,
+      "status": "PASS ✅"
+    },
+    {
+      "name": "high_exploits_zero",
+      "description": "No HIGH severity exploit should affect >5% of player sessions",
+      "threshold": {
+        "eq": 0
+      },
+      "actual": 2,
+      "status": "FAIL ❌"
+    },
+    {
+      "name": "cps_softcap_bypass_zero",
+      "description": "No session should bypass CPS soft cap protections",
+      "threshold": {
+        "eq": 0
+      },
+      "actual": 0,
+      "status": "PASS ✅"
+    },
+    {
+      "name": "prestige_abuse_zero",
+      "description": "No session should trigger prestige abuse loop detection",
+      "threshold": {
+        "eq": 0
+      },
+      "actual": 0,
+      "status": "PASS ✅"
+    },
+    {
+      "name": "processor_arbitrage_rate_lte2pct",
+      "description": "Processor arbitrage signatures should stay under 2% of sessions",
+      "threshold": {
+        "lte": 2
+      },
+      "actual": 0,
+      "status": "PASS ✅"
+    },
+    {
+      "name": "any_exploit_sessions_lte10pct",
+      "description": "Sessions with any exploit signatures should stay under 10%",
+      "threshold": {
+        "lte": 10
+      },
+      "actual": 100,
+      "status": "FAIL ❌"
+    }
+  ],
+  "failed_tests": [
+    {
+      "name": "crop_arbitrage_zero",
+      "description": "No session should trigger crop arbitrage exploit detection",
+      "threshold": {
+        "eq": 0
+      },
+      "actual": 9821,
+      "status": "FAIL ❌"
+    },
+    {
+      "name": "random_event_exploit_zero",
+      "description": "No session should trigger random event exploit detection",
+      "threshold": {
+        "eq": 0
+      },
+      "actual": 179,
+      "status": "FAIL ❌"
+    },
+    {
+      "name": "automation_within_40min_p90",
+      "description": "Active players must reach automation within 40 minutes at p90",
+      "threshold": {
+        "lte": 40
+      },
+      "actual": 81,
+      "status": "FAIL ❌"
+    },
+    {
+      "name": "high_exploits_zero",
+      "description": "No HIGH severity exploit should affect >5% of player sessions",
+      "threshold": {
+        "eq": 0
+      },
+      "actual": 2,
+      "status": "FAIL ❌"
+    },
+    {
+      "name": "any_exploit_sessions_lte10pct",
+      "description": "Sessions with any exploit signatures should stay under 10%",
+      "threshold": {
+        "lte": 10
+      },
+      "actual": 100,
+      "status": "FAIL ❌"
+    }
+  ],
+  "exploit_paths": [
+    {
+      "rank": 1,
+      "name": "CROP_ARBITRAGE",
+      "frequency": 9821,
+      "affected_sessions_pct": 982.1,
+      "trace": [
+        {
+          "t_sec": 455,
+          "action": "crop_arbitrage",
+          "delta_coins": 768,
+          "total_coins": 768,
+          "flags": [
+            "CROP_ARBITRAGE"
+          ]
+        },
+        {
+          "t_sec": 845,
+          "action": "crop_arbitrage",
+          "delta_coins": 1041,
+          "total_coins": 1041,
+          "flags": [
+            "CROP_ARBITRAGE"
+          ]
+        },
+        {
+          "t_sec": 965,
+          "action": "crop_arbitrage",
+          "delta_coins": 502,
+          "total_coins": 502,
+          "flags": [
+            "CROP_ARBITRAGE"
+          ]
+        },
+        {
+          "t_sec": 1055,
+          "action": "crop_arbitrage",
+          "delta_coins": 502,
+          "total_coins": 502,
+          "flags": [
+            "CROP_ARBITRAGE"
+          ]
+        },
+        {
+          "t_sec": 1295,
+          "action": "crop_arbitrage",
+          "delta_coins": 509,
+          "total_coins": 509,
+          "flags": [
+            "CROP_ARBITRAGE"
+          ]
+        }
+      ],
+      "severity": "HIGH",
+      "proposed_fix": "Manual review required. Check trace log for root cause."
+    },
+    {
+      "rank": 2,
+      "name": "RANDOM_EVENT_EXPLOIT",
+      "frequency": 179,
+      "affected_sessions_pct": 17.9,
+      "trace": [],
+      "severity": "HIGH",
+      "proposed_fix": "Manual review required. Check trace log for root cause."
+    }
+  ],
+  "proposed_patches": [
+    {
+      "patch_id": "auto_v1773807104609_0",
+      "issued_by": "SimulationQA_AI",
+      "timestamp": "2026-03-18T04:11:44.609Z",
+      "reason": "Auto-generated patch for HIGH severity exploit: CROP_ARBITRAGE",
+      "changes": [
+        {
+          "path": "economy.auto",
+          "old_value": "current",
+          "new_value": "see proposed_fix"
+        }
+      ],
+      "proposed_fix": "Manual review required. Check trace log for root cause.",
+      "rollback_conditions": [
+        "If KPI regression detected on next simulation run",
+        "If D1 retention drops >10%"
+      ],
+      "sim_report_ref": "simulation/reports/qa_report_<this_run>",
+      "approved_by": "PENDING_MANUAL_REVIEW"
+    },
+    {
+      "patch_id": "auto_v1773807104610_1",
+      "issued_by": "SimulationQA_AI",
+      "timestamp": "2026-03-18T04:11:44.610Z",
+      "reason": "Auto-generated patch for HIGH severity exploit: RANDOM_EVENT_EXPLOIT",
+      "changes": [
+        {
+          "path": "economy.auto",
+          "old_value": "current",
+          "new_value": "see proposed_fix"
+        }
+      ],
+      "proposed_fix": "Manual review required. Check trace log for root cause.",
+      "rollback_conditions": [
+        "If KPI regression detected on next simulation run",
+        "If D1 retention drops >10%"
+      ],
+      "sim_report_ref": "simulation/reports/qa_report_<this_run>",
+      "approved_by": "PENDING_MANUAL_REVIEW"
+    }
+  ],
+  "runtime": {
+    "started_at": "2026-03-18T04:09:53.157Z",
+    "ended_at": "2026-03-18T04:11:44.611Z",
+    "elapsed_ms": 111454
+  },
+  "raw_KPIs": {
+    "by_profile": {
+      "casual": {
+        "pct_reached_automation": 100,
+        "median_auto_min": 89,
+        "avg_cps_1h": 1,
+        "avg_lifetime_coins": 9568879
+      },
+      "active": {
+        "pct_reached_automation": 100,
+        "median_auto_min": 30,
+        "avg_cps_1h": 1,
+        "avg_lifetime_coins": 1456831
+      },
+      "whale_sim": {
+        "pct_reached_automation": 100,
+        "median_auto_min": 20,
+        "avg_cps_1h": 1,
+        "avg_lifetime_coins": 1271889
+      }
+    }
+  }
+}

@@ -81,7 +81,10 @@ export function stopMachine(inst: MachineInstance): AutomationTelemetry | null {
 }
 
 export function overclockMachine(inst: MachineInstance, def: MachineDef): AutomationTelemetry | null {
-  if (inst.state === 'active' && def.overclockable) {
+  if (!def.overclockable) {
+    throw new Error(`Machine ${inst.machineId} cannot be overclocked.`);
+  }
+  if (inst.state === 'active') {
     inst.state = 'overclocked';
     return {
       timestamp: Date.now(),

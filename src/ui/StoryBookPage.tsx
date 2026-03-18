@@ -10,7 +10,6 @@ import type { Chapter, StoryPage } from '../data/chapters';
 import { CHAPTERS } from '../data/chapters';
 import { CROPS } from '../data/crops';
 import { VILLAGE_FOLK } from '../data/villageFolk';
-import { marketService, type MarketPrice } from '../services/marketService';
 
 interface Props {
   page: StoryPage;

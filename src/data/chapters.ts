@@ -7,7 +7,6 @@
 import type { UnlockMetadata } from '../types/unlock';
 import { ALWAYS_UNLOCKED, chapterGated } from '../types/unlock';
 import type {
-  BossTemplate,
   ChapterRewards,
   StoryBeat,
   BalanceTargets,

@@ -127,8 +127,10 @@ function getWorkerRole(workerId: string): WorkerRole {
       scientist: 'scientist',
       trader: 'analyst',
       manager: 'manager',
+      'biohacker': 'biohacker',
+      'bio-hacker': 'biohacker',
     };
-    return roleMap[folk.role] ?? 'intern';
+    return roleMap[folk.role.replace(/-/g, '').toLowerCase()] ?? 'intern';
   }
 
   const worker = getWorker(workerId);
@@ -146,13 +148,13 @@ function getWorkerRole(workerId: string): WorkerRole {
     geneticist: 'geneticist',
     manager: 'manager',
     supervisor: 'supervisor',
-    'logistics expert': 'logistics',
-    'market analyst': 'analyst',
-    'drone pilot': 'drone_pilot',
-    'bio-hacker': 'biohacker',
+    logistics: 'logistics',
+    analyst: 'analyst',
+    drone_pilot: 'drone_pilot',
+    biohacker: 'biohacker',
     botanist: 'botanist',
   };
-  return roleMap[worker.role.toLowerCase()] ?? 'intern';
+  return roleMap[worker.role.replace(/-/g, '').toLowerCase()] ?? 'intern';
 }
 
 /**
@@ -275,6 +277,10 @@ export const createWorkerAssignmentSlice: StateCreator<
 
     // Check if this assignment type is allowed for this role
     if (!template.assignableTo.includes(assignment.type)) {
+      eventBus.emit('CONTENT_UNLOCKED', {
+        contentType: 'worker_assignment_failure',
+        itemId: instanceId,
+      });
       return false;
     }
 

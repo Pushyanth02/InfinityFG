@@ -7,7 +7,7 @@ const StatsBar: React.FC = () => {
   const biomeLabel = currentRegion.replace(/_/g, ' ');
 
   return (
-    <header
+    <header aria-label="Game stats bar" role="banner"
       style={{
         background: 'linear-gradient(135deg, #8b6033 0%, #5c3d1e 100%)',
         borderBottom: '3px solid #4a2d0e',

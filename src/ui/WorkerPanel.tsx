@@ -82,7 +82,7 @@ const WorkerPanel: React.FC = () => {
           const canAssign = !!instance && !!machineTarget;
 
           return (
-            <div
+                <div role="img" aria-label={`Worker role: ${worker.role}`}
               key={worker.worker_id}
               className="glass-panel"
               style={{ padding: 'var(--space-md)', display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}
