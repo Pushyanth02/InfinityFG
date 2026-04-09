@@ -10,10 +10,11 @@ function ensureDir(dir: string): void {
 export function writeTimestampedJsonReport<T>(
   reportDir: string,
   filePrefix: string,
-  report: T
+  report: T,
+  timestamp: Date = new Date()
 ): string {
   ensureDir(reportDir);
-  const filename = `${filePrefix}_${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
+  const filename = `${filePrefix}_${timestamp.toISOString().replace(/[:.]/g, '-')}.json`;
   const outPath = path.join(reportDir, filename);
   fs.writeFileSync(outPath, JSON.stringify(report, null, 2));
   return outPath;
