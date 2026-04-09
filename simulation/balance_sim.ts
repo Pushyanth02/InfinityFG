@@ -5,7 +5,7 @@
  * Runs N virtual player sessions and validates whether pacing targets are met.
  * Run with: npx ts-node simulation/balance_sim.ts
  *
- * Output: simulation/reports/sim_report_<timestamp>.json
+ * Output: <qa_integration.report_output_dir>/sim_report_<timestamp>.json
  */
 
 import { writeTimestampedJsonReport } from './reportIo';
