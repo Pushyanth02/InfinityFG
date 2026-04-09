@@ -56,7 +56,8 @@ function loadRootConfig(): RootConfig {
   try {
     const raw = fs.readFileSync(configPath, 'utf8');
     return JSON.parse(raw) as RootConfig;
-  } catch {
+  } catch (error) {
+    console.warn(`Failed to load ${configPath}; using default simulation tunables.`, error);
     return {};
   }
 }
