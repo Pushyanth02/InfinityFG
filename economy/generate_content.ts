@@ -214,5 +214,5 @@ console.log(`   - 20 NPCs`);
 console.log(`   - 6 Seasonal Events`);
 console.log(`   - ${achievements.length} Achievements`);
 console.log(`   - ${Object.keys(microcopy).length} UI Microcopy Strings`);
-console.log(`📁 JSON: data_exports/narrative_content.json`);
+console.log(`📁 JSON: src/data_exports/narrative_content.json`);
 console.log(`📁 TS:   src/data/narrative.ts`);

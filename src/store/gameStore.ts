@@ -11,7 +11,7 @@ import { createWorkerAssignmentSlice } from './slices/workerAssignmentSlice';
 import { createCraftingSlice } from './slices/craftingSlice';
 import { calculatePlotGrowth, calculateMachineProduction } from '../engine/mechanics';
 import { marketService } from '../services/marketService';
-import { eventBus } from '../services/eventBus';
+import { emitCoinsChanged } from '../services/gameEvents';
 
 export const useGameStore = create<GameState>()(
   persist(
@@ -78,10 +78,8 @@ export const useGameStore = create<GameState>()(
         }));
 
         // Phase 2: emit COINS_CHANGED so unlock pipeline can re-evaluate
-        if (coinGain > 0) {
-          const { coins, lifetimeCoins } = get();
-          eventBus.emit('COINS_CHANGED', { coins, delta: coinGain, lifetimeCoins });
-        }
+        const { coins, lifetimeCoins } = get();
+        emitCoinsChanged({ coins, delta: coinGain, lifetimeCoins });
 
         // 3. Check quest progress on every tick (for earn/deploy quests)
         get().checkQuestProgress();

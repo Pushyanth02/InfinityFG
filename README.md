@@ -15,7 +15,7 @@ InfinityFG is a farming automation and story progression game built with React, 
 - `simulation/`: deterministic simulation and QA runners
 - `economy/`: economy and progression source models
 - `scripts/`: orchestration scripts
-- `data_exports/`: exported content datasets
+- `src/data_exports/`: canonical exported content datasets consumed by runtime data modules
 - `patches/`: content/economy patch artifacts
 
 ## Getting Started
