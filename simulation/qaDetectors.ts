@@ -1,5 +1,6 @@
 import type { CropDef } from './qaData';
 
+// 0.05% chance per roll; tuned to keep random events rare and avoid false exploit positives.
 const RANDOM_EVENT_TRIGGER_THRESHOLD = 0.9995;
 
 export interface QaDetectorConfig {

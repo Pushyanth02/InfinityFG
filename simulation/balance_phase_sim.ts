@@ -258,7 +258,7 @@ function buildScenarioSummary(duration: DurationHours, metrics: SessionMetrics[]
 
 console.log(`🎯 Balance Phase Simulator — ${SESSIONS} sessions/scenario, seed=${SEED}`);
 const report = {
-  schema: 'infinityfg-balance-phase/v1',
+  schema: 'agriempire-balance-phase/v1',
   issued_by: 'SimulationQA_AI',
   timestamp: new Date().toISOString(),
   input: { sessions: SESSIONS, seed: SEED, durations_hours: DURATIONS },

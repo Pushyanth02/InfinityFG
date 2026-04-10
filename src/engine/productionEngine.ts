@@ -158,6 +158,8 @@ export function getProductionBreakdown(
   );
 
   // === Fixed Modifiers (not tunable) ===
+  // Equipment bonuses are logarithmically dampened to prevent runaway late-game scaling:
+  // the ×2 then ÷2 shape keeps early equipment gains meaningful while compressing high-end stacks.
   const equipmentEffective = 1 + Math.log1p(Math.max(0, input.equipmentMultiplier - 1) * 2) / 2;
   const fixedMult =
     input.regionMultiplier * input.weatherMultiplier * equipmentEffective;
