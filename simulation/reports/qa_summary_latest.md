@@ -1,6 +1,6 @@
 # QA Summary (Latest)
 
-- Timestamp: 2026-04-10T05:56:13.386Z
+- Timestamp: 2026-04-10T11:00:53.846Z
 - Sessions: 1000
 - Profiles: casual, active, whale_sim
 - Regression pass rate: 100%
@@ -13,4 +13,4 @@
 ## Top Exploits
 - None
 
-Report JSON: qa_report_2026-04-10T05-56-13-387Z.json
+Report JSON: qa_report_2026-04-10T11-00-53-847Z.json
