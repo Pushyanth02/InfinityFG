@@ -1,0 +1,5 @@
+[
+  { "id": 1, "name": "Slime of Delay", "hp": 2500 },
+  { "id": 2, "name": "Rock of Resistance", "hp": 62500 },
+  { "id": 3, "name": "Spirit of Doubt", "hp": 1562500 }
+]

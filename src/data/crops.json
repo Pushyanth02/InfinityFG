@@ -1,0 +1,14 @@
+[
+  {
+    "id": "wheat_1",
+    "tier": 1,
+    "baseValue": 2,
+    "growthTime": 10
+  },
+  {
+    "id": "wheat_2",
+    "tier": 2,
+    "baseValue": 3.6,
+    "growthTime": 12
+  }
+]

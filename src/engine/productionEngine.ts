@@ -310,3 +310,25 @@ export const MAX_MULTIPLIERS = {
   // Combined theoretical maximum (for inflation testing)
   THEORETICAL_MAX: 3.0 * 2.0 * 3.0 * 6.5 * 2.0 * 10.0, // = 2,340x
 };
+
+// ============================================================
+// DROP-IN INFINITY FARM FORMULA
+// ============================================================
+
+export interface BasicCrop {
+  baseValue: number;
+  growthTime: number;
+}
+
+export interface BasicProductionMultipliers {
+  total: number;
+}
+
+export function calculateProduction(
+  crop: BasicCrop,
+  multipliers: BasicProductionMultipliers
+): number {
+  if (crop.growthTime <= 0) return 0;
+  const base = crop.baseValue / crop.growthTime;
+  return base * multipliers.total;
+}

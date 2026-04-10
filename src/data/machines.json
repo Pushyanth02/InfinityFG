@@ -1,0 +1,14 @@
+[
+  {
+    "id": "planter",
+    "baseCost": 50,
+    "effect": "autoPlant",
+    "speed": 1
+  },
+  {
+    "id": "harvester",
+    "baseCost": 100,
+    "effect": "autoHarvest",
+    "speed": 1
+  }
+]
