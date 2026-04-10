@@ -163,3 +163,7 @@ export function tickMachine(inst: MachineInstance, def: MachineDef, tickSec: num
 
   return result;
 }
+
+export function getMachineCost(base: number, owned: number): number {
+  return base * Math.pow(1.15, owned);
+}

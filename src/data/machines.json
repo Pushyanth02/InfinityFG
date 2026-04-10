@@ -1,14 +1,46 @@
 [
-  {
-    "id": "planter",
-    "baseCost": 50,
-    "effect": "autoPlant",
-    "speed": 1
-  },
-  {
-    "id": "harvester",
-    "baseCost": 100,
-    "effect": "autoHarvest",
-    "speed": 1
-  }
+  { "id": "planter_1", "type": "planter", "tier": 1, "baseCost": 50, "speed": 1 },
+  { "id": "planter_2", "type": "planter", "tier": 2, "baseCost": 500, "speed": 2 },
+  { "id": "planter_3", "type": "planter", "tier": 3, "baseCost": 5000, "speed": 4 },
+  { "id": "planter_4", "type": "planter", "tier": 4, "baseCost": 50000, "speed": 8 },
+  { "id": "planter_5", "type": "planter", "tier": 5, "baseCost": 500000, "speed": 16 },
+  { "id": "planter_6", "type": "planter", "tier": 6, "baseCost": 5000000, "speed": 32 },
+  { "id": "planter_7", "type": "planter", "tier": 7, "baseCost": 50000000, "speed": 64 },
+  { "id": "planter_8", "type": "planter", "tier": 8, "baseCost": 500000000, "speed": 128 },
+
+  { "id": "waterer_1", "type": "waterer", "tier": 1, "baseCost": 50, "speed": 1 },
+  { "id": "waterer_2", "type": "waterer", "tier": 2, "baseCost": 500, "speed": 2 },
+  { "id": "waterer_3", "type": "waterer", "tier": 3, "baseCost": 5000, "speed": 4 },
+  { "id": "waterer_4", "type": "waterer", "tier": 4, "baseCost": 50000, "speed": 8 },
+  { "id": "waterer_5", "type": "waterer", "tier": 5, "baseCost": 500000, "speed": 16 },
+  { "id": "waterer_6", "type": "waterer", "tier": 6, "baseCost": 5000000, "speed": 32 },
+  { "id": "waterer_7", "type": "waterer", "tier": 7, "baseCost": 50000000, "speed": 64 },
+  { "id": "waterer_8", "type": "waterer", "tier": 8, "baseCost": 500000000, "speed": 128 },
+
+  { "id": "harvester_1", "type": "harvester", "tier": 1, "baseCost": 100, "speed": 1 },
+  { "id": "harvester_2", "type": "harvester", "tier": 2, "baseCost": 1000, "speed": 2 },
+  { "id": "harvester_3", "type": "harvester", "tier": 3, "baseCost": 10000, "speed": 4 },
+  { "id": "harvester_4", "type": "harvester", "tier": 4, "baseCost": 100000, "speed": 8 },
+  { "id": "harvester_5", "type": "harvester", "tier": 5, "baseCost": 1000000, "speed": 16 },
+  { "id": "harvester_6", "type": "harvester", "tier": 6, "baseCost": 10000000, "speed": 32 },
+  { "id": "harvester_7", "type": "harvester", "tier": 7, "baseCost": 100000000, "speed": 64 },
+  { "id": "harvester_8", "type": "harvester", "tier": 8, "baseCost": 1000000000, "speed": 128 },
+
+  { "id": "processor_1", "type": "processor", "tier": 1, "baseCost": 200, "speed": 1 },
+  { "id": "processor_2", "type": "processor", "tier": 2, "baseCost": 2000, "speed": 2 },
+  { "id": "processor_3", "type": "processor", "tier": 3, "baseCost": 20000, "speed": 4 },
+  { "id": "processor_4", "type": "processor", "tier": 4, "baseCost": 200000, "speed": 8 },
+  { "id": "processor_5", "type": "processor", "tier": 5, "baseCost": 2000000, "speed": 16 },
+  { "id": "processor_6", "type": "processor", "tier": 6, "baseCost": 20000000, "speed": 32 },
+  { "id": "processor_7", "type": "processor", "tier": 7, "baseCost": 200000000, "speed": 64 },
+  { "id": "processor_8", "type": "processor", "tier": 8, "baseCost": 2000000000, "speed": 128 },
+
+  { "id": "drone_1", "type": "drone", "tier": 1, "baseCost": 500, "speed": 1 },
+  { "id": "drone_2", "type": "drone", "tier": 2, "baseCost": 5000, "speed": 2 },
+  { "id": "drone_3", "type": "drone", "tier": 3, "baseCost": 50000, "speed": 4 },
+  { "id": "drone_4", "type": "drone", "tier": 4, "baseCost": 500000, "speed": 8 },
+  { "id": "drone_5", "type": "drone", "tier": 5, "baseCost": 5000000, "speed": 16 },
+  { "id": "drone_6", "type": "drone", "tier": 6, "baseCost": 50000000, "speed": 32 },
+  { "id": "drone_7", "type": "drone", "tier": 7, "baseCost": 500000000, "speed": 64 },
+  { "id": "drone_8", "type": "drone", "tier": 8, "baseCost": 5000000000, "speed": 128 }
 ]

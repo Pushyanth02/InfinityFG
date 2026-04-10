@@ -326,9 +326,11 @@ export interface BasicProductionMultipliers {
 
 export function calculateProduction(
   crop: BasicCrop,
-  multipliers: BasicProductionMultipliers
+  multipliers: BasicProductionMultipliers | number
 ): number {
   if (crop.growthTime <= 0) return 0;
   const base = crop.baseValue / crop.growthTime;
-  return base * multipliers.total;
+  const totalMultiplier =
+    typeof multipliers === 'number' ? multipliers : multipliers.total;
+  return base * totalMultiplier;
 }
