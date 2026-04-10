@@ -17,7 +17,7 @@ export interface LiveRule {
 export interface TunableParameterContract {
   key: string;
   target_path: string;
-  safe_range: [number, number];
+  safe_range: number[];
   rollback_condition: string;
 }
 
@@ -100,13 +100,13 @@ export interface KPIDashboardSnapshot {
  * If a threshold is crossed, it auto-generates a safe, reversible ParameterPatch.
  */
 export class LiveOpsGatekeeper {
-  private readonly config: LiveOpsRulesConfig = rulesData as LiveOpsRulesConfig;
-  private readonly rules: LiveRule[] = (rulesData as LiveOpsRulesConfig).live_rules ?? [];
+  private readonly config: LiveOpsRulesConfig = rulesData as unknown as LiveOpsRulesConfig;
+  private readonly rules: LiveRule[] = this.config.live_rules ?? [];
   private readonly tunableRegistry = new Map<string, TunableParameterContract>(
-    ((rulesData as LiveOpsRulesConfig).tunable_parameter_registry ?? []).map((entry) => [entry.key, entry])
+    (this.config.tunable_parameter_registry ?? []).map((entry) => [entry.key, entry])
   );
   private readonly dashboardFields: Array<keyof LiveTelemetrySummary> =
-    (rulesData as LiveOpsRulesConfig).kpi_dashboard_fields ?? [
+    this.config.kpi_dashboard_fields ?? [
       'region_dropoff_rate',
       'avg_region_completion_minutes',
       'idle_active_ratio',
@@ -139,10 +139,10 @@ export class LiveOpsGatekeeper {
     return generatedPatches;
   }
 
-  public getKPIDashboardSnapshot(telemetry: LiveTelemetrySummary): KPIDashboardSnapshot {
-    const snapshot = {} as KPIDashboardSnapshot;
+  public getKPIDashboardSnapshot(telemetry: LiveTelemetrySummary): Record<string, number> {
+    const snapshot: Record<string, number> = {};
     for (const field of this.dashboardFields) {
-      (snapshot as Record<string, number>)[field] = telemetry[field] as number;
+      snapshot[field] = telemetry[field] as number;
     }
     return snapshot;
   }
