@@ -130,6 +130,11 @@ export function getProductionBreakdown(
   input: ProductionMultiplierInput,
   tunables: ProductionTunables = DEFAULT_TUNABLES
 ): ProductionBreakdown {
+  /**
+   * Softcap helper:
+   * - knee: threshold where logarithmic compression begins
+   * - softness: compression rate after the knee (higher = stronger compression)
+   */
   const softcap = (value: number, knee: number, softness: number): number => {
     if (value <= knee) return value;
     return knee + Math.log1p((value - knee) * softness) / softness;
@@ -328,7 +333,9 @@ export function calculateProduction(
   crop: BasicCrop,
   multipliers: BasicProductionMultipliers | number
 ): number {
-  if (crop.growthTime <= 0) return 0;
+  if (crop.growthTime <= 0) {
+    throw new RangeError(`Invalid crop growthTime: ${crop.growthTime}`);
+  }
   const base = crop.baseValue / crop.growthTime;
   const totalMultiplier =
     typeof multipliers === 'number' ? multipliers : multipliers.total;
