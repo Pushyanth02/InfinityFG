@@ -3,16 +3,111 @@
   "metrics_monitored": [
     "DAU",
     "D1_retention",
+    "D3_retention",
     "avg_session_length_minutes",
     "inflation_index",
     "avg_coins_earned_per_day",
-    "prestige_rate_daily"
+    "prestige_rate_daily",
+    "region_dropoff_rate",
+    "avg_region_completion_minutes",
+    "idle_active_ratio",
+    "worker_usage_rate",
+    "machine_usage_rate",
+    "market_usage_rate",
+    "p50_prestige_hours",
+    "p90_prestige_hours"
+  ],
+  "kpi_dashboard_fields": [
+    "region_dropoff_rate",
+    "avg_region_completion_minutes",
+    "idle_active_ratio",
+    "worker_usage_rate",
+    "machine_usage_rate",
+    "market_usage_rate",
+    "p50_prestige_hours",
+    "p90_prestige_hours",
+    "D1_retention",
+    "D3_retention",
+    "avg_session_length_minutes"
   ],
   "alert_thresholds": {
     "inflation_index_high": 25,
     "inflation_index_critical": 35,
     "D1_retention_low": 0.35,
-    "prestige_rate_high": 0.05
+    "D3_retention_low": 0.2,
+    "prestige_rate_high": 0.05,
+    "region_dropoff_rate_high": 0.45,
+    "avg_region_completion_minutes_high": 90,
+    "idle_active_ratio_high": 4.0,
+    "machine_usage_rate_low": 0.35,
+    "worker_usage_rate_low": 0.3,
+    "market_usage_rate_low": 0.2,
+    "p50_prestige_hours_low": 2.0
+  },
+  "tunable_parameter_registry": [
+    {
+      "key": "crop_yield_multiplier",
+      "target_path": "economy.revenue_formula.tunables.base_crop_value_scalar",
+      "safe_range": [0.5, 3.0],
+      "rollback_condition": "auto_rollback_after_24h_if: inflation_index < 20"
+    },
+    {
+      "key": "machine_cost_base_multiplier",
+      "target_path": "economy.machine_cost_scaling.tunables.machine_unlock_coin_threshold_scalar",
+      "safe_range": [0.5, 2.0],
+      "rollback_condition": "auto_rollback_after_24h_if: machine_usage_rate > 0.55"
+    },
+    {
+      "key": "AURA_WEIGHT",
+      "target_path": "src/engine/productionEngine.DEFAULT_TUNABLES.AURA_WEIGHT",
+      "safe_range": [0.3, 1.0],
+      "rollback_condition": "auto_rollback_after_24h_if: inflation_index > 25"
+    },
+    {
+      "key": "prestige_divisor",
+      "target_path": "economy.prestige_formula.tunables.prestige_divisor",
+      "safe_range": [500000, 10000000],
+      "rollback_condition": "auto_rollback_after_24h_if: D1_retention < 0.35"
+    }
+  ],
+  "experiment_protocol": {
+    "observation_window_hours": 48,
+    "sample_cohorts": ["new_players", "active_players", "high_engagement_players"],
+    "success_targets": {
+      "D1_retention_min": 0.35,
+      "D3_retention_min": 0.2,
+      "avg_session_length_minutes_min": 18
+    }
+  },
+  "first_iteration_micro_adjustments": [
+    {
+      "id": "iter1_machine_cost_relief",
+      "target": "machine_cost_base_multiplier",
+      "proposed_adjustment": "-5%",
+      "hypothesis": "Lower machine entry friction will improve machine adoption without inflation spikes.",
+      "guardrail_metric": "inflation_index <= 25",
+      "rollback_condition": "machine_usage_rate does not improve by at least +0.05 after 48h"
+    },
+    {
+      "id": "iter1_worker_weight_nudge",
+      "target": "AURA_WEIGHT",
+      "proposed_adjustment": "+5%",
+      "hypothesis": "Slightly stronger worker aura increases long-term worker investment viability.",
+      "guardrail_metric": "idle_active_ratio <= 4.0",
+      "rollback_condition": "worker_usage_rate does not improve by at least +0.05 after 48h"
+    },
+    {
+      "id": "iter1_prestige_pacing",
+      "target": "prestige_divisor",
+      "proposed_adjustment": "+10%",
+      "hypothesis": "Slightly slower prestige pacing reduces premature reset loops and improves session depth.",
+      "guardrail_metric": "D1_retention >= 0.35",
+      "rollback_condition": "avg_session_length_minutes drops below 18 after 48h"
+    }
+  ],
+  "operational_cadence": {
+    "loop": "small_change -> observe -> keep_or_revert",
+    "decision_window_hours": 48
   },
   "live_rules": [
     {
@@ -49,6 +144,42 @@
       },
       "rollback_condition": "manual_review_required",
       "volatility_rating": "MEDIUM"
+    },
+    {
+      "rule_id": "rule_machine_cost_relief_1",
+      "condition": "machine_usage_rate < 0.35",
+      "action": {
+        "type": "parameter_nudge",
+        "target": "machine_cost_base_multiplier",
+        "adjustment": "-5%",
+        "reason": "Machine adoption under target. Apply low-risk cost relief."
+      },
+      "rollback_condition": "auto_rollback_after_24h_if: inflation_index > 25",
+      "volatility_rating": "LOW"
+    },
+    {
+      "rule_id": "rule_worker_weight_nudge_1",
+      "condition": "worker_usage_rate < 0.30",
+      "action": {
+        "type": "parameter_nudge",
+        "target": "AURA_WEIGHT",
+        "adjustment": "+5%",
+        "reason": "Worker adoption under target. Nudge worker aura contribution."
+      },
+      "rollback_condition": "auto_rollback_after_24h_if: idle_active_ratio > 4",
+      "volatility_rating": "LOW"
+    },
+    {
+      "rule_id": "rule_prestige_pacing_nudge_1",
+      "condition": "p50_prestige_hours < 2.0",
+      "action": {
+        "type": "parameter_nudge",
+        "target": "prestige_divisor",
+        "adjustment": "+10%",
+        "reason": "Prestige is being reached too early for core loop depth."
+      },
+      "rollback_condition": "auto_rollback_after_24h_if: D1_retention < 0.35",
+      "volatility_rating": "LOW"
     }
   ],
   "ab_testing": {
