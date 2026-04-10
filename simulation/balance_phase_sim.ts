@@ -278,7 +278,7 @@ const jsonPath = writeTimestampedJsonReport(reportDir, 'balance_phase_report', r
 const summaryPath = `${reportDir}/balance_phase_summary_latest.md`;
 
 const summary = [
-  '# InfinityFG Balance Phase Summary',
+  '# AgriEmpire Balance Phase Summary',
   '',
   `Generated: ${report.timestamp}`,
   '',
