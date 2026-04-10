@@ -9,6 +9,7 @@ import { CHAPTERS } from '../../data/chapters';
 import { getWeapon } from '../../data/cropWeapons';
 import { eventBus } from '../../services/eventBus';
 import { VILLAGE_FOLK } from '../../data/villageFolk';
+import { applyBossHit, runBossTick } from '../../engine/bossEngine';
 
 export interface ChapterProgressEntry {
   bossHp: number;        // remaining HP (decremented on harvest)
@@ -23,6 +24,7 @@ export interface StorySlice {
   unlockedFeatures: string[];
   pendingUnlocks: Array<{ id: string; reqs: string[]; cost?: number }>;
   futureUnlocksPreview: Array<{ id: string; unlockCondition: string }>;
+  bossElapsedTracking: Record<string, number>;
 
   // ── Weapon state ──────────────────────────────────
   ownedWeapons: string[];
@@ -30,6 +32,7 @@ export interface StorySlice {
 
   // ── Actions ───────────────────────────────────────
   damageChapterBoss: (cropId: string, harvestCount: number) => void;
+  tickChapterBoss: (deltaSec: number, baseDps: number) => void;
   checkQuestProgress: () => void;
   buyWeapon: (weaponId: string) => void;
   equipWeapon: (weaponId: string | null) => void;
@@ -47,6 +50,12 @@ const initialProgress = (): Record<string, ChapterProgressEntry> => {
       isDefeated: false,
     };
   }
+  return map;
+};
+
+const initialBossElapsed = (): Record<string, number> => {
+  const map: Record<string, number> = {};
+  for (const ch of CHAPTERS) map[ch.id] = 0;
   return map;
 };
 
@@ -68,6 +77,7 @@ export const createStorySlice: StateCreator<
     id: w.worker_id,
     unlockCondition: `Reach Chapter ${w.tier}`,
   })),
+  bossElapsedTracking: initialBossElapsed(),
   ownedWeapons: [],
   equippedWeaponId: null,
 
@@ -96,8 +106,13 @@ export const createStorySlice: StateCreator<
     }
 
     const rawDamage = harvestCount * boss.damagePerCrop * weakMult * weaponMult;
-    const newHp = Math.max(0, progress.bossHp - rawDamage);
+    const elapsed = get().bossElapsedTracking[currentChapterId] ?? 0;
+    const { nextHp: newHp, damageApplied } = applyBossHit(boss, progress.bossHp, rawDamage, elapsed);
     const isDefeated = newHp === 0;
+
+    if (damageApplied > 0) {
+      get().trackBossDamage(boss.id, damageApplied);
+    }
 
     set(state => ({
       chapterProgress: {
@@ -123,6 +138,54 @@ export const createStorySlice: StateCreator<
         reward: boss.defeatReward.coinsBonus,
       });
 
+      get().advanceChapter();
+    }
+  },
+
+  tickChapterBoss: (deltaSec, baseDps) => {
+    if (deltaSec <= 0 || baseDps <= 0) return;
+    const { currentChapterId, chapterProgress, bossElapsedTracking } = get();
+    const chapter = CHAPTERS.find((c) => c.id === currentChapterId);
+    if (!chapter) return;
+    const progress = chapterProgress[currentChapterId];
+    if (!progress || progress.isDefeated) return;
+
+    const elapsed = bossElapsedTracking[currentChapterId] ?? 0;
+    const result = runBossTick({
+      boss: chapter.boss,
+      currentHp: progress.bossHp,
+      baseDps,
+      deltaSec,
+      elapsedSec: elapsed,
+    });
+    const isDefeated = result.nextHp === 0;
+
+    if (result.damageApplied > 0) {
+      get().trackBossDamage(chapter.boss.id, result.damageApplied);
+    }
+
+    set((state) => ({
+      coins: Math.max(0, state.coins - result.coinDrain),
+      chapterProgress: {
+        ...state.chapterProgress,
+        [currentChapterId]: {
+          ...progress,
+          bossHp: result.nextHp,
+          isDefeated,
+        },
+      },
+      bossElapsedTracking: {
+        ...state.bossElapsedTracking,
+        [currentChapterId]: result.nextElapsedSec,
+      },
+    }));
+
+    if (isDefeated) {
+      eventBus.emit('BOSS_DEFEATED', {
+        bossId: chapter.boss.id,
+        bossName: chapter.boss.name,
+        reward: chapter.boss.defeatReward.coinsBonus,
+      });
       get().advanceChapter();
     }
   },
