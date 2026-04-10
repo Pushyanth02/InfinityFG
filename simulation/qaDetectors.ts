@@ -1,5 +1,7 @@
 import type { CropDef } from './qaData';
 
+const RANDOM_EVENT_TRIGGER_THRESHOLD = 0.9995;
+
 export interface QaDetectorConfig {
   processingMultPerStage: number;
   processingFeeRatio: number;
@@ -65,5 +67,5 @@ export function detectCropArbitrage(plots: SimPlot[], crops: CropDef[]): boolean
 
 export function shouldTriggerRandomEvent(rng: () => number): boolean {
   // Random events should be rare; this function represents a single event roll.
-  return rng() > 0.9995;
+  return rng() > RANDOM_EVENT_TRIGGER_THRESHOLD;
 }

@@ -17,7 +17,7 @@ export const createMetaSlice: StateCreator<
   MetaSlice
 > = (set, get) => ({
   unlockedCrops: ['crop_001'],
-  unlockedRegions: ['region_01'],
+  unlockedRegions: ['meadow'],
   unlockedSkills: [],
   chapterTokens: ['meadow_token'],
   skillPoints: {
@@ -115,7 +115,7 @@ export const createMetaSlice: StateCreator<
       machines: [],
       workers: {},
       unlockedCrops: ['crop_001'],
-      unlockedRegions: ['region_01'],
+      unlockedRegions: ['meadow'],
       unlockedSkills: [],
       chapterTokens: ['meadow_token'],
       skillPoints: {
