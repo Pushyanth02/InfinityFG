@@ -263,14 +263,18 @@ export const createStorySlice: StateCreator<
     set((state) => ({
       coins: state.coins - ucw.cost,
       unlockedUcws: [...state.unlockedUcws, ucwId],
-      activeUCW: state.activeUCW.includes(ucwId) ? state.activeUCW : [ucwId],
+      activeUCW: state.activeUCW.includes(ucwId) ? state.activeUCW : [...state.activeUCW, ucwId],
     }));
   },
 
   equipUCW: (ucwId) => {
     const { unlockedUcws } = get();
     if (!unlockedUcws.includes(ucwId)) return;
-    set({ activeUCW: [ucwId] });
+    set((state) => ({
+      activeUCW: state.activeUCW.includes(ucwId)
+        ? state.activeUCW
+        : [...state.activeUCW, ucwId],
+    }));
   },
 
   // ── checkQuestProgress ────────────────────────────────────
