@@ -46,7 +46,7 @@ const INPUT = {
 
 const FAIL_ON_REGRESSION = (args['failOnRegression'] ?? args['strict'] ?? 'false') === 'true';
 const SILENT = (args['silent'] ?? 'false') === 'true';
-const RANDOM_EVENT_EXPLOIT_STREAK_THRESHOLD = 8;
+const RANDOM_EVENT_EXPLOIT_MIN_CONSECUTIVE_TRIGGERS = 8;
 
 const DEFAULT_QA_THRESHOLDS = {
   ACTIVE_FIRST_HARVEST_P50_SEC_MAX: 300,
@@ -315,7 +315,7 @@ function simulate(sessId: number, profile: Profile, rng: () => number): SessionR
 
     // Require an implausible sustained streak before treating this as an exploit.
     // At this event probability, 8 consecutive triggers is effectively unattainable in normal play.
-    if (randomEventCount >= RANDOM_EVENT_EXPLOIT_STREAK_THRESHOLD) {
+    if (randomEventCount >= RANDOM_EVENT_EXPLOIT_MIN_CONSECUTIVE_TRIGGERS) {
       exploitFlags.push('RANDOM_EVENT_EXPLOIT');
       addTrace(t, 'random_event_exploit', randomEventCount, ['RANDOM_EVENT_EXPLOIT']);
       randomEventCount = 0;

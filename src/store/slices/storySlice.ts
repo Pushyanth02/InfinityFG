@@ -76,6 +76,19 @@ const initialBossShield = (): Record<string, number> => {
   return map;
 };
 
+function getActiveUcwsForChapter(chapterNumber: number, unlockedUcws: string[], activeUCW: string[]) {
+  const chapterUcws = getUcwsByRegion(chapterNumber);
+  const unlockedForChapter = chapterUcws.filter((ucw) => unlockedUcws.includes(ucw.id));
+  if (unlockedForChapter.length === 0) return [];
+
+  const manuallyActive = unlockedForChapter.filter((ucw) => activeUCW.includes(ucw.id));
+  if (manuallyActive.length > 0) return manuallyActive;
+
+  // Fallback: automatically use the highest-region unlocked UCW available.
+  const fallback = unlockedForChapter.sort((a, b) => b.region - a.region)[0];
+  return fallback ? [fallback] : [];
+}
+
 export const createStorySlice: StateCreator<
   GameState,
   [],
@@ -127,19 +140,11 @@ export const createStorySlice: StateCreator<
 
     const rawDamage = harvestCount * boss.damagePerCrop * weakMult * weaponMult;
     const elapsed = get().bossElapsedTracking[currentChapterId] ?? 0;
-    const manualActiveUcwIds = get().activeUCW;
-    const fallbackUcwId = get().equippedWeaponId
-      ? getUcwsByRegion(chapter.number).find((ucw) => ucw.region === chapter.number)?.id
-      : undefined;
-    const activeUcwIds = manualActiveUcwIds.length > 0
-      ? manualActiveUcwIds
-      : fallbackUcwId
-        ? [fallbackUcwId]
-        : [];
+    const activeUcws = getActiveUcwsForChapter(chapter.number, get().unlockedUcws, get().activeUCW);
     const ucwState = {
       bossHP: progress.bossHp,
       bossShield: get().bossShieldTracking[currentChapterId] ?? 0,
-      activeUCW: getUcwsByRegion(chapter.number).filter((ucw) => activeUcwIds.includes(ucw.id)),
+      activeUCW: activeUcws,
     };
     const boostedDamage = applyUCW(ucwState, rawDamage, 1);
     let postShieldDamage = boostedDamage;
@@ -196,19 +201,11 @@ export const createStorySlice: StateCreator<
     if (!progress || progress.isDefeated) return;
 
     const elapsed = bossElapsedTracking[currentChapterId] ?? 0;
-    const manualActiveUcwIds = get().activeUCW;
-    const fallbackUcwId = get().equippedWeaponId
-      ? getUcwsByRegion(chapter.number).find((ucw) => ucw.region === chapter.number)?.id
-      : undefined;
-    const activeUcwIds = manualActiveUcwIds.length > 0
-      ? manualActiveUcwIds
-      : fallbackUcwId
-        ? [fallbackUcwId]
-        : [];
+    const activeUcws = getActiveUcwsForChapter(chapter.number, get().unlockedUcws, get().activeUCW);
     const ucwState = {
       bossHP: progress.bossHp,
       bossShield: get().bossShieldTracking[currentChapterId] ?? 0,
-      activeUCW: getUcwsByRegion(chapter.number).filter((ucw) => activeUcwIds.includes(ucw.id)),
+      activeUCW: activeUcws,
     };
     const shieldPenalty = ucwState.bossShield > 0 ? 0.35 : 1;
     const boostedDps = applyUCW(ucwState, baseDps * shieldPenalty, deltaSec);

@@ -6,6 +6,8 @@ export interface AutoBalanceConfig {
   machineScale: number;
 }
 
+const MAX_BALANCE_ITERATIONS = 20;
+
 export function autoBalance(): AutoBalanceConfig {
   const config: AutoBalanceConfig = {
     cropValueScale: 1.8,
@@ -13,7 +15,7 @@ export function autoBalance(): AutoBalanceConfig {
     machineScale: 1.15,
   };
 
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < MAX_BALANCE_ITERATIONS; i++) {
     const result = runSimulation(50, config);
 
     // TARGET: reach region 12 in ~50 hours
