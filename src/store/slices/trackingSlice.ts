@@ -53,6 +53,18 @@ export interface TrackingSlice {
   /** Milestones that have been reached (milestoneId -> timestamp) */
   milestonesReached: Record<string, number>;
 
+  // ── Balance Telemetry ───────────────────────────────
+  /** Timestamp when current region/chapter timing started */
+  regionStartedAt: number;
+  /** Accumulated active time per region/chapter ID in seconds */
+  timeInRegionSec: Record<string, number>;
+  /** Number of prestige resets performed */
+  prestigeCount: number;
+  /** Rolling coins-per-minute telemetry samples */
+  coinsPerMinuteSamples: number[];
+  /** Worker purchases by workerId */
+  workerPurchases: Record<string, number>;
+
   // ── Actions ──────────────────────────────────────────
   trackHarvest: (cropId: string, amount: number, regionId?: string) => void;
   trackBossDamage: (bossId: string, damage: number) => void;
@@ -60,11 +72,17 @@ export interface TrackingSlice {
   decayReputation: (deltaSeconds: number) => void;
   trackCrafting: (recipeId: string, amount: number) => void;
   checkMilestone: (milestoneId: string, value: number, threshold: number) => void;
+  trackCoinFlow: (coinDelta: number, deltaSeconds: number) => void;
+  trackRegionTransition: (fromRegionId: string, toRegionId: string) => void;
+  trackPrestige: () => void;
+  trackWorkerPurchase: (workerId: string) => void;
 
   // ── Getters ──────────────────────────────────────────
   getHarvestCount: (cropId: string) => number;
   getTotalHarvests: () => number;
   getRegionReputation: (regionId: string) => number;
+  getMostUsedCrops: (limit?: number) => Array<{ cropId: string; count: number }>;
+  getWorkerPurchaseRatePerHour: () => number;
 }
 
 export const createTrackingSlice: StateCreator<
@@ -79,6 +97,11 @@ export const createTrackingSlice: StateCreator<
   lastReputationUpdate: Date.now(),
   craftingTracking: {},
   milestonesReached: {},
+  regionStartedAt: Date.now(),
+  timeInRegionSec: {},
+  prestigeCount: 0,
+  coinsPerMinuteSamples: [],
+  workerPurchases: {},
 
   // ── trackHarvest ─────────────────────────────────────────
   trackHarvest: (cropId, amount, regionId) => {
@@ -236,5 +259,60 @@ export const createTrackingSlice: StateCreator<
   // ── getRegionReputation ──────────────────────────────────
   getRegionReputation: (regionId) => {
     return get().regionReputation[regionId] ?? 0;
+  },
+
+  // ── trackCoinFlow ───────────────────────────────────────
+  trackCoinFlow: (coinDelta, deltaSeconds) => {
+    if (!Number.isFinite(coinDelta) || !Number.isFinite(deltaSeconds) || deltaSeconds <= 0) return;
+    const coinsPerMinute = (coinDelta / deltaSeconds) * 60;
+    set((state) => ({
+      coinsPerMinuteSamples: [...state.coinsPerMinuteSamples, coinsPerMinute].slice(-240),
+    }));
+  },
+
+  // ── trackRegionTransition ───────────────────────────────
+  trackRegionTransition: (fromRegionId, toRegionId) => {
+    if (!fromRegionId || !toRegionId || fromRegionId === toRegionId) return;
+    const now = Date.now();
+    const elapsedSec = Math.max(0, (now - get().regionStartedAt) / 1000);
+    set((state) => ({
+      regionStartedAt: now,
+      timeInRegionSec: {
+        ...state.timeInRegionSec,
+        [fromRegionId]: (state.timeInRegionSec[fromRegionId] ?? 0) + elapsedSec,
+      },
+    }));
+  },
+
+  // ── trackPrestige ────────────────────────────────────────
+  trackPrestige: () => {
+    set((state) => ({
+      prestigeCount: state.prestigeCount + 1,
+    }));
+  },
+
+  // ── trackWorkerPurchase ──────────────────────────────────
+  trackWorkerPurchase: (workerId) => {
+    set((state) => ({
+      workerPurchases: {
+        ...state.workerPurchases,
+        [workerId]: (state.workerPurchases[workerId] ?? 0) + 1,
+      },
+    }));
+  },
+
+  // ── getMostUsedCrops ─────────────────────────────────────
+  getMostUsedCrops: (limit = 5) => {
+    return Object.entries(get().harvestTracking)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, limit)
+      .map(([cropId, count]) => ({ cropId, count }));
+  },
+
+  // ── getWorkerPurchaseRatePerHour ─────────────────────────
+  getWorkerPurchaseRatePerHour: () => {
+    const totalPurchases = Object.values(get().workerPurchases).reduce((sum, value) => sum + value, 0);
+    const elapsedHours = Math.max(1 / 60, (Date.now() - get().regionStartedAt) / 3_600_000);
+    return totalPurchases / elapsedHours;
   },
 });

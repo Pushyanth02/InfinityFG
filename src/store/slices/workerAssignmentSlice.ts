@@ -106,6 +106,8 @@ export interface WorkerAssignmentSlice {
   getAnalystBonus: () => number;
   /** Get trust value for a worker */
   getWorkerTrust: (workerId: string) => number;
+  /** Get count of active workers by role */
+  getRoleCounts: () => Partial<Record<WorkerRole, number>>;
 }
 
 /**
@@ -551,5 +553,15 @@ export const createWorkerAssignmentSlice: StateCreator<
   // ── getWorkerTrust ───────────────────────────────────────
   getWorkerTrust: (workerId) => {
     return get().workerTrust[workerId] ?? 0;
+  },
+
+  // ── getRoleCounts ─────────────────────────────────────────
+  getRoleCounts: () => {
+    const counts: Partial<Record<WorkerRole, number>> = {};
+    for (const instance of get().workerInstances) {
+      const role = getWorkerRole(instance.workerId);
+      counts[role] = (counts[role] ?? 0) + 1;
+    }
+    return counts;
   },
 });

@@ -106,13 +106,13 @@ export interface ProductionBreakdown {
  * This is the single formula that combines all multiplicative effects.
  *
  * Formula:
- *   final = base * workerMult * skillMult * prestigeMult * fixedMult
+ *   final = base * (1 + workerBonus + skillBonus) * prestigeMult * fixedMult
  *
  * Where:
- *   workerMult = 1 + (auraBonus * AURA_WEIGHT + assignmentBonus * ASSIGNMENT_WEIGHT)
- *   skillMult = min(1 + sum(skills * 0.85^idx), SKILL_CAP)
- *   prestigeMult = min(1 + prestigePoints * PRESTIGE_SCALE, PRESTIGE_CAP)
- *   fixedMult = region * weather * equipment
+ *   workerBonus = softcap(auraBonus * AURA_WEIGHT + assignmentBonus * ASSIGNMENT_WEIGHT)
+ *   skillBonus = softcap(sum(skills * 0.85^idx))
+ *   prestigeMult = min(1 + ln(1 + prestigePoints) * PRESTIGE_SCALE, PRESTIGE_CAP)
+ *   fixedMult = region * weather * softcap(equipment)
  */
 export function calculateProductionMultiplier(
   input: ProductionMultiplierInput,
@@ -130,11 +130,16 @@ export function getProductionBreakdown(
   input: ProductionMultiplierInput,
   tunables: ProductionTunables = DEFAULT_TUNABLES
 ): ProductionBreakdown {
+  const softcap = (value: number, knee: number, softness: number): number => {
+    if (value <= knee) return value;
+    return knee + Math.log1p((value - knee) * softness) / softness;
+  };
+
   // === KNOB 1: Worker Contribution ===
-  const workerMult =
-    1 +
+  const workerRaw =
     input.globalAuraBonus * tunables.AURA_WEIGHT +
     input.assignmentBonus * tunables.ASSIGNMENT_WEIGHT;
+  const workerMult = 1 + softcap(Math.max(0, workerRaw), 1.5, 1.0);
 
   // === KNOB 2: Skill Contribution ===
   // Sort skills by value (highest first) and apply stacking decay
@@ -144,20 +149,22 @@ export function getProductionBreakdown(
     const decayFactor = Math.pow(tunables.SKILL_STACKING_DECAY, i);
     skillTotal += sortedSkills[i] * decayFactor;
   }
-  const skillMult = Math.min(1 + skillTotal, tunables.SKILL_CAP);
+  const skillMult = Math.min(1 + softcap(Math.max(0, skillTotal), 0.8, 1.1), tunables.SKILL_CAP);
 
   // === KNOB 3: Prestige Contribution ===
   const prestigeMult = Math.min(
-    1 + input.prestigePoints * tunables.PRESTIGE_SCALE,
+    1 + Math.log1p(Math.max(0, input.prestigePoints)) * tunables.PRESTIGE_SCALE,
     tunables.PRESTIGE_CAP
   );
 
   // === Fixed Modifiers (not tunable) ===
+  const equipmentEffective = 1 + Math.log1p(Math.max(0, input.equipmentMultiplier - 1) * 2) / 2;
   const fixedMult =
-    input.regionMultiplier * input.weatherMultiplier * input.equipmentMultiplier;
+    input.regionMultiplier * input.weatherMultiplier * equipmentEffective;
 
   // === Final Multiplier ===
-  const finalMult = workerMult * skillMult * prestigeMult * fixedMult;
+  const additiveGrowth = (workerMult - 1) + (skillMult - 1);
+  const finalMult = (1 + additiveGrowth) * prestigeMult * fixedMult;
 
   return {
     workerMult,

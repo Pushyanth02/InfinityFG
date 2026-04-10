@@ -109,6 +109,7 @@ export const createAutomationSlice: StateCreator<
       }
     }));
 
+    get().trackWorkerPurchase(workerId);
     // Also create an instance so role/assignment mechanics are active.
     get().createWorkerInstance(workerId);
   }

@@ -25,7 +25,7 @@ export const createMetaSlice: StateCreator<
     spent: 0,
     byTree: {},
   },
-  currentRegion: 'region_01',
+  currentRegion: 'meadow',
   prestigePoints: 0,
   activePanel: 'farm',
 
@@ -96,7 +96,7 @@ export const createMetaSlice: StateCreator<
   },
 
   ascend: () => {
-    const { lifetimeCoins, prestigePoints } = get();
+    const { lifetimeCoins, prestigePoints, currentRegion } = get();
     const potentialPoints = Math.floor(Math.sqrt(lifetimeCoins / 1e6));
     const gained = Math.max(0, potentialPoints - prestigePoints);
     
@@ -123,9 +123,11 @@ export const createMetaSlice: StateCreator<
         spent: 0,
         byTree: {},
       },
-      currentRegion: 'region_01',
+      currentRegion: 'meadow',
       prestigePoints: prestigePoints + gained,
       activePanel: 'farm'
     }));
+    get().trackPrestige();
+    get().trackRegionTransition(currentRegion, 'meadow');
   }
 });

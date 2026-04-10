@@ -9,6 +9,7 @@ import {
   type ProductionTunables,
 } from './productionEngine';
 import type { MachineWorkerBonus } from '../types/worker';
+import type { WorkerRole } from '../types/worker';
 
 /**
  * Calculates a total multiplier from a set of unlocked skills for a specific bonus type.
@@ -70,6 +71,7 @@ export const calculateMachineProduction = (
   options?: {
     getGlobalAuraBonus?: () => number;
     getMachineBonuses?: (machineId: string) => MachineWorkerBonus;
+    getRoleCounts?: () => Partial<Record<WorkerRole, number>>;
     regionMultiplier?: number;
     weatherMultiplier?: number;
     equipmentMultiplier?: number;
@@ -83,6 +85,7 @@ export const calculateMachineProduction = (
     return acc + (wDef ? wDef.efficiency_bonus * count : 0);
   }, 0);
   const globalAuraBonus = options?.getGlobalAuraBonus?.() ?? fallbackAura;
+  const roleCounts = options?.getRoleCounts?.() ?? {};
 
   const sellMultiplier = getSkillMultiplier(unlockedSkills, 'sell_multiplier');
   const machineSpeedSkill = getTotalSkillBonus(unlockedSkills, 'machine_speed');
@@ -114,9 +117,17 @@ export const calculateMachineProduction = (
       const machineSpeedAssignment = assignmentBonus?.speedMultiplier ?? 0;
       const machineYieldAssignment = assignmentBonus?.yieldMultiplier ?? 0;
 
+      // Cross-system linkage:
+      // - Farmers/farmhands improve base crop value before machine multipliers.
+      // - Engineers offset overclock stability penalty on machine fleets.
+      const farmerSupportCount = (roleCounts.farmhand ?? 0) + (roleCounts.planter ?? 0);
+      const engineerSupportCount = roleCounts.engineer ?? 0;
+      const preMachineYieldBoost = 1 + Math.min(0.35, farmerSupportCount * 0.015);
+      const overclockPenaltyMultiplier = Math.min(1, 0.92 + engineerSupportCount * 0.006);
+
       const coinsPerSecondPerMachine = calculateProductionMultiplier(
         {
-          baseValue: baseCps * baseSeedValue * sellMultiplier,
+          baseValue: baseCps * baseSeedValue * preMachineYieldBoost * sellMultiplier,
           globalAuraBonus,
           assignmentBonus: machineSpeedAssignment + machineYieldAssignment,
           skillBonuses: [machineSpeedSkill, machineYieldSkill, yieldUpgradeBonus],
@@ -126,7 +137,7 @@ export const calculateMachineProduction = (
           equipmentMultiplier,
         },
         tunables
-      );
+      ) * overclockPenaltyMultiplier;
 
       coinGain += coinsPerSecondPerMachine * pm.count * delta;
     }

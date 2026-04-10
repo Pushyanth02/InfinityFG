@@ -251,6 +251,7 @@ export const createStorySlice: StateCreator<
     // Unlock the next region
     set(state => ({
       currentChapterId: nextChapter.id,
+      currentRegion: nextChapter.regionId,
       unlockedRegions: state.unlockedRegions.includes(nextChapter.regionId)
         ? state.unlockedRegions
         : [...state.unlockedRegions, nextChapter.regionId],
@@ -264,6 +265,7 @@ export const createStorySlice: StateCreator<
       regionId: nextChapter.regionId,
       regionName: nextChapter.title,
     });
+    get().trackRegionTransition(currentChapter.regionId, nextChapter.regionId);
 
     // Emit chapter started event
     eventBus.emit('CHAPTER_STARTED', {

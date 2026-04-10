@@ -36,6 +36,8 @@ export const useGameStore = create<GameState>()(
           unlockedSkills,
           getGlobalAuraBonus,
           getMachineBonuses,
+          getRoleCounts,
+          trackCoinFlow,
         } = get();
         const delta = (timestamp - lastTick) / 1000;
 
@@ -62,6 +64,7 @@ export const useGameStore = create<GameState>()(
           {
             getGlobalAuraBonus,
             getMachineBonuses,
+            getRoleCounts,
           }
         );
 
@@ -79,6 +82,7 @@ export const useGameStore = create<GameState>()(
 
         // Phase 2: emit COINS_CHANGED so unlock pipeline can re-evaluate
         const { coins, lifetimeCoins } = get();
+        trackCoinFlow(coinGain, delta);
         emitCoinsChanged({ coins, delta: coinGain, lifetimeCoins });
 
         // 3. Check quest progress on every tick (for earn/deploy quests)

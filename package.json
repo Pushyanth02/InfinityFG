@@ -17,6 +17,7 @@
     "simulate:qa:strict": "npx tsx simulation/qa_runner.ts --failOnRegression=true",
     "simulate:progression": "npx tsx simulation/progression_sim.ts",
     "simulate:balance": "npx tsx simulation/balance_sim.ts",
+    "simulate:balance:phase": "npx tsx simulation/balance_phase_sim.ts",
     "simulate:roi": "npx tsx simulation/machine_roi_sim.ts",
     "validate:system": "npm run lint && npm run build && npm run simulate:qa:strict"
   },
