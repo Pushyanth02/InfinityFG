@@ -27,6 +27,7 @@ import {
 } from './qaDetectors';
 import { getSimulationReportDir, loadSimulationTunables } from './sharedGameConfig';
 import { writeTextReport, writeTimestampedJsonReport } from './reportIo';
+import { autoBalance } from './aiBalancer';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = path.dirname(__filename);
 
@@ -485,8 +486,10 @@ function makeRegressionTest(
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 const runStartedAt = Date.now();
+const balanceConfig = autoBalance();
 
 if (!SILENT) {
+  console.log('AI Balanced Config:', balanceConfig);
   console.log(`🔬 SimulationQA AI — Running ${INPUT.num_simulations} sessions...`);
   console.log(`   Profiles: ${INPUT.player_profiles.join(', ')} | Seed: ${INPUT.random_seed} | Duration: ${INPUT.duration_hours}h`);
 }
@@ -774,6 +777,7 @@ const report = {
   },
 
   thresholds: QA_THRESHOLDS,
+  ai_balance_config: balanceConfig,
 
   profile_summaries: profileSummaries,
   regression_tests:  regressionTests,

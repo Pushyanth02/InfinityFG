@@ -11,6 +11,7 @@ import { createWorkerAssignmentSlice } from './slices/workerAssignmentSlice';
 import { createCraftingSlice } from './slices/craftingSlice';
 import { calculatePlotGrowth, calculateMachineProduction } from '../engine/mechanics';
 import { calculateDPS } from '../engine/combatEngine';
+import { getInfinityMultiplier } from '../engine/infinityEngine';
 import { marketService } from '../services/marketService';
 import { emitCoinsChanged } from '../services/gameEvents';
 
@@ -57,7 +58,7 @@ export const useGameStore = create<GameState>()(
 
         // 2. Calculate Automation Production
         const { prestigePoints } = get();
-        const coinGain = calculateMachineProduction(
+        const rawCoinGain = calculateMachineProduction(
           machines,
           workers,
           delta,
@@ -69,6 +70,8 @@ export const useGameStore = create<GameState>()(
             getRoleCounts,
           }
         );
+        const infinityBoost = getInfinityMultiplier(get().lifetimeCoins);
+        const coinGain = rawCoinGain * infinityBoost;
 
         // Update market prices at most once per minute.
         if (marketService.getTimeSinceUpdate() >= 60_000) {

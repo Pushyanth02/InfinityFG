@@ -10,6 +10,7 @@ import { getWeapon } from '../../data/cropWeapons';
 import { eventBus } from '../../services/eventBus';
 import { VILLAGE_FOLK } from '../../data/villageFolk';
 import { applyBossHit, runBossTick } from '../../engine/bossEngine';
+import { applyUCW, getUcwsByRegion } from '../../engine/ucwEngine';
 
 export interface ChapterProgressEntry {
   bossHp: number;        // remaining HP (decremented on harvest)
@@ -25,6 +26,9 @@ export interface StorySlice {
   pendingUnlocks: Array<{ id: string; reqs: string[]; cost?: number }>;
   futureUnlocksPreview: Array<{ id: string; unlockCondition: string }>;
   bossElapsedTracking: Record<string, number>;
+  bossShieldTracking: Record<string, number>;
+  unlockedUcws: string[];
+  activeUCW: string[];
 
   // ── Weapon state ──────────────────────────────────
   ownedWeapons: string[];
@@ -33,6 +37,8 @@ export interface StorySlice {
   // ── Actions ───────────────────────────────────────
   damageChapterBoss: (cropId: string, harvestCount: number) => void;
   tickChapterBoss: (deltaSec: number, baseDps: number) => void;
+  unlockUCW: (ucwId: string) => void;
+  equipUCW: (ucwId: string) => void;
   checkQuestProgress: () => void;
   buyWeapon: (weaponId: string) => void;
   equipWeapon: (weaponId: string | null) => void;
@@ -59,6 +65,17 @@ const initialBossElapsed = (): Record<string, number> => {
   return map;
 };
 
+const SHIELDED_MECHANICS = new Set(['hardened_cores', 'core_harden', 'acid_resist', 'fire_shell']);
+
+const initialBossShield = (): Record<string, number> => {
+  const map: Record<string, number> = {};
+  for (const ch of CHAPTERS) {
+    const shielded = ch.boss.mechanics?.some((m) => SHIELDED_MECHANICS.has(m)) ?? false;
+    map[ch.id] = shielded ? Math.floor(ch.boss.maxHp * 0.2) : 0;
+  }
+  return map;
+};
+
 export const createStorySlice: StateCreator<
   GameState,
   [],
@@ -78,6 +95,9 @@ export const createStorySlice: StateCreator<
     unlockCondition: `Reach Chapter ${w.tier}`,
   })),
   bossElapsedTracking: initialBossElapsed(),
+  bossShieldTracking: initialBossShield(),
+  unlockedUcws: [],
+  activeUCW: [],
   ownedWeapons: [],
   equippedWeaponId: null,
 
@@ -107,7 +127,28 @@ export const createStorySlice: StateCreator<
 
     const rawDamage = harvestCount * boss.damagePerCrop * weakMult * weaponMult;
     const elapsed = get().bossElapsedTracking[currentChapterId] ?? 0;
-    const { nextHp: newHp, damageApplied } = applyBossHit(boss, progress.bossHp, rawDamage, elapsed);
+    const manualActiveUcwIds = get().activeUCW;
+    const fallbackUcwId = get().equippedWeaponId
+      ? getUcwsByRegion(chapter.number).find((ucw) => ucw.region === chapter.number)?.id
+      : undefined;
+    const activeUcwIds = manualActiveUcwIds.length > 0
+      ? manualActiveUcwIds
+      : fallbackUcwId
+        ? [fallbackUcwId]
+        : [];
+    const ucwState = {
+      bossHP: progress.bossHp,
+      bossShield: get().bossShieldTracking[currentChapterId] ?? 0,
+      activeUCW: getUcwsByRegion(chapter.number).filter((ucw) => activeUcwIds.includes(ucw.id)),
+    };
+    const boostedDamage = applyUCW(ucwState, rawDamage, 1);
+    let postShieldDamage = boostedDamage;
+    if (ucwState.bossShield > 0) {
+      const absorbed = Math.min(ucwState.bossShield, postShieldDamage);
+      ucwState.bossShield -= absorbed;
+      postShieldDamage -= absorbed;
+    }
+    const { nextHp: newHp, damageApplied } = applyBossHit(boss, ucwState.bossHP, postShieldDamage, elapsed);
     const isDefeated = newHp === 0;
 
     if (damageApplied > 0) {
@@ -122,6 +163,10 @@ export const createStorySlice: StateCreator<
           bossHp: newHp,
           isDefeated,
         },
+      },
+      bossShieldTracking: {
+        ...state.bossShieldTracking,
+        [currentChapterId]: ucwState.bossShield,
       },
       // Defeat reward: add coins and unlock via advanceChapter
       coins: isDefeated
@@ -151,10 +196,26 @@ export const createStorySlice: StateCreator<
     if (!progress || progress.isDefeated) return;
 
     const elapsed = bossElapsedTracking[currentChapterId] ?? 0;
+    const manualActiveUcwIds = get().activeUCW;
+    const fallbackUcwId = get().equippedWeaponId
+      ? getUcwsByRegion(chapter.number).find((ucw) => ucw.region === chapter.number)?.id
+      : undefined;
+    const activeUcwIds = manualActiveUcwIds.length > 0
+      ? manualActiveUcwIds
+      : fallbackUcwId
+        ? [fallbackUcwId]
+        : [];
+    const ucwState = {
+      bossHP: progress.bossHp,
+      bossShield: get().bossShieldTracking[currentChapterId] ?? 0,
+      activeUCW: getUcwsByRegion(chapter.number).filter((ucw) => activeUcwIds.includes(ucw.id)),
+    };
+    const shieldPenalty = ucwState.bossShield > 0 ? 0.35 : 1;
+    const boostedDps = applyUCW(ucwState, baseDps * shieldPenalty, deltaSec);
     const result = runBossTick({
       boss: chapter.boss,
-      currentHp: progress.bossHp,
-      baseDps,
+      currentHp: ucwState.bossHP,
+      baseDps: boostedDps,
       deltaSec,
       elapsedSec: elapsed,
     });
@@ -174,6 +235,10 @@ export const createStorySlice: StateCreator<
           isDefeated,
         },
       },
+      bossShieldTracking: {
+        ...state.bossShieldTracking,
+        [currentChapterId]: ucwState.bossShield,
+      },
       bossElapsedTracking: {
         ...state.bossElapsedTracking,
         [currentChapterId]: result.nextElapsedSec,
@@ -188,6 +253,27 @@ export const createStorySlice: StateCreator<
       });
       get().advanceChapter();
     }
+  },
+
+  unlockUCW: (ucwId) => {
+    const ucw = getUcwsByRegion(CHAPTERS.length).find((entry) => entry.id === ucwId);
+    const chapter = CHAPTERS.find((c) => c.id === get().currentChapterId);
+    if (!ucw || !chapter) return;
+    if (ucw.region > chapter.number) return;
+    const { coins, unlockedUcws } = get();
+    if (unlockedUcws.includes(ucwId) || coins < ucw.cost) return;
+
+    set((state) => ({
+      coins: state.coins - ucw.cost,
+      unlockedUcws: [...state.unlockedUcws, ucwId],
+      activeUCW: state.activeUCW.includes(ucwId) ? state.activeUCW : [ucwId],
+    }));
+  },
+
+  equipUCW: (ucwId) => {
+    const { unlockedUcws } = get();
+    if (!unlockedUcws.includes(ucwId)) return;
+    set({ activeUCW: [ucwId] });
   },
 
   // ── checkQuestProgress ────────────────────────────────────
