@@ -24,6 +24,10 @@ const SESSIONS = parseInt(args.sessions ?? '300', 10);
 const SEED = parseInt(args.seed ?? '20260410', 10);
 const DURATIONS: DurationHours[] = [50, 100, 200];
 const BOSS_COUNT = Math.min(CHAPTERS.length, 12);
+const MID_GAME_START_CHAPTER_INDEX = 4; // Region 5
+const MID_GAME_END_CHAPTER_INDEX = 7;   // Region 8
+const LATE_GAME_CHAPTER_INDEX = 9;      // Region 10
+const LATE_GAME_EXPLOSION_THRESHOLD_HOURS = 0.4;
 
 function makePrng(seed: number): () => number {
   let s = seed >>> 0;
@@ -223,10 +227,14 @@ function buildScenarioSummary(duration: DurationHours, metrics: SessionMetrics[]
 
   const symptoms: string[] = [];
   if (avgMaxRegionReached < 3) symptoms.push('Early game too slow: players are stuck below Region 3.');
-  if (avgTimePerRegionHours['ch_05'] && avgTimePerRegionHours['ch_08'] && avgTimePerRegionHours['ch_08'] > avgTimePerRegionHours['ch_05'] * 2) {
+  const midStartId = CHAPTERS[MID_GAME_START_CHAPTER_INDEX]?.id;
+  const midEndId = CHAPTERS[MID_GAME_END_CHAPTER_INDEX]?.id;
+  const lateGameId = CHAPTERS[LATE_GAME_CHAPTER_INDEX]?.id;
+
+  if (midStartId && midEndId && avgTimePerRegionHours[midStartId] && avgTimePerRegionHours[midEndId] && avgTimePerRegionHours[midEndId] > avgTimePerRegionHours[midStartId] * 2) {
     symptoms.push('Mid-game dead zone: Regions 5–8 are significantly slower than early progression.');
   }
-  if (avgTimePerRegionHours['ch_10'] && avgTimePerRegionHours['ch_10'] < 0.4) {
+  if (lateGameId && avgTimePerRegionHours[lateGameId] && avgTimePerRegionHours[lateGameId] < LATE_GAME_EXPLOSION_THRESHOLD_HOURS) {
     symptoms.push('Late-game explosion: Region 10+ appears to break intended scaling.');
   }
   if (machineShare > 0.75 || machineShare < 0.25) {
