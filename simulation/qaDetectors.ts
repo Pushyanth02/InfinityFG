@@ -44,23 +44,26 @@ export function detectMachineStacking(machinesOwned: string[]): boolean {
 
 export function detectCropArbitrage(plots: SimPlot[], crops: CropDef[]): boolean {
   if (plots.length === 0) return false;
-  let arbitrageDetected = false;
-  let rapidPlotCycle = false;
+
+  // Flag only highly suspicious loops, not normal profitable crops.
+  if (plots.length > 16) return true;
+
   for (const p of plots) {
     const crop = crops.find((c) => c.id === p.cropId);
     if (!crop) continue;
+
     const yieldValue = crop.baseValue * crop.yieldAmt;
-    if (yieldValue > crop.seedCost * 2 && yieldValue > 30) {
-      arbitrageDetected = true;
-      break;
+    const profitRatio = yieldValue / Math.max(1, crop.seedCost);
+
+    if (crop.growthSec <= 10 && profitRatio >= 25 && yieldValue >= 5000) {
+      return true;
     }
-    if (crop.growthSec < 20) rapidPlotCycle = true;
   }
-  if (plots.length > 8) return true;
-  if (rapidPlotCycle) return true;
-  return arbitrageDetected;
+
+  return false;
 }
 
 export function detectRandomEventExploit(rng: () => number): boolean {
-  return rng() > 0.995;
+  // Random events should be rare; this function represents a single event roll.
+  return rng() > 0.9995;
 }

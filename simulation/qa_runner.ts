@@ -306,13 +306,16 @@ function simulate(sessId: number, profile: Profile, rng: () => number): SessionR
 
     // ── Random event exploit check ──
     if (detectRandomEventExploit(rng)) {
-      randomEventCount++;
-      if (randomEventCount > 1) {
-        exploitFlags.push('RANDOM_EVENT_EXPLOIT');
-        addTrace(t, 'random_event_exploit', randomEventCount, ['RANDOM_EVENT_EXPLOIT']);
-        // Defensive: reset random event count
-        randomEventCount = 0;
-      }
+      randomEventCount += 1;
+    } else if (randomEventCount > 0) {
+      randomEventCount -= 1;
+    }
+
+    // Require an implausible sustained streak before treating this as an exploit.
+    if (randomEventCount >= 8) {
+      exploitFlags.push('RANDOM_EVENT_EXPLOIT');
+      addTrace(t, 'random_event_exploit', randomEventCount, ['RANDOM_EVENT_EXPLOIT']);
+      randomEventCount = 0;
     }
 
     // ── Stall / infinite-loop check & guard ──
