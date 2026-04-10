@@ -49,7 +49,6 @@ function runSession(durationHours: DurationHours, seed: number): SessionMetrics 
   const tick = 30;
 
   let coins = 50;
-  let lifetimeCoins = 0;
   let machineCount = 0;
   let workerCount = 0;
   let engineerCount = 0;
@@ -104,7 +103,6 @@ function runSession(durationHours: DurationHours, seed: number): SessionMetrics 
     const machineIncomeTick = machineCps * tick * (1 + workerCount * 0.01);
     const gain = (manualIncome + machineIncomeTick) * overclockMult * engineerOverclockPenalty;
     coins += gain;
-    lifetimeCoins += gain;
     machineIncome += machineIncomeTick * overclockMult * engineerOverclockPenalty;
     workerIncome += manualIncome * overclockMult * engineerOverclockPenalty;
 
