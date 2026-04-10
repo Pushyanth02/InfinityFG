@@ -63,7 +63,7 @@ export function detectCropArbitrage(plots: SimPlot[], crops: CropDef[]): boolean
   return false;
 }
 
-export function detectRandomEventExploit(rng: () => number): boolean {
+export function shouldTriggerRandomEvent(rng: () => number): boolean {
   // Random events should be rare; this function represents a single event roll.
   return rng() > 0.9995;
 }
