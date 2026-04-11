@@ -3,6 +3,7 @@ import { useGameStore } from './store/gameStore';
 import Layout from './ui/Layout';
 import PanelManager from './ui/PanelManager';
 import { pingAppwrite } from './services/appwrite';
+import { FeedbackLayer } from './ui/feedback/FeedbackLayer';
 
 export default function App() {
   const activePanel = useGameStore(s => s.activePanel);
@@ -13,8 +14,10 @@ export default function App() {
   }, []);
 
   return (
-    <Layout>
-      <PanelManager activePanel={activePanel} />
-    </Layout>
+    <FeedbackLayer>
+      <Layout>
+        <PanelManager activePanel={activePanel} />
+      </Layout>
+    </FeedbackLayer>
   );
 }
