@@ -22,6 +22,14 @@ import {
   type BossDebuffState,
 } from '../../engine/bossAttackEngine';
 import { applyAdaptiveDifficulty } from '../../engine/adaptiveAI';
+import { evaluateBossAI } from '../../engine/bossAI';
+import {
+  adaptBossToPlayer,
+  detectPlayerStrategy,
+  type PlayerStrategy,
+} from '../../engine/playerAI';
+import { processPuzzleBoss } from '../../engine/puzzleBoss';
+import { getPuzzleRequirement } from '../../data/puzzleBosses';
 
 export interface ChapterProgressEntry {
   bossHp: number;        // remaining HP (decremented on harvest)
@@ -41,6 +49,9 @@ export interface StorySlice {
   bossAttackTracking: Record<string, BossAttackRuntime[]>;
   bossDebuffTracking: Record<string, BossDebuffState>;
   rewardMultiplierTracking: Record<string, number>;
+  bossEnrageTracking: Record<string, boolean>;
+  bossVulnerabilityTracking: Record<string, boolean>;
+  playerStrategyTracking: Record<string, PlayerStrategy>;
   unlockedUcws: string[];
   activeUCW: string[];
 
@@ -113,6 +124,24 @@ const initialRewardMultipliers = (): Record<string, number> => {
   return map;
 };
 
+const initialBossEnrage = (): Record<string, boolean> => {
+  const map: Record<string, boolean> = {};
+  for (const ch of CHAPTERS) map[ch.id] = false;
+  return map;
+};
+
+const initialBossVulnerability = (): Record<string, boolean> => {
+  const map: Record<string, boolean> = {};
+  for (const ch of CHAPTERS) map[ch.id] = true;
+  return map;
+};
+
+const initialPlayerStrategies = (): Record<string, PlayerStrategy> => {
+  const map: Record<string, PlayerStrategy> = {};
+  for (const ch of CHAPTERS) map[ch.id] = 'balanced';
+  return map;
+};
+
 function getActiveUcwsForChapter(chapterNumber: number, unlockedUcws: string[], activeUCW: string[]) {
   const chapterUcws = getUcwsByRegion(chapterNumber);
   const unlockedForChapter = chapterUcws.filter((ucw) => unlockedUcws.includes(ucw.id));
@@ -132,6 +161,16 @@ function getPlayTimeHours(state: GameState): number {
   return Math.max(1 / 60, (historicalSec + currentSec) / 3600);
 }
 
+function getCropDiversity(state: GameState): number {
+  const harvestedDiversity = Object.values(state.harvestTracking ?? {}).filter((count) => count > 0).length;
+  if (harvestedDiversity > 0) return harvestedDiversity;
+  return new Set(
+    state.plots
+      .map((plot) => plot.cropId)
+      .filter((cropId): cropId is string => Boolean(cropId)),
+  ).size;
+}
+
 function getAdaptiveProfile(state: GameState, chapterNumber: number, bossBaseHp: number) {
   const latestCoinsPerMinute = state.coinsPerMinuteSamples.at(-1) ?? 0;
   return applyAdaptiveDifficulty({
@@ -140,6 +179,32 @@ function getAdaptiveProfile(state: GameState, chapterNumber: number, bossBaseHp:
     chapterNumber,
     playTimeHours: getPlayTimeHours(state),
     bossBaseHp,
+  });
+}
+
+function ensureAttackRuntime(
+  attacks: BossAttackRuntime[],
+  extraAttack?: { id: string; type: BossAttackRuntime['type']; cooldown: number; power: number },
+): BossAttackRuntime[] {
+  if (!extraAttack) return attacks;
+  if (attacks.some((attack) => attack.id === extraAttack.id)) return attacks;
+  return [
+    ...attacks,
+    {
+      ...extraAttack,
+      timer: Math.max(1, extraAttack.cooldown),
+    },
+  ];
+}
+
+function forceAttack(attacks: BossAttackRuntime[], type: BossAttackRuntime['type'] | undefined): BossAttackRuntime[] {
+  if (!type) return attacks;
+  return attacks.map((attack) => {
+    if (attack.type !== type) return attack;
+    return {
+      ...attack,
+      timer: 0,
+    };
   });
 }
 
@@ -166,6 +231,9 @@ export const createStorySlice: StateCreator<
   bossAttackTracking: initialBossAttacks(),
   bossDebuffTracking: initialBossDebuffs(),
   rewardMultiplierTracking: initialRewardMultipliers(),
+  bossEnrageTracking: initialBossEnrage(),
+  bossVulnerabilityTracking: initialBossVulnerability(),
+  playerStrategyTracking: initialPlayerStrategies(),
   unlockedUcws: [],
   activeUCW: [],
   ownedWeapons: [],
@@ -199,6 +267,11 @@ export const createStorySlice: StateCreator<
     const rawDamage = harvestCount * boss.damagePerCrop * weakMult * weaponMult;
     const elapsed = get().bossElapsedTracking[currentChapterId] ?? 0;
     const activeUcws = getActiveUcwsForChapter(chapter.number, get().unlockedUcws, get().activeUCW);
+    const puzzle = processPuzzleBoss({
+      requirement: getPuzzleRequirement(boss.id),
+      cropDiversity: getCropDiversity(snapshot),
+      overclockActive: activeUcws.length > 0,
+    });
     const ucwState = {
       bossHP: progress.bossHp,
       bossShield: get().bossShieldTracking[currentChapterId] ?? 0,
@@ -216,7 +289,7 @@ export const createStorySlice: StateCreator<
     const { nextHp: newHp, damageApplied } = applyBossHit(
       boss,
       ucwState.bossHP,
-      postShieldDamage / hpScale,
+      (puzzle.vulnerable ? postShieldDamage : 0) / hpScale,
       elapsed,
     );
     const isDefeated = newHp === 0;
@@ -244,6 +317,10 @@ export const createStorySlice: StateCreator<
         ...state.rewardMultiplierTracking,
         [currentChapterId]: difficulty.rewardMultiplier,
       },
+      bossVulnerabilityTracking: {
+        ...state.bossVulnerabilityTracking,
+        [currentChapterId]: puzzle.vulnerable,
+      },
       // Defeat reward: add coins and unlock via advanceChapter
       coins: state.coins + rewardCoins,
     }));
@@ -270,19 +347,64 @@ export const createStorySlice: StateCreator<
     const progress = chapterProgress[currentChapterId];
     if (!progress || progress.isDefeated) return;
 
+    const elapsed = bossElapsedTracking[currentChapterId] ?? 0;
     const difficulty = getAdaptiveProfile(snapshot, chapter.number, chapter.boss.maxHp);
     const hpScale = Math.max(0.25, difficulty.bossMaxHp / Math.max(1, chapter.boss.maxHp));
-    const elapsed = bossElapsedTracking[currentChapterId] ?? 0;
-    const attacks = snapshot.bossAttackTracking[currentChapterId] ?? createBossAttackRuntime(getBossAttacks(chapter.boss.id));
+
+    const totalMachines = snapshot.machines.reduce((sum, machine) => sum + machine.count, 0);
+    const strategy = detectPlayerStrategy({
+      totalMachines,
+      cropDiversity: getCropDiversity(snapshot),
+      prestigeCount: snapshot.prestigeCount,
+      playTimeHours: getPlayTimeHours(snapshot),
+    });
+    const adaptation = adaptBossToPlayer(strategy);
+
+    let attacks = snapshot.bossAttackTracking[currentChapterId]
+      ?? createBossAttackRuntime(getBossAttacks(chapter.boss.id));
+    attacks = ensureAttackRuntime(attacks, adaptation.extraAttack);
     const debuffs = snapshot.bossDebuffTracking[currentChapterId] ?? createBossDebuffState();
+    const aiState = evaluateBossAI(
+      chapter.boss.id,
+      {
+        hp: progress.bossHp,
+        maxHP: chapter.boss.maxHp,
+        playerDPS: baseDps,
+        playerCoins: snapshot.coins,
+        debuffed: debuffs.stunned || debuffs.productionMultiplier < 1,
+      },
+      {
+        enraged: snapshot.bossEnrageTracking[currentChapterId] ?? false,
+        cooldownMultiplier: 1,
+        forcedAttackType: undefined,
+        shieldGain: 0,
+      },
+    );
+    attacks = forceAttack(attacks, aiState.forcedAttackType);
+
+    let additionalShield = aiState.shieldGain;
+    if (adaptation.shieldGain > 0) {
+      const intervalSec = 20;
+      const crossedInterval = Math.floor((elapsed + deltaSec) / intervalSec) > Math.floor(elapsed / intervalSec);
+      if (crossedInterval) additionalShield += adaptation.shieldGain;
+    }
+
+    const effectiveCooldownMultiplier =
+      difficulty.attackCooldownMultiplier * adaptation.cooldownMultiplier * aiState.cooldownMultiplier;
+
     const attackResult = processBossAttacks({
       coins: snapshot.coins,
-      bossShield: snapshot.bossShieldTracking[currentChapterId] ?? 0,
+      bossShield: (snapshot.bossShieldTracking[currentChapterId] ?? 0) + additionalShield,
       attacks,
       debuffs,
-    }, deltaSec, difficulty.attackCooldownMultiplier);
+    }, deltaSec, effectiveCooldownMultiplier);
 
     const activeUcws = getActiveUcwsForChapter(chapter.number, get().unlockedUcws, get().activeUCW);
+    const puzzle = processPuzzleBoss({
+      requirement: getPuzzleRequirement(chapter.boss.id),
+      cropDiversity: getCropDiversity(snapshot),
+      overclockActive: activeUcws.length > 0,
+    });
     const ucwState = {
       bossHP: progress.bossHp,
       bossShield: attackResult.bossShield,
@@ -293,7 +415,7 @@ export const createStorySlice: StateCreator<
     const result = runBossTick({
       boss: chapter.boss,
       currentHp: ucwState.bossHP,
-      baseDps: boostedDps / hpScale,
+      baseDps: (puzzle.vulnerable ? boostedDps : 0) / hpScale,
       deltaSec,
       elapsedSec: elapsed,
     });
@@ -333,6 +455,18 @@ export const createStorySlice: StateCreator<
       rewardMultiplierTracking: {
         ...state.rewardMultiplierTracking,
         [currentChapterId]: difficulty.rewardMultiplier,
+      },
+      bossEnrageTracking: {
+        ...state.bossEnrageTracking,
+        [currentChapterId]: aiState.enraged,
+      },
+      bossVulnerabilityTracking: {
+        ...state.bossVulnerabilityTracking,
+        [currentChapterId]: puzzle.vulnerable,
+      },
+      playerStrategyTracking: {
+        ...state.playerStrategyTracking,
+        [currentChapterId]: strategy,
       },
     }));
 

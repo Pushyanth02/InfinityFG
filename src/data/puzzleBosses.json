@@ -1,0 +1,16 @@
+[
+  {
+    "id": "boss_void_blight",
+    "requirements": {
+      "type": "diversity",
+      "value": 4
+    }
+  },
+  {
+    "id": "boss_frost_mite",
+    "requirements": {
+      "type": "overclock",
+      "value": true
+    }
+  }
+]
