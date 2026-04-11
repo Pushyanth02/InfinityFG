@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { FloatingText } from './FloatingText';
 import { CinematicOverlay } from '../cinematic/CinematicOverlay';
@@ -21,9 +21,10 @@ interface FeedbackLayerProps {
 export function FeedbackLayer({ children }: FeedbackLayerProps) {
   const [floating, setFloating] = useState<FloatingEntry[]>([]);
   const [cinematicText, setCinematicText] = useState<string | null>(null);
+  const nextFloatingId = useRef(1);
 
   const spawnFloatingText = useCallback((value: string, x: number, y: number, color?: string) => {
-    const id = Date.now() + Math.floor(Math.random() * 1000);
+    const id = nextFloatingId.current++;
     setFloating((prev) => [...prev, { id, value, x, y, color }]);
   }, []);
 
