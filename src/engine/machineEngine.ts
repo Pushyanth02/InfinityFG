@@ -1,4 +1,5 @@
 import type { MachineDef } from '../data/machines';
+import { GAME_CONFIG } from '../config/gameConfig';
 
 export type MachineState = 'idle' | 'active' | 'maintenance' | 'overclocked';
 
@@ -165,5 +166,5 @@ export function tickMachine(inst: MachineInstance, def: MachineDef, tickSec: num
 }
 
 export function getMachineCost(base: number, owned: number): number {
-  return base * Math.pow(1.15, owned);
+  return base * Math.pow(GAME_CONFIG.MACHINE_COST_SCALING, owned);
 }

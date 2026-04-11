@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
+import { GAME_CONFIG } from '../src/config/gameConfig';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -30,7 +31,7 @@ interface RootConfig {
 }
 
 const DEFAULTS: SimulationTunables = {
-  upgradeScaleFactor: 1.15,
+  upgradeScaleFactor: GAME_CONFIG.MACHINE_COST_SCALING,
   machineMultPerUnit: 0.08,
   automationSlope: 0.12,
   autoHarvestThreshold: 4,

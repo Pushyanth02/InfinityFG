@@ -156,9 +156,7 @@ function getActiveUcwsForChapter(chapterNumber: number, unlockedUcws: string[], 
 }
 
 function getPlayTimeHours(state: GameState): number {
-  const historicalSec = Object.values(state.timeInRegionSec).reduce((sum, seconds) => sum + seconds, 0);
-  const currentSec = Math.max(0, (Date.now() - state.regionStartedAt) / 1000);
-  return Math.max(1 / 60, (historicalSec + currentSec) / 3600);
+  return Math.max(1 / 60, state.totalPlayTimeSec / 3600);
 }
 
 function getCropDiversity(state: GameState): number {

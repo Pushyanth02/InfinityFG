@@ -28,6 +28,7 @@ import {
 import { getSimulationReportDir, loadSimulationTunables } from './sharedGameConfig';
 import { writeTextReport, writeTimestampedJsonReport } from './reportIo';
 import { autoBalance } from './aiBalancer';
+import { GAME_CONFIG } from '../src/config/gameConfig';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = path.dirname(__filename);
 
@@ -102,13 +103,13 @@ const CFG = {
   autoHarvestThreshold:     tunables.autoHarvestThreshold,
   prestigeDivisor:          tunables.prestigeDivisor,
   processingMultPerStage:   tunables.processingMultPerStage,
-  processingFeeRatio:       0.10,
-  landTaxRatePctPerHour:    0.005,
-  machineMaintRatePerSec:   0.0001,
-  seedCostRatio:            0.5,
-  repDecayPctPerHour:       0.05,
+  processingFeeRatio:       GAME_CONFIG.PROCESSING_FEE_RATIO,
+  landTaxRatePctPerHour:    GAME_CONFIG.LAND_TAX_RATE_PCT_PER_HOUR,
+  machineMaintRatePerSec:   GAME_CONFIG.MACHINE_MAINTENANCE_RATE_PER_SEC,
+  seedCostRatio:            GAME_CONFIG.SEED_COST_RATIO,
+  repDecayPctPerHour:       GAME_CONFIG.REPUTATION_DECAY_RATE_PER_HOUR,
   repSellCapBonus:          0.30,
-  machineCpsSoftCap:        10_000,
+  machineCpsSoftCap:        GAME_CONFIG.MACHINE_CPS_SOFT_CAP,
 };
 
 // ── Exploit trace entry ───────────────────────────────────────────────────────

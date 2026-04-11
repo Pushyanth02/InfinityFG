@@ -7,6 +7,7 @@
 import type { StateCreator } from 'zustand';
 import type { GameState } from '../../types/game';
 import { eventBus } from '../../services/eventBus';
+import { GAME_CONFIG } from '../../config/gameConfig';
 
 /**
  * Tunables for reputation system.
@@ -20,7 +21,7 @@ export const REPUTATION_TUNABLES = {
   RARE_CROP_REP_MULT: 3,
 
   /** Reputation decay rate per hour when idle (fraction) */
-  DECAY_RATE_PER_HOUR: 0.05,
+  DECAY_RATE_PER_HOUR: GAME_CONFIG.REPUTATION_DECAY_RATE_PER_HOUR,
 
   /** Minimum reputation (never goes below this) */
   MIN_REPUTATION: 0,
@@ -60,6 +61,8 @@ export interface TrackingSlice {
   timeInRegionSec: Record<string, number>;
   /** Number of prestige resets performed */
   prestigeCount: number;
+  /** Deterministic cumulative playtime in seconds from tick deltas */
+  totalPlayTimeSec: number;
   /** Rolling coins-per-minute telemetry samples */
   coinsPerMinuteSamples: number[];
   /** Worker purchases by workerId */
@@ -100,6 +103,7 @@ export const createTrackingSlice: StateCreator<
   regionStartedAt: Date.now(),
   timeInRegionSec: {},
   prestigeCount: 0,
+  totalPlayTimeSec: 0,
   coinsPerMinuteSamples: [],
   workerPurchases: {},
 
@@ -266,6 +270,7 @@ export const createTrackingSlice: StateCreator<
     if (!Number.isFinite(coinDelta) || !Number.isFinite(deltaSeconds) || deltaSeconds <= 0) return;
     const coinsPerMinute = (coinDelta / deltaSeconds) * 60;
     set((state) => ({
+      totalPlayTimeSec: state.totalPlayTimeSec + deltaSeconds,
       coinsPerMinuteSamples: [...state.coinsPerMinuteSamples, coinsPerMinute].slice(-240),
     }));
   },
@@ -312,7 +317,7 @@ export const createTrackingSlice: StateCreator<
   // ── getWorkerPurchaseRatePerHour ─────────────────────────
   getWorkerPurchaseRatePerHour: () => {
     const totalPurchases = Object.values(get().workerPurchases).reduce((sum, value) => sum + value, 0);
-    const elapsedHours = Math.max(1 / 60, (Date.now() - get().regionStartedAt) / 3_600_000);
+    const elapsedHours = Math.max(1 / 60, get().totalPlayTimeSec / 3600);
     return totalPurchases / elapsedHours;
   },
 });

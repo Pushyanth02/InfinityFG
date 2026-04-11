@@ -1,4 +1,5 @@
 import type { ChapterBoss } from '../data/chapters';
+import { GAME_CONFIG } from '../config/gameConfig';
 
 export interface BossTickInput {
   boss: ChapterBoss;
@@ -66,7 +67,7 @@ function getRegenPerSec(boss: ChapterBoss, hpRatio: number, elapsedSec: number):
 
 function getCoinDrainPerSec(boss: ChapterBoss): number {
   if (!hasAny(boss.mechanics, MECHANIC_DRAIN)) return 0;
-  return Math.max(1, boss.maxHp * 0.0002);
+  return Math.max(1, boss.maxHp * GAME_CONFIG.BOSS_COIN_DRAIN_PER_HP_RATIO);
 }
 
 export function runBossTick(input: BossTickInput): BossTickResult {

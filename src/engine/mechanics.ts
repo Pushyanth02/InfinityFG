@@ -10,6 +10,7 @@ import {
 } from './productionEngine';
 import type { MachineWorkerBonus } from '../types/worker';
 import type { WorkerRole } from '../types/worker';
+import { GAME_CONFIG } from '../config/gameConfig';
 
 /**
  * Calculates a total multiplier from a set of unlocked skills for a specific bonus type.
@@ -150,26 +151,32 @@ export const calculateMachineProduction = (
  * Calculates the cost of the next machine.
  */
 export const getMachineCost = (baseCost: number, currentCount: number): number => {
-  return Math.floor(baseCost * Math.pow(1.18, currentCount));
+  return Math.floor(baseCost * Math.pow(GAME_CONFIG.MACHINE_COST_SCALING, currentCount));
 };
 
 /**
  * Calculates the cost of a machine upgrade.
  */
 export const getUpgradeCost = (baseCost: number, level: number): number => {
-  return Math.floor(baseCost * 0.5 * Math.pow(1.2, level));
+  return Math.floor(
+    baseCost
+      * GAME_CONFIG.UPGRADE_COST_BASE_MULTIPLIER
+      * Math.pow(GAME_CONFIG.UPGRADE_COST_SCALING, level),
+  );
 };
 
 /**
  * Calculates the cost of hiring a worker.
  */
 export const getWorkerCost = (baseCost: number, currentCount: number): number => {
-  return Math.floor(baseCost * Math.pow(2.5, currentCount));
+  return Math.floor(baseCost * Math.pow(GAME_CONFIG.WORKER_COST_SCALING, currentCount));
 };
 
 /**
  * Calculates the cost of buying a new plot.
  */
 export const getPlotCost = (plotCount: number): number => {
-  return Math.floor(100 * Math.pow(2, plotCount - 4));
+  return Math.floor(
+    GAME_CONFIG.PLOT_BASE_COST * Math.pow(GAME_CONFIG.PLOT_COST_SCALING, plotCount - 4),
+  );
 };
