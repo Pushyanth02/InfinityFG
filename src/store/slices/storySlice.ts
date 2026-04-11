@@ -11,6 +11,17 @@ import { eventBus } from '../../services/eventBus';
 import { VILLAGE_FOLK } from '../../data/villageFolk';
 import { applyBossHit, runBossTick } from '../../engine/bossEngine';
 import { applyUCW, getUcwsByRegion } from '../../engine/ucwEngine';
+import { getBossAttacks } from '../../data/bossAttacks';
+import {
+  createBossAttackRuntime,
+  createBossDebuffState,
+  getEffectiveProductionMultiplier,
+  processBossAttacks,
+  tickBossDebuffs,
+  type BossAttackRuntime,
+  type BossDebuffState,
+} from '../../engine/bossAttackEngine';
+import { applyAdaptiveDifficulty } from '../../engine/adaptiveAI';
 
 export interface ChapterProgressEntry {
   bossHp: number;        // remaining HP (decremented on harvest)
@@ -27,6 +38,9 @@ export interface StorySlice {
   futureUnlocksPreview: Array<{ id: string; unlockCondition: string }>;
   bossElapsedTracking: Record<string, number>;
   bossShieldTracking: Record<string, number>;
+  bossAttackTracking: Record<string, BossAttackRuntime[]>;
+  bossDebuffTracking: Record<string, BossDebuffState>;
+  rewardMultiplierTracking: Record<string, number>;
   unlockedUcws: string[];
   activeUCW: string[];
 
@@ -37,6 +51,9 @@ export interface StorySlice {
   // ── Actions ───────────────────────────────────────
   damageChapterBoss: (cropId: string, harvestCount: number) => void;
   tickChapterBoss: (deltaSec: number, baseDps: number) => void;
+  tickBossCombatState: (deltaSec: number) => void;
+  getBossProductionMultiplier: () => number;
+  getBossRewardMultiplier: () => number;
   unlockUCW: (ucwId: string) => void;
   equipUCW: (ucwId: string) => void;
   checkQuestProgress: () => void;
@@ -76,6 +93,26 @@ const initialBossShield = (): Record<string, number> => {
   return map;
 };
 
+const initialBossAttacks = (): Record<string, BossAttackRuntime[]> => {
+  const map: Record<string, BossAttackRuntime[]> = {};
+  for (const ch of CHAPTERS) {
+    map[ch.id] = createBossAttackRuntime(getBossAttacks(ch.boss.id));
+  }
+  return map;
+};
+
+const initialBossDebuffs = (): Record<string, BossDebuffState> => {
+  const map: Record<string, BossDebuffState> = {};
+  for (const ch of CHAPTERS) map[ch.id] = createBossDebuffState();
+  return map;
+};
+
+const initialRewardMultipliers = (): Record<string, number> => {
+  const map: Record<string, number> = {};
+  for (const ch of CHAPTERS) map[ch.id] = 1;
+  return map;
+};
+
 function getActiveUcwsForChapter(chapterNumber: number, unlockedUcws: string[], activeUCW: string[]) {
   const chapterUcws = getUcwsByRegion(chapterNumber);
   const unlockedForChapter = chapterUcws.filter((ucw) => unlockedUcws.includes(ucw.id));
@@ -87,6 +124,23 @@ function getActiveUcwsForChapter(chapterNumber: number, unlockedUcws: string[], 
   // Fallback: automatically use the highest-region unlocked UCW available.
   const fallback = unlockedForChapter.sort((a, b) => b.region - a.region)[0];
   return fallback ? [fallback] : [];
+}
+
+function getPlayTimeHours(state: GameState): number {
+  const historicalSec = Object.values(state.timeInRegionSec).reduce((sum, seconds) => sum + seconds, 0);
+  const currentSec = Math.max(0, (Date.now() - state.regionStartedAt) / 1000);
+  return Math.max(1 / 60, (historicalSec + currentSec) / 3600);
+}
+
+function getAdaptiveProfile(state: GameState, chapterNumber: number, bossBaseHp: number) {
+  const latestCoinsPerMinute = state.coinsPerMinuteSamples.at(-1) ?? 0;
+  return applyAdaptiveDifficulty({
+    coinsPerSecond: latestCoinsPerMinute / 60,
+    lifetimeCoins: state.lifetimeCoins,
+    chapterNumber,
+    playTimeHours: getPlayTimeHours(state),
+    bossBaseHp,
+  });
 }
 
 export const createStorySlice: StateCreator<
@@ -109,6 +163,9 @@ export const createStorySlice: StateCreator<
   })),
   bossElapsedTracking: initialBossElapsed(),
   bossShieldTracking: initialBossShield(),
+  bossAttackTracking: initialBossAttacks(),
+  bossDebuffTracking: initialBossDebuffs(),
+  rewardMultiplierTracking: initialRewardMultipliers(),
   unlockedUcws: [],
   activeUCW: [],
   ownedWeapons: [],
@@ -116,7 +173,8 @@ export const createStorySlice: StateCreator<
 
   // ── damageChapterBoss ──────────────────────────────────
   damageChapterBoss: (cropId, harvestCount) => {
-    const { currentChapterId, chapterProgress, equippedWeaponId } = get();
+    const snapshot = get();
+    const { currentChapterId, chapterProgress, equippedWeaponId } = snapshot;
     const chapter = CHAPTERS.find(c => c.id === currentChapterId);
     if (!chapter) return;
 
@@ -153,8 +211,17 @@ export const createStorySlice: StateCreator<
       ucwState.bossShield -= absorbed;
       postShieldDamage -= absorbed;
     }
-    const { nextHp: newHp, damageApplied } = applyBossHit(boss, ucwState.bossHP, postShieldDamage, elapsed);
+    const difficulty = getAdaptiveProfile(snapshot, chapter.number, boss.maxHp);
+    const hpScale = Math.max(0.25, difficulty.bossMaxHp / Math.max(1, boss.maxHp));
+    const { nextHp: newHp, damageApplied } = applyBossHit(
+      boss,
+      ucwState.bossHP,
+      postShieldDamage / hpScale,
+      elapsed,
+    );
     const isDefeated = newHp === 0;
+    const rewardMult = snapshot.rewardMultiplierTracking[currentChapterId] ?? difficulty.rewardMultiplier;
+    const rewardCoins = isDefeated ? boss.defeatReward.coinsBonus * rewardMult : 0;
 
     if (damageApplied > 0) {
       get().trackBossDamage(boss.id, damageApplied);
@@ -173,10 +240,12 @@ export const createStorySlice: StateCreator<
         ...state.bossShieldTracking,
         [currentChapterId]: ucwState.bossShield,
       },
+      rewardMultiplierTracking: {
+        ...state.rewardMultiplierTracking,
+        [currentChapterId]: difficulty.rewardMultiplier,
+      },
       // Defeat reward: add coins and unlock via advanceChapter
-      coins: isDefeated
-        ? state.coins + boss.defeatReward.coinsBonus
-        : state.coins,
+      coins: state.coins + rewardCoins,
     }));
 
     // Auto-advance chapter on defeat
@@ -194,17 +263,29 @@ export const createStorySlice: StateCreator<
 
   tickChapterBoss: (deltaSec, baseDps) => {
     if (deltaSec <= 0 || baseDps <= 0) return;
-    const { currentChapterId, chapterProgress, bossElapsedTracking } = get();
+    const snapshot = get();
+    const { currentChapterId, chapterProgress, bossElapsedTracking } = snapshot;
     const chapter = CHAPTERS.find((c) => c.id === currentChapterId);
     if (!chapter) return;
     const progress = chapterProgress[currentChapterId];
     if (!progress || progress.isDefeated) return;
 
+    const difficulty = getAdaptiveProfile(snapshot, chapter.number, chapter.boss.maxHp);
+    const hpScale = Math.max(0.25, difficulty.bossMaxHp / Math.max(1, chapter.boss.maxHp));
     const elapsed = bossElapsedTracking[currentChapterId] ?? 0;
+    const attacks = snapshot.bossAttackTracking[currentChapterId] ?? createBossAttackRuntime(getBossAttacks(chapter.boss.id));
+    const debuffs = snapshot.bossDebuffTracking[currentChapterId] ?? createBossDebuffState();
+    const attackResult = processBossAttacks({
+      coins: snapshot.coins,
+      bossShield: snapshot.bossShieldTracking[currentChapterId] ?? 0,
+      attacks,
+      debuffs,
+    }, deltaSec, difficulty.attackCooldownMultiplier);
+
     const activeUcws = getActiveUcwsForChapter(chapter.number, get().unlockedUcws, get().activeUCW);
     const ucwState = {
       bossHP: progress.bossHp,
-      bossShield: get().bossShieldTracking[currentChapterId] ?? 0,
+      bossShield: attackResult.bossShield,
       activeUCW: activeUcws,
     };
     const shieldPenalty = ucwState.bossShield > 0 ? 0.35 : 1;
@@ -212,18 +293,19 @@ export const createStorySlice: StateCreator<
     const result = runBossTick({
       boss: chapter.boss,
       currentHp: ucwState.bossHP,
-      baseDps: boostedDps,
+      baseDps: boostedDps / hpScale,
       deltaSec,
       elapsedSec: elapsed,
     });
     const isDefeated = result.nextHp === 0;
+    const rewardCoins = isDefeated ? chapter.boss.defeatReward.coinsBonus * difficulty.rewardMultiplier : 0;
 
     if (result.damageApplied > 0) {
       get().trackBossDamage(chapter.boss.id, result.damageApplied);
     }
 
     set((state) => ({
-      coins: Math.max(0, state.coins - result.coinDrain),
+      coins: Math.max(0, state.coins - attackResult.coinDrainApplied - result.coinDrain + rewardCoins),
       chapterProgress: {
         ...state.chapterProgress,
         [currentChapterId]: {
@@ -236,9 +318,21 @@ export const createStorySlice: StateCreator<
         ...state.bossShieldTracking,
         [currentChapterId]: ucwState.bossShield,
       },
+      bossAttackTracking: {
+        ...state.bossAttackTracking,
+        [currentChapterId]: attackResult.attacks,
+      },
+      bossDebuffTracking: {
+        ...state.bossDebuffTracking,
+        [currentChapterId]: attackResult.debuffs,
+      },
       bossElapsedTracking: {
         ...state.bossElapsedTracking,
         [currentChapterId]: result.nextElapsedSec,
+      },
+      rewardMultiplierTracking: {
+        ...state.rewardMultiplierTracking,
+        [currentChapterId]: difficulty.rewardMultiplier,
       },
     }));
 
@@ -250,6 +344,34 @@ export const createStorySlice: StateCreator<
       });
       get().advanceChapter();
     }
+  },
+
+  tickBossCombatState: (deltaSec) => {
+    if (deltaSec <= 0) return;
+    const { currentChapterId, chapterProgress, bossDebuffTracking } = get();
+    const progress = chapterProgress[currentChapterId];
+    if (!progress || progress.isDefeated) return;
+    const currentDebuff = bossDebuffTracking[currentChapterId] ?? createBossDebuffState();
+    const nextDebuff = tickBossDebuffs(currentDebuff, deltaSec);
+    set((state) => ({
+      bossDebuffTracking: {
+        ...state.bossDebuffTracking,
+        [currentChapterId]: nextDebuff,
+      },
+    }));
+  },
+
+  getBossProductionMultiplier: () => {
+    const { currentChapterId, chapterProgress, bossDebuffTracking } = get();
+    const progress = chapterProgress[currentChapterId];
+    if (!progress || progress.isDefeated) return 1;
+    const debuff = bossDebuffTracking[currentChapterId] ?? createBossDebuffState();
+    return getEffectiveProductionMultiplier(debuff);
+  },
+
+  getBossRewardMultiplier: () => {
+    const { currentChapterId, rewardMultiplierTracking } = get();
+    return rewardMultiplierTracking[currentChapterId] ?? 1;
   },
 
   unlockUCW: (ucwId) => {

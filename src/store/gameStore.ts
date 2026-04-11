@@ -40,9 +40,12 @@ export const useGameStore = create<GameState>()(
           getMachineBonuses,
           getRoleCounts,
           trackCoinFlow,
+          tickBossCombatState,
+          getBossProductionMultiplier,
         } = get();
         const deltaRaw = (timestamp - lastTick) / 1000;
         const delta = Number.isFinite(deltaRaw) ? Math.max(0, Math.min(5, deltaRaw)) : 0;
+        tickBossCombatState(delta);
 
         // 1. Calculate Growth
         const nextPlots = plots.map(plot => {
@@ -70,8 +73,9 @@ export const useGameStore = create<GameState>()(
             getRoleCounts,
           }
         );
+        const bossProductionMult = getBossProductionMultiplier();
         const infinityBoost = getInfinityMultiplier(get().lifetimeCoins);
-        const coinGain = rawCoinGain * infinityBoost;
+        const coinGain = rawCoinGain * infinityBoost * bossProductionMult;
 
         // Update market prices at most once per minute.
         if (marketService.getTimeSinceUpdate() >= 60_000) {
