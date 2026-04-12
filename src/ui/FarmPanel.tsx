@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useGameStore, fmt } from '../store/gameStore';
 import { CROPS } from '../data/crops';
+import { AnimatedButton } from './components/AnimatedButton';
+import { useFeedback } from './feedback/useFeedback';
+import { useSound } from './hooks/useSound';
 
 /* ── Cozy helper styles ─────────────────────────────────── */
 const plotCard: React.CSSProperties = {
@@ -18,6 +21,9 @@ const plotCard: React.CSSProperties = {
 const FarmPanel: React.FC = () => {
   const { plots, coins, unlockedCrops, plantCrop, harvestCrop, buyPlot } = useGameStore();
   const [selectedPlot, setSelectedPlot] = useState<string | null>(null);
+  const { spawnFloatingText } = useFeedback();
+  const playCoin = useSound('/sounds/coin.wav', 0.28);
+  const playBuy = useSound('/sounds/buy.wav', 0.3);
   const nextPlotCost = 100 * Math.pow(2, plots.length - 4);
 
   /* ── Friendly Plot Name ── */
@@ -36,8 +42,12 @@ const FarmPanel: React.FC = () => {
             Your cozy garden plots — tend, grow & harvest
           </p>
         </div>
-        <button aria-label="Buy new garden bed"
-          onClick={buyPlot}
+        <AnimatedButton aria-label="Buy new garden bed"
+          onClick={(event) => {
+            buyPlot();
+            playBuy();
+            spawnFloatingText(`-${fmt(nextPlotCost)} 🪙`, event.clientX, event.clientY, '#f5b942');
+          }}
           disabled={coins < nextPlotCost}
           className="btn-base btn-amber"
           style={{ fontSize: '0.78rem', padding: '8px 16px', gap: 6 }}
@@ -47,7 +57,7 @@ const FarmPanel: React.FC = () => {
             <span>New Garden Bed</span>
             <span style={{ fontSize: '0.6rem', opacity: 0.75 }}>{fmt(nextPlotCost)} Gold Coins</span>
           </div>
-        </button>
+        </AnimatedButton>
       </div>
 
       {/* ── Plot Grid ── */}
@@ -114,22 +124,27 @@ const FarmPanel: React.FC = () => {
               {/* Action button */}
               <div>
                 {plot.cropId ? (
-                  <button
+                  <AnimatedButton
                     disabled={!plot.isReady}
-                    onClick={() => harvestCrop(plot.id)}
+                    onClick={(event) => {
+                      harvestCrop(plot.id);
+                      if (!crop) return;
+                      playCoin();
+                      spawnFloatingText(`+${fmt(crop.baseValue)} 🪙`, event.clientX, event.clientY);
+                    }}
                     className={`btn-base w-full ${plot.isReady ? 'btn-primary' : 'btn-ghost'}`}
                     style={{ fontSize: '0.78rem', padding: '8px 12px', opacity: plot.isReady ? 1 : 0.55 }}
                   >
                     {plot.isReady ? '🌾 Harvest Crops' : `🕐 Growing... ${Math.floor(plot.growthProgress * 100)}%`}
-                  </button>
+                  </AnimatedButton>
                 ) : (
-                  <button
+                  <AnimatedButton
                     onClick={() => setSelectedPlot(plot.id)}
                     className="btn-base btn-amber w-full"
                     style={{ fontSize: '0.78rem', padding: '8px 12px' }}
                   >
                     🌱 Plant Seeds
-                  </button>
+                  </AnimatedButton>
                 )}
               </div>
             </div>
@@ -176,10 +191,16 @@ const FarmPanel: React.FC = () => {
               {CROPS.filter(c => unlockedCrops.includes(c.id)).map(crop => {
                 const canAfford = coins >= crop.seedCost;
                 return (
-                  <button
+                  <AnimatedButton
                     key={crop.id}
                     disabled={!canAfford}
-                    onClick={() => { plantCrop(selectedPlot, crop.id); setSelectedPlot(null); }}
+                    onClick={(event) => {
+                      if (!selectedPlot) return;
+                      plantCrop(selectedPlot, crop.id);
+                      playBuy();
+                      spawnFloatingText(`-${fmt(crop.seedCost)} 🪙`, event.clientX, event.clientY, '#f5b942');
+                      setSelectedPlot(null);
+                    }}
                     style={{
                       background: canAfford ? 'var(--surface)' : 'rgba(240,230,204,0.5)',
                       border: `2px solid ${canAfford ? 'var(--brown-border)' : 'rgba(139,96,51,0.15)'}`,
@@ -213,7 +234,7 @@ const FarmPanel: React.FC = () => {
                         <div style={{ fontFamily: 'var(--font-main)', fontWeight: 800, fontSize: '0.82rem', color: 'var(--green-mid)' }}>{crop.growthTime}s</div>
                       </div>
                     </div>
-                  </button>
+                  </AnimatedButton>
                 );
               })}
             </div>

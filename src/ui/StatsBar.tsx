@@ -1,8 +1,12 @@
 import React from 'react';
 import { useGameStore, fmt } from '../store/gameStore';
+import { useAnimatedNumber } from './hooks/useAnimatedNumber';
 
 const StatsBar: React.FC = () => {
   const { coins, gems, prestigePoints, currentRegion } = useGameStore();
+  const animatedCoins = useAnimatedNumber(coins);
+  const animatedGems = useAnimatedNumber(gems);
+  const animatedPrestige = useAnimatedNumber(prestigePoints);
 
   const biomeLabel = currentRegion.replace(/_/g, ' ');
 
@@ -50,9 +54,9 @@ const StatsBar: React.FC = () => {
 
         {/* ── Stats Chips ── */}
         <div className="flex items-center gap-3">
-          <StatChip icon="🪙" label="Gold Coins"   value={fmt(coins)}         color="#fcc940" />
-          <StatChip icon="💧" label="Magic Dew"    value={fmt(gems)}          color="#74bfe0" />
-          <StatChip icon="⭐" label="Harvest Stars" value={fmt(prestigePoints)} color="#f5b942" />
+          <StatChip icon="🪙" label="Gold Coins"   value={fmt(animatedCoins)}    color="#fcc940" />
+          <StatChip icon="💧" label="Magic Dew"    value={fmt(animatedGems)}     color="#74bfe0" />
+          <StatChip icon="⭐" label="Harvest Stars" value={fmt(animatedPrestige)} color="#f5b942" />
         </div>
       </div>
 

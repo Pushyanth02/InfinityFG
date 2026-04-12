@@ -2,6 +2,8 @@ import React from 'react';
 import { useGameStore, fmt } from '../store/gameStore';
 import { VILLAGE_FOLK } from '../data/villageFolk';
 import { evaluateRequirement } from '../services/unlockService';
+import { AnimatedButton } from './components/AnimatedButton';
+import { useSound } from './hooks/useSound';
 
 const WorkerPanel: React.FC = () => {
   const {
@@ -26,6 +28,7 @@ const WorkerPanel: React.FC = () => {
     craftingTracking,
   } = useGameStore();
   const totalWorkers = Object.values(workers).reduce((a, b) => a + b, 0);
+  const playBuy = useSound('/sounds/buy.wav', 0.3);
 
   const roleEmoji = (role: string) => {
     if (role === 'gardener') return '🌿';
@@ -134,18 +137,21 @@ const WorkerPanel: React.FC = () => {
                 <div className="panel-subtitle">Mysterious visitor: complete chapter/quests to invite.</div>
               )}
 
-              <button
-                onClick={() => buyWorker(worker.worker_id)}
+              <AnimatedButton
+                onClick={() => {
+                  buyWorker(worker.worker_id);
+                  playBuy();
+                }}
                 disabled={!canAfford || !unlocked || (!worker.repeatable && count > 0)}
                 className={`btn-base w-full ${canAfford ? 'btn-primary' : 'btn-ghost'}`}
                 style={{ fontSize: '0.78rem', padding: '8px 12px', opacity: canAfford && unlocked ? 1 : 0.5 }}
               >
                 🏡 Invite to Village
                 <span style={{ fontSize: '0.62rem', opacity: 0.75, marginLeft: 4 }}>({fmt(nextCost)} 🪙)</span>
-              </button>
+              </AnimatedButton>
 
               {instance && (
-                <button
+                <AnimatedButton
                   onClick={() => {
                     if (assigned) {
                       unassignWorker(instance.instanceId);
@@ -157,17 +163,17 @@ const WorkerPanel: React.FC = () => {
                   style={{ fontSize: '0.72rem', padding: '6px 10px' }}
                 >
                   {assigned ? 'Return to Aura' : 'Assign to Machine'}
-                </button>
+                </AnimatedButton>
               )}
 
               {nextQuest && instance && (
-                <button
+                <AnimatedButton
                   onClick={() => completePersonalQuest(worker.worker_id, nextQuest.id)}
                   className="btn-base btn-amber"
                   style={{ fontSize: '0.72rem', padding: '6px 10px' }}
                 >
                   Quick Quest: {nextQuest.title}
-                </button>
+                </AnimatedButton>
               )}
             </div>
           );

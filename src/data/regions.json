@@ -1,0 +1,14 @@
+[
+  { "id": 1, "name": "Valley", "multiplier": 1 },
+  { "id": 2, "name": "Peaks", "multiplier": 5 },
+  { "id": 3, "name": "Woods", "multiplier": 25 },
+  { "id": 4, "name": "Caves", "multiplier": 125 },
+  { "id": 5, "name": "Reef", "multiplier": 625 },
+  { "id": 6, "name": "Sands", "multiplier": 3125 },
+  { "id": 7, "name": "Plateau", "multiplier": 15625 },
+  { "id": 8, "name": "Heights", "multiplier": 78125 },
+  { "id": 9, "name": "Void", "multiplier": 390625 },
+  { "id": 10, "name": "Grove", "multiplier": 1953125 },
+  { "id": 11, "name": "Gardens", "multiplier": 9765625 },
+  { "id": 12, "name": "Infinity", "multiplier": 48828125 }
+]

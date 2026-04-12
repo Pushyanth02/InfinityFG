@@ -1,6 +1,9 @@
 import React from 'react';
 import { useGameStore, fmt } from '../store/gameStore';
 import { AUGMENTED_MACHINES } from '../data/machine_upgrades';
+import { motion } from 'framer-motion';
+import { AnimatedButton } from './components/AnimatedButton';
+import { useSound } from './hooks/useSound';
 
 /* Cozy helper names for machine types */
 const helperNames: Record<string, { friendly: string; emoji: string }> = {
@@ -21,6 +24,7 @@ const categoryFriendly: Record<string, string> = {
 
 const MachinePanel: React.FC = () => {
   const { coins, machines, buyMachine } = useGameStore();
+  const playBuy = useSound('/sounds/buy.wav', 0.3);
   const categories = ['planter', 'waterer', 'harvester', 'processor', 'drone'];
   const totalHelpers = machines.reduce((acc, m) => acc + m.count, 0);
 
@@ -88,15 +92,19 @@ const MachinePanel: React.FC = () => {
                       background: 'var(--bg-deep)', borderRadius: 'var(--radius-sm)',
                       padding: 'var(--space-sm)', border: '1px solid var(--brown-border)',
                     }}>
-                      <div style={{
-                        width: 52, height: 52, borderRadius: 'var(--radius-md)',
-                        background: 'linear-gradient(135deg, var(--amber-pale), var(--bg-deep))',
-                        border: '2px solid var(--brown-border)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: '2rem', flexShrink: 0,
-                      }}>
+                      <motion.div
+                        animate={count > 0 ? { scale: [1, 1.08, 1] } : { scale: 1 }}
+                        transition={{ repeat: count > 0 ? Infinity : 0, duration: 1.1 }}
+                        style={{
+                          width: 52, height: 52, borderRadius: 'var(--radius-md)',
+                          background: 'linear-gradient(135deg, var(--amber-pale), var(--bg-deep))',
+                          border: '2px solid var(--brown-border)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: '2rem', flexShrink: 0,
+                        }}
+                      >
                         {emoji}
-                      </div>
+                      </motion.div>
                       <div style={{ flex: 1 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
                           <span style={{ fontFamily: 'var(--font-sans)', fontSize: '0.58rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>T{def.tier} Unit</span>
@@ -127,15 +135,18 @@ const MachinePanel: React.FC = () => {
                       )}
                     </div>
 
-                    <button
-                      onClick={() => buyMachine(def.id)}
+                    <AnimatedButton
+                      onClick={() => {
+                        buyMachine(def.id);
+                        playBuy();
+                      }}
                       disabled={!canAfford}
                       className={`btn-base w-full ${canAfford ? 'btn-primary' : 'btn-ghost'}`}
                       style={{ fontSize: '0.78rem', padding: '8px 12px', opacity: canAfford ? 1 : 0.5 }}
                     >
                       🌿 Deploy Helper
                       <span style={{ fontSize: '0.62rem', opacity: 0.75, marginLeft: 4 }}>({fmt(nextCost)} 🪙)</span>
-                    </button>
+                    </AnimatedButton>
                   </div>
                 );
               })}

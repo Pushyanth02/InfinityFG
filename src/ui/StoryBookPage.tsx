@@ -10,6 +10,9 @@ import type { Chapter, StoryPage } from '../data/chapters';
 import { CHAPTERS } from '../data/chapters';
 import { CROPS } from '../data/crops';
 import { VILLAGE_FOLK } from '../data/villageFolk';
+import type { MarketPrice } from '../services/marketService';
+import { BossHealthBar } from './boss/BossHealthBar';
+import { AnimatedButton } from './components/AnimatedButton';
 
 interface Props {
   page: StoryPage;
@@ -406,9 +409,7 @@ const BossPreludePage: React.FC<{ page: StoryPage; chapter: Chapter }> = ({ page
           <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.82rem', color: 'var(--brown-mid)' }}>💖 Threat Level</span>
           <span style={{ fontFamily: 'var(--font-sans)', fontSize: '0.7rem', fontWeight: 700, color: '#c0392b' }}>{fmt(chapter.boss.maxHp)} HP</span>
         </div>
-        <div style={{ height: 12, borderRadius: 'var(--radius-xl)', background: '#1a0a05', border: '1.5px solid #5c3d1e', overflow: 'hidden' }}>
-          <div style={{ height: '100%', width: `${bossHpPct}%`, background: 'linear-gradient(90deg, #8b0000, #c0392b, #e74c3c)', borderRadius: 'var(--radius-xl)' }} />
-        </div>
+        <BossHealthBar hpPercent={bossHpPct} height={12} />
       </div>
     </div>
   );
@@ -418,11 +419,11 @@ const BossPreludePage: React.FC<{ page: StoryPage; chapter: Chapter }> = ({ page
 const BossPageContent: React.FC<{ chapter: Chapter }> = ({ chapter }) => {
   const { chapterProgress, coins, ownedWeapons, equippedWeaponId, buyWeapon, equipWeapon } = useGameStore();
   const progress = chapterProgress[chapter.id];
-  if (!progress) return null;
-
-  const bossHpPct = Math.max(0, (progress.bossHp / chapter.boss.maxHp) * 100);
+  const currentBossHp = progress?.bossHp ?? chapter.boss.maxHp;
+  const bossHpPct = Math.max(0, (currentBossHp / chapter.boss.maxHp) * 100);
   const weapon = chapter.cropWeaponId;
   const weaponOwned = ownedWeapons.includes(weapon);
+  if (!progress) return null;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
@@ -455,9 +456,7 @@ const BossPageContent: React.FC<{ chapter: Chapter }> = ({ chapter }) => {
           <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.82rem', color: 'var(--brown-mid)' }}>💖 Boss Health</span>
           <span style={{ fontFamily: 'var(--font-sans)', fontSize: '0.7rem', fontWeight: 700, color: '#c0392b' }}>{fmt(progress.bossHp)} / {fmt(chapter.boss.maxHp)}</span>
         </div>
-        <div style={{ height: 18, borderRadius: 'var(--radius-xl)', background: '#1a0a05', border: '2px solid #5c3d1e', overflow: 'hidden' }}>
-          <div style={{ height: '100%', width: `${bossHpPct}%`, background: 'linear-gradient(90deg, #8b0000, #c0392b, #e74c3c)', transition: 'width 0.6s ease', borderRadius: 'var(--radius-xl)' }} />
-        </div>
+        <BossHealthBar hpPercent={bossHpPct} height={18} shakeKey={Math.floor(currentBossHp)} />
         <div className="panel-subtitle" style={{ marginTop: 4 }}>Harvest crops to deal damage — weak crops deal ×3!</div>
       </div>
 
@@ -487,25 +486,25 @@ const BossPageContent: React.FC<{ chapter: Chapter }> = ({ chapter }) => {
           {weaponOwned ? (
             <div style={{ display: 'flex', gap: 8 }}>
               {equippedWeaponId !== weapon && (
-                <button onClick={() => equipWeapon(weapon)} className="btn-base btn-amber" style={{ flex: 1, fontSize: '0.78rem', padding: '8px 12px' }}>
+                <AnimatedButton onClick={() => equipWeapon(weapon)} className="btn-base btn-amber" style={{ flex: 1, fontSize: '0.78rem', padding: '8px 12px' }}>
                   ⚔️ Equip Chapter Weapon
-                </button>
+                </AnimatedButton>
               )}
               {equippedWeaponId === weapon && (
-                <button onClick={() => equipWeapon(null)} className="btn-base btn-ghost" style={{ flex: 1, fontSize: '0.78rem', padding: '8px 12px' }}>
+                <AnimatedButton onClick={() => equipWeapon(null)} className="btn-base btn-ghost" style={{ flex: 1, fontSize: '0.78rem', padding: '8px 12px' }}>
                   🗃️ Unequip Weapon
-                </button>
+                </AnimatedButton>
               )}
             </div>
           ) : (
-            <button
+            <AnimatedButton
               onClick={() => buyWeapon(weapon)}
               disabled={coins < 1000}
               className={`btn-base ${coins >= 1000 ? 'btn-amber' : 'btn-ghost'}`}
               style={{ width: '100%', fontSize: '0.78rem', padding: '8px 12px', opacity: coins >= 1000 ? 1 : 0.5 }}
             >
               🌟 Craft Chapter Weapon
-            </button>
+            </AnimatedButton>
           )}
         </div>
       )}

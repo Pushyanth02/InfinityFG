@@ -1,0 +1,29 @@
+[
+  {
+    "id": "root_cannon",
+    "name": "Root Cannon",
+    "region": 1,
+    "requiredCrop": "wheat_5",
+    "cost": 500,
+    "effect": "shield_break",
+    "multiplier": 2
+  },
+  {
+    "id": "tidal_core",
+    "name": "Tidal Core",
+    "region": 5,
+    "requiredCrop": "lotus_5",
+    "cost": 800,
+    "effect": "burst_dps",
+    "multiplier": 3
+  },
+  {
+    "id": "void_collapse",
+    "name": "Void Collapse",
+    "region": 9,
+    "requiredCrop": "void_7",
+    "cost": 1200,
+    "effect": "true_damage",
+    "multiplier": 5
+  }
+]

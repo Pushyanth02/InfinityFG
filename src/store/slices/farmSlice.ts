@@ -4,6 +4,7 @@ import { CROPS } from '../../data/crops';
 import { getPlotCost, getSkillMultiplier } from '../../engine/mechanics';
 import { eventBus } from '../../services/eventBus';
 import { marketService } from '../../services/marketService';
+import { nowMs } from '../../systems/time';
 
 export const createFarmSlice: StateCreator<
   GameState,
@@ -29,7 +30,7 @@ export const createFarmSlice: StateCreator<
       plots: state.plots.map(p => p.id === plotId ? {
         ...p,
         cropId,
-        plantedAt: Date.now(),
+        plantedAt: nowMs(),
         growthProgress: 0,
         isReady: false
       } : p)

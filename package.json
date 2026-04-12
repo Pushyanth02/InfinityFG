@@ -5,7 +5,7 @@
   "description": "InfinityFG farming automation and progression simulator",
   "type": "module",
   "engines": {
-    "node": ">=20.0.0"
+    "node": "20.x"
   },
   "scripts": {
     "dev": "vite",
@@ -17,6 +17,7 @@
     "simulate:qa:strict": "npx tsx simulation/qa_runner.ts --failOnRegression=true",
     "simulate:progression": "npx tsx simulation/progression_sim.ts",
     "simulate:balance": "npx tsx simulation/balance_sim.ts",
+    "simulate:balance:phase": "npx tsx simulation/balance_phase_sim.ts",
     "simulate:roi": "npx tsx simulation/machine_roi_sim.ts",
     "validate:system": "npm run lint && npm run build && npm run simulate:qa:strict"
   },
@@ -24,6 +25,7 @@
     "@tailwindcss/postcss": "^4.2.1",
     "appwrite": "^23.0.0",
     "autoprefixer": "^10.4.27",
+    "framer-motion": "^12.38.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "tailwindcss": "^4.2.1",

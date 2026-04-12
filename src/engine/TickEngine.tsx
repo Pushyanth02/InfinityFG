@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useGameStore } from '../store/gameStore';
+import { nowMs } from '../systems/time';
 
 /**
  * The Heartbeat of AgriEmpire.
@@ -10,9 +11,9 @@ export const TickEngine: React.FC = () => {
 
   // Allow configurable tick frequency and batch updates
   useEffect(() => {
-    let lastTick = Date.now();
+    let lastTick = nowMs();
     const interval = setInterval(() => {
-      const now = Date.now();
+      const now = nowMs();
       // Batch updates if >200ms elapsed
       if (now - lastTick > 200) {
         tick(now);

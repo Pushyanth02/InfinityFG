@@ -6,6 +6,7 @@
 
 import { CROPS } from '../data/crops';
 import { eventBus } from './eventBus';
+import { createStableId, nowMs, randomUnit } from '../systems/time';
 
 /**
  * Tunable parameters for the market system.
@@ -86,7 +87,7 @@ class MarketService {
   private priceHistory: Map<string, number[]> = new Map();
   private tunables: MarketTunables = DEFAULT_MARKET_TUNABLES;
   private currentWeather: string = 'sunny';
-  private lastUpdateTime: number = Date.now();
+  private lastUpdateTime: number = nowMs();
 
   constructor() {
     this.initializePrices();
@@ -104,7 +105,7 @@ class MarketService {
         trend: 'stable',
         affectedByWeather: crop.weatherAffinity?.length > 0,
         activeBonuses: [],
-        lastUpdate: Date.now(),
+        lastUpdate: nowMs(),
       });
       this.priceHistory.set(crop.id, [1.0]);
     }
@@ -118,7 +119,7 @@ class MarketService {
       this.currentWeather = weatherType;
     }
 
-    const now = Date.now();
+    const now = nowMs();
 
     for (const crop of CROPS) {
       const current = this.prices.get(crop.id);
@@ -136,7 +137,7 @@ class MarketService {
 
       // Random swing
       const randomSwing =
-        1 + (Math.random() - 0.5) * this.tunables.PRICE_VOLATILITY;
+        1 + (randomUnit() - 0.5) * this.tunables.PRICE_VOLATILITY;
 
       // Apply trend momentum
       const trendFactor =
@@ -237,7 +238,7 @@ class MarketService {
   addOffer(offer: MerchantOffer): void {
     // Set expiration if duration is specified
     if (offer.duration > 0) {
-      offer.expiresAt = Date.now() + offer.duration * 1000;
+      offer.expiresAt = nowMs() + offer.duration * 1000;
     }
 
     this.activeOffers.push(offer);
@@ -268,7 +269,7 @@ class MarketService {
    */
   getActiveOffers(): MerchantOffer[] {
     // Clean up expired offers
-    const now = Date.now();
+    const now = nowMs();
     const expired = this.activeOffers.filter(
       (o) => o.expiresAt && o.expiresAt < now
     );
@@ -318,7 +319,7 @@ class MarketService {
    * Get time since last price update.
    */
   getTimeSinceUpdate(): number {
-    return Date.now() - this.lastUpdateTime;
+    return nowMs() - this.lastUpdateTime;
   }
 
   /**
@@ -407,10 +408,10 @@ export function spawnRandomOffer(currentChapter: number): void {
   if (eligibleOffers.length === 0) return;
 
   const randomOffer =
-    eligibleOffers[Math.floor(Math.random() * eligibleOffers.length)];
+    eligibleOffers[Math.floor(randomUnit() * eligibleOffers.length)];
 
   marketService.addOffer({
     ...randomOffer,
-    id: `offer_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+    id: createStableId('offer'),
   });
 }

@@ -1,0 +1,14 @@
+[
+  {
+    "id": "willow",
+    "role": "farmer",
+    "baseCost": 100,
+    "baseBonus": 0.1
+  },
+  {
+    "id": "silas",
+    "role": "trader",
+    "baseCost": 150,
+    "baseBonus": 0.15
+  }
+]

@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useGameStore } from '../store/gameStore';
+import { createStableId } from '../systems/time';
 
 interface GameEvent {
   id: string;
@@ -30,7 +31,7 @@ const EventFeed: React.FC = () => {
   const addEvent = (message: string, type: GameEvent['type']) => {
     eventCounter.current += 1;
     const newEvent: GameEvent = {
-      id: `evt_${Date.now()}_${eventCounter.current}`,
+      id: createStableId(`evt_${eventCounter.current}`),
       type,
       message,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),

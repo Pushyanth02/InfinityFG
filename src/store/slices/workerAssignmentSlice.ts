@@ -25,6 +25,7 @@ import {
 import { getWorker } from '../../data/world';
 import { getVillageFolkById } from '../../data/villageFolk';
 import { eventBus } from '../../services/eventBus';
+import { createStableId, nowMs } from '../../systems/time';
 
 /**
  * Default empty bonuses.
@@ -106,13 +107,15 @@ export interface WorkerAssignmentSlice {
   getAnalystBonus: () => number;
   /** Get trust value for a worker */
   getWorkerTrust: (workerId: string) => number;
+  /** Get count of active workers by role */
+  getRoleCounts: () => Partial<Record<WorkerRole, number>>;
 }
 
 /**
  * Generate unique instance ID.
  */
 function generateInstanceId(): string {
-  return `worker_inst_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  return createStableId('worker_inst');
 }
 
 /**
@@ -205,7 +208,7 @@ export const createWorkerAssignmentSlice: StateCreator<
       level: 1,
       experience: 0,
       mood: 80, // Start with good mood
-      hiredAt: Date.now(),
+      hiredAt: nowMs(),
     };
 
     set((state) => ({
@@ -551,5 +554,15 @@ export const createWorkerAssignmentSlice: StateCreator<
   // ── getWorkerTrust ───────────────────────────────────────
   getWorkerTrust: (workerId) => {
     return get().workerTrust[workerId] ?? 0;
+  },
+
+  // ── getRoleCounts ─────────────────────────────────────────
+  getRoleCounts: () => {
+    const counts: Partial<Record<WorkerRole, number>> = {};
+    for (const instance of get().workerInstances) {
+      const role = getWorkerRole(instance.workerId);
+      counts[role] = (counts[role] ?? 0) + 1;
+    }
+    return counts;
   },
 });

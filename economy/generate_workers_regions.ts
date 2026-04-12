@@ -128,5 +128,5 @@ const tsOutDir = path.join(__dirname, '../src/data');
 fs.writeFileSync(path.join(tsOutDir, 'world.ts'), tsContent);
 
 console.log(`✅ Generated 40 Workers and 12 Regions successfully.`);
-console.log(`📁 JSON: data_exports/workers.json, regions.json`);
+console.log(`📁 JSON: src/data_exports/workers.json, regions.json`);
 console.log(`📁 TS:   src/data/world.ts`);

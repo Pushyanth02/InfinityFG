@@ -5,28 +5,26 @@
  * Runs N virtual player sessions and validates whether pacing targets are met.
  * Run with: npx ts-node simulation/balance_sim.ts
  *
- * Output: simulation/reports/sim_report_<timestamp>.json
+ * Output: <qa_integration.report_output_dir>/sim_report_<timestamp>.json
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
-import { fileURLToPath } from 'url';
+import { writeTimestampedJsonReport } from './reportIo';
+import { getSimulationReportDir, loadSimulationTunables } from './sharedGameConfig';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const tunables = loadSimulationTunables();
 
-// ─── Config (mirrors game_config.json) ────────────────────────────────────────
+// ─── Config (uses game_config.json for shared economy tunables) ───────────────
 const CONFIG = {
-  // Economy (patch v1.0.1 applied)
+  // Economy
   base_crop_value_scalar: 1.0,
   farm_multiplier_cap: 10.0,
-  machine_multiplier_per_unit: 0.07,       // was 0.1 — patch v1.0.1
-  upgrade_scale_factor: 1.15,
+  machine_multiplier_per_unit: tunables.machineMultPerUnit,
+  upgrade_scale_factor: tunables.upgradeScaleFactor,
   machine_tier_exponent: 1.18,
-  automation_slope: 0.12,
-  auto_harvest_trigger_threshold: 6,       // was 3 — patch v1.0.1
-  prestige_divisor: 5_000_000,             // was 1M — patch v1.0.1
-  processing_value_multiplier: 2.3,
+  automation_slope: tunables.automationSlope,
+  auto_harvest_trigger_threshold: tunables.autoHarvestThreshold,
+  prestige_divisor: tunables.prestigeDivisor,
+  processing_value_multiplier: tunables.processingMultPerStage,
 
   // Simulation
   num_sessions: 1000,
@@ -342,12 +340,8 @@ if (report.recommendations.length === 0) {
 }
 
 // ─── Output report ────────────────────────────────────────────────────────────
-const reportDir = path.join(__dirname, 'reports');
-if (!fs.existsSync(reportDir)) fs.mkdirSync(reportDir, { recursive: true });
-
-const filename = `sim_report_${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
-const outPath = path.join(reportDir, filename);
-fs.writeFileSync(outPath, JSON.stringify(report, null, 2));
+const reportDir = getSimulationReportDir();
+const outPath = writeTimestampedJsonReport(reportDir, 'sim_report', report);
 
 console.log('\n📊 SIMULATION RESULTS:');
 console.log('─'.repeat(60));

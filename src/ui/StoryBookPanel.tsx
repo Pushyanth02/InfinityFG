@@ -52,7 +52,7 @@ const StoryBookPanel: React.FC = () => {
   const {
     currentChapterId, chapterProgress,
     unlockedCrops,
-    
+    coins,
     ownedWeapons, equippedWeaponId,
     buyWeapon, equipWeapon,
     setPanel,
@@ -147,6 +147,7 @@ const StoryBookPanel: React.FC = () => {
             const owned    = ownedWeapons.includes(weapon.id);
             const equipped = equippedWeaponId === weapon.id;
             const isCurrent = chapter.cropWeaponId === weapon.id;
+            const canAfford = coins >= weapon.cost;
             return (
               <div key={weapon.id} className="glass-panel" style={{ padding: 'var(--space-md)', display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)', borderColor: equipped ? 'rgba(201,124,46,0.6)' : isCurrent ? 'rgba(74,124,89,0.45)' : 'var(--brown-border)', background: equipped ? 'linear-gradient(135deg, var(--amber-pale), var(--surface))' : undefined }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>

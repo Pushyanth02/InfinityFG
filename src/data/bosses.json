@@ -1,0 +1,59 @@
+[
+  {
+    "id": "boss_crumblewort",
+    "attacks": [
+      { "id": "cw_burst", "type": "burst", "cooldown": 10, "power": 0.25 },
+      { "id": "cw_drain", "type": "drain", "cooldown": 16, "power": 0.08 },
+      { "id": "cw_shield", "type": "shield", "cooldown": 20, "power": 800 }
+    ]
+  },
+  {
+    "id": "boss_swamp_mold",
+    "attacks": [
+      { "id": "sm_burst", "type": "burst", "cooldown": 9, "power": 0.3 },
+      { "id": "sm_drain", "type": "drain", "cooldown": 14, "power": 0.1 },
+      { "id": "sm_shield", "type": "shield", "cooldown": 18, "power": 6000 }
+    ]
+  },
+  {
+    "id": "boss_frost_mite",
+    "attacks": [
+      { "id": "fm_burst", "type": "burst", "cooldown": 8, "power": 0.3 },
+      { "id": "fm_stun", "type": "stun", "cooldown": 15, "power": 1 },
+      { "id": "fm_shield", "type": "shield", "cooldown": 20, "power": 26000 }
+    ]
+  },
+  {
+    "id": "boss_desert_locust",
+    "attacks": [
+      { "id": "dl_burst", "type": "burst", "cooldown": 7, "power": 0.35 },
+      { "id": "dl_drain", "type": "drain", "cooldown": 12, "power": 0.12 },
+      { "id": "dl_stun", "type": "stun", "cooldown": 18, "power": 1 }
+    ]
+  },
+  {
+    "id": "boss_vine_strangler",
+    "attacks": [
+      { "id": "vs_burst", "type": "burst", "cooldown": 8, "power": 0.32 },
+      { "id": "vs_shield", "type": "shield", "cooldown": 14, "power": 350000 },
+      { "id": "vs_stun", "type": "stun", "cooldown": 22, "power": 1 }
+    ]
+  },
+  {
+    "id": "boss_ember_blister",
+    "attacks": [
+      { "id": "eb_burst", "type": "burst", "cooldown": 7, "power": 0.35 },
+      { "id": "eb_drain", "type": "drain", "cooldown": 13, "power": 0.14 },
+      { "id": "eb_shield", "type": "shield", "cooldown": 16, "power": 2200000 }
+    ]
+  },
+  {
+    "id": "boss_void_blight",
+    "attacks": [
+      { "id": "vb_burst", "type": "burst", "cooldown": 6, "power": 0.4 },
+      { "id": "vb_drain", "type": "drain", "cooldown": 10, "power": 0.18 },
+      { "id": "vb_shield", "type": "shield", "cooldown": 14, "power": 12000000 },
+      { "id": "vb_stun", "type": "stun", "cooldown": 20, "power": 1 }
+    ]
+  }
+]
