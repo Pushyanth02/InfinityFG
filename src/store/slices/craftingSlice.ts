@@ -4,6 +4,7 @@ import { STORY_RECIPES } from '../../data/recipes';
 import { CHAPTERS } from '../../data/chapters';
 import { eventBus } from '../../services/eventBus';
 import { AUGMENTED_MACHINES } from '../../data/machine_upgrades';
+import { nowMs } from '../../systems/time';
 
 export interface CraftQueueItem {
   recipeId: string;
@@ -86,7 +87,7 @@ export const createCraftingSlice: StateCreator<GameState, [], [], CraftingSlice>
     const can = get().canCraftRecipe(recipeId);
     if (!can.ok) return;
 
-    const completeAt = Date.now() + recipe.craftTime_s * 1000;
+    const completeAt = nowMs() + recipe.craftTime_s * 1000;
 
     set((state) => ({
       coins: state.coins - recipe.costCoins,

@@ -25,6 +25,7 @@ import {
 import { getWorker } from '../../data/world';
 import { getVillageFolkById } from '../../data/villageFolk';
 import { eventBus } from '../../services/eventBus';
+import { createStableId, nowMs } from '../../systems/time';
 
 /**
  * Default empty bonuses.
@@ -114,7 +115,7 @@ export interface WorkerAssignmentSlice {
  * Generate unique instance ID.
  */
 function generateInstanceId(): string {
-  return `worker_inst_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  return createStableId('worker_inst');
 }
 
 /**
@@ -207,7 +208,7 @@ export const createWorkerAssignmentSlice: StateCreator<
       level: 1,
       experience: 0,
       mood: 80, // Start with good mood
-      hiredAt: Date.now(),
+      hiredAt: nowMs(),
     };
 
     set((state) => ({

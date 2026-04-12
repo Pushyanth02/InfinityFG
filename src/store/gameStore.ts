@@ -14,6 +14,7 @@ import { calculateDPS } from '../engine/combatEngine';
 import { getInfinityMultiplier } from '../engine/infinityEngine';
 import { marketService } from '../services/marketService';
 import { emitCoinsChanged } from '../services/gameEvents';
+import { nowMs } from '../systems/time';
 
 export const useGameStore = create<GameState>()(
   persist(
@@ -27,7 +28,7 @@ export const useGameStore = create<GameState>()(
       ...createWorkerAssignmentSlice(set, get, ...args),
       ...createCraftingSlice(set, get, ...args),
 
-      lastTick: Date.now(),
+      lastTick: nowMs(),
 
       tick: (timestamp: number) => {
         const {

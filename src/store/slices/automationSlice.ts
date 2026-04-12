@@ -6,6 +6,7 @@ import { WORKERS } from '../../data/world';
 import { getVillageFolkById } from '../../data/villageFolk';
 import { getMachineCost, getUpgradeCost, getWorkerCost } from '../../engine/mechanics';
 import { evaluateRequirement } from '../../services/unlockService';
+import { createStableId } from '../../systems/time';
 
 export const createAutomationSlice: StateCreator<
   GameState,
@@ -34,10 +35,10 @@ export const createAutomationSlice: StateCreator<
           machines: state.machines.map(m => m.machineId === machineId ? { ...m, count: m.count + 1 } : m)
         };
       } else {
-        return {
-          coins: state.coins - cost,
-          machines: [...state.machines, {
-            id: `pm_${Date.now()}`,
+          return {
+            coins: state.coins - cost,
+            machines: [...state.machines, {
+            id: createStableId('pm'),
             machineId,
             count: 1,
             level: { speed: 0, yield: 0, durability: 0 },

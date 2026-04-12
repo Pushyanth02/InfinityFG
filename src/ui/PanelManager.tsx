@@ -1,14 +1,15 @@
-import React, { useMemo } from 'react';
-import FarmPanel from './FarmPanel';
-import MachinePanel from './MachinePanel';
-import WorkerPanel from './WorkerPanel';
-import SkillTreePanel from './SkillTreePanel';
-import RegionPanel from './RegionPanel';
-import PrestigePanel from './PrestigePanel';
-import UpgradePanel from './UpgradePanel';
-import StoryBookPanel from './StoryBookPanel';
-import MarketPanel from './MarketPanel';
-import AchievementsPanel from './AchievementsPanel';
+import React, { Suspense, lazy, useMemo } from 'react';
+
+const FarmPanel = lazy(() => import('./FarmPanel'));
+const MachinePanel = lazy(() => import('./MachinePanel'));
+const WorkerPanel = lazy(() => import('./WorkerPanel'));
+const SkillTreePanel = lazy(() => import('./SkillTreePanel'));
+const RegionPanel = lazy(() => import('./RegionPanel'));
+const PrestigePanel = lazy(() => import('./PrestigePanel'));
+const UpgradePanel = lazy(() => import('./UpgradePanel'));
+const StoryBookPanel = lazy(() => import('./StoryBookPanel'));
+const MarketPanel = lazy(() => import('./MarketPanel'));
+const AchievementsPanel = lazy(() => import('./AchievementsPanel'));
 
 interface PanelManagerProps {
   activePanel: string;
@@ -31,7 +32,11 @@ export const PanelManager: React.FC<PanelManagerProps> = ({ activePanel }) => {
     }
   }, [activePanel]);
 
-  return <>{panel}</>;
+  return (
+    <Suspense fallback={<div className="text-sm opacity-80">Loading panel…</div>}>
+      {panel}
+    </Suspense>
+  );
 };
 
 export default PanelManager;

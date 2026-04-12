@@ -8,6 +8,7 @@ import type { StateCreator } from 'zustand';
 import type { GameState } from '../../types/game';
 import { eventBus } from '../../services/eventBus';
 import { GAME_CONFIG } from '../../config/gameConfig';
+import { nowMs } from '../../systems/time';
 
 /**
  * Tunables for reputation system.
@@ -97,10 +98,10 @@ export const createTrackingSlice: StateCreator<
   harvestTracking: {},
   bossDamageTracking: {},
   regionReputation: {},
-  lastReputationUpdate: Date.now(),
+  lastReputationUpdate: nowMs(),
   craftingTracking: {},
   milestonesReached: {},
-  regionStartedAt: Date.now(),
+  regionStartedAt: nowMs(),
   timeInRegionSec: {},
   prestigeCount: 0,
   totalPlayTimeSec: 0,
@@ -174,7 +175,7 @@ export const createTrackingSlice: StateCreator<
           ...state.regionReputation,
           [regionId]: newRep,
         },
-        lastReputationUpdate: Date.now(),
+        lastReputationUpdate: nowMs(),
       };
     });
 
@@ -206,7 +207,7 @@ export const createTrackingSlice: StateCreator<
       }
       return {
         regionReputation: newReputation,
-        lastReputationUpdate: Date.now(),
+        lastReputationUpdate: nowMs(),
       };
     });
   },
@@ -240,7 +241,7 @@ export const createTrackingSlice: StateCreator<
     set((state) => ({
       milestonesReached: {
         ...state.milestonesReached,
-        [milestoneId]: Date.now(),
+        [milestoneId]: nowMs(),
       },
     }));
 
@@ -278,7 +279,7 @@ export const createTrackingSlice: StateCreator<
   // ── trackRegionTransition ───────────────────────────────
   trackRegionTransition: (fromRegionId, toRegionId) => {
     if (!fromRegionId || !toRegionId || fromRegionId === toRegionId) return;
-    const now = Date.now();
+    const now = nowMs();
     const elapsedSec = Math.max(0, (now - get().regionStartedAt) / 1000);
     set((state) => ({
       regionStartedAt: now,
