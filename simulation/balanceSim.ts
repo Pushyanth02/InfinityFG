@@ -34,12 +34,20 @@ function createState(config: BalanceConfig): SimulatableGameState {
   return state;
 }
 
+function sanitizeFinite(value: number, fallback = 0): number {
+  if (!Number.isFinite(value)) return fallback;
+  return Math.max(0, Math.min(value, GAME_CONFIG.SIMULATION_VALUE_CAP));
+}
+
 export function runSimulation(hours = 50, config: BalanceConfig = DEFAULT_CONFIG): BalanceRunResult {
   const final = simulateGame(createState(config), hours);
-  const region = Math.max(1, Math.floor(Math.log10(Math.max(1, final.coins)) * 1.6));
+  const safeCoins = sanitizeFinite(final.coins, 0);
+  const safeCps = sanitizeFinite(final.coinsPerSecond, 0);
+  const rawRegion = Math.floor(Math.log10(Math.max(1, safeCoins)) * 1.6);
+  const region = Math.max(1, Number.isFinite(rawRegion) ? rawRegion : 1);
   return {
     region,
-    coins: Math.round(final.coins),
-    coinsPerSecond: Math.round(final.coinsPerSecond * 100) / 100,
+    coins: Math.round(safeCoins),
+    coinsPerSecond: Math.round(safeCps * 100) / 100,
   };
 }

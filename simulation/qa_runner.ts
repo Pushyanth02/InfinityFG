@@ -47,6 +47,7 @@ const INPUT = {
 
 const FAIL_ON_REGRESSION = (args['failOnRegression'] ?? args['strict'] ?? 'false') === 'true';
 const SILENT = (args['silent'] ?? 'false') === 'true';
+const DETERMINISTIC_REPORTS = (args['deterministicReports'] ?? 'true') !== 'false';
 const RANDOM_EVENT_EXPLOIT_MIN_CONSECUTIVE_TRIGGERS = 8;
 
 const DEFAULT_QA_THRESHOLDS = {
@@ -94,6 +95,17 @@ function makePrng(seed: number) {
 }
 
 const tunables = loadSimulationTunables();
+
+function getDeterministicReportDate(): Date {
+  const offset =
+    INPUT.random_seed * 1_000 +
+    INPUT.num_simulations * 10 +
+    INPUT.duration_hours;
+  return new Date(GAME_CONFIG.SIMULATION_DETERMINISTIC_REPORT_EPOCH_MS + offset);
+}
+
+const reportDate = DETERMINISTIC_REPORTS ? getDeterministicReportDate() : new Date();
+const reportTimestampIso = reportDate.toISOString();
 
 // ── Economy constants (loaded from game_config.json with local QA defaults) ───
 const CFG = {
@@ -486,7 +498,7 @@ function makeRegressionTest(
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
-const runStartedAt = Date.now();
+const runStartedAt = DETERMINISTIC_REPORTS ? reportDate.getTime() : Date.now();
 const balanceConfig = autoBalance();
 
 if (!SILENT) {
@@ -621,9 +633,9 @@ const prestigeAbuseCount = flagCounts['PRESTIGE_ABUSE_LOOP'] ?? 0;
 const patches: object[] = [];
 exploitPaths.filter(e => e.severity === 'HIGH').forEach((ex, i) => {
   patches.push({
-    patch_id: `auto_v${Date.now()}_${i}`,
+    patch_id: `auto_v${runStartedAt}_${i}`,
     issued_by: 'SimulationQA_AI',
-    timestamp: new Date().toISOString(),
+    timestamp: reportTimestampIso,
     reason:    `Auto-generated patch for HIGH severity exploit: ${ex.name}`,
     changes:   [{ path: 'economy.auto', old_value: 'current', new_value: 'see proposed_fix' }],
     proposed_fix: ex.proposed_fix,
@@ -754,7 +766,7 @@ const failedTests = regressionTests.filter(t => t.status.includes('FAIL'));
 const report = {
   schema: 'agriempire-qa-report/v1',
   issued_by: 'SimulationQA_AI',
-  timestamp: new Date().toISOString(),
+  timestamp: reportTimestampIso,
   input: INPUT,
   notes: 'Deterministic simulation using Mulberry32 PRNG. Reproduce any session with --seed <seed> --sessions 1 and sessionSeed = seed + sessId * 31337.',
 
@@ -788,8 +800,8 @@ const report = {
 
   runtime: {
     started_at: new Date(runStartedAt).toISOString(),
-    ended_at: new Date().toISOString(),
-    elapsed_ms: Date.now() - runStartedAt,
+    ended_at: DETERMINISTIC_REPORTS ? reportTimestampIso : new Date().toISOString(),
+    elapsed_ms: DETERMINISTIC_REPORTS ? 0 : Date.now() - runStartedAt,
   },
 
   raw_KPIs: {
@@ -806,7 +818,7 @@ const report = {
 
 // ── Write report ──────────────────────────────────────────────────────────────
 const reportsDir = getSimulationReportDir();
-const outPath = writeTimestampedJsonReport(reportsDir, 'qa_report', report);
+const outPath = writeTimestampedJsonReport(reportsDir, 'qa_report', report, reportDate);
 
 const summaryPath = path.join(reportsDir, 'qa_summary_latest.md');
 const summaryLines = [
