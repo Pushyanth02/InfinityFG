@@ -1,4 +1,5 @@
 import rulesData from '../../economy/live_ops_rules.json';
+import { createStableId } from '../systems/time';
 
 // Types mapping directly to the Live-Ops Analytics AI outputs
 export interface LiveRule {
@@ -187,7 +188,7 @@ export class LiveOpsGatekeeper {
 
   private generatePatchFromAction(action: LiveRule['action'], rollbackCond: string): ParameterPatch {
     return {
-      patch_id: `auto_${Date.now()}`,
+      patch_id: createStableId('auto'),
       issued_by: 'LiveOps_AI',
       timestamp: new Date().toISOString(),
       reason: action.reason,

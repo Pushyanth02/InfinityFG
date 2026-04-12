@@ -6,6 +6,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNewsEvents, type GameEvent } from '../services/eventBus';
+import { createStableId, nowMs } from '../systems/time';
 
 /**
  * News item type categories.
@@ -36,7 +37,7 @@ export interface NewsItem {
  */
 function eventToNewsItem(event: GameEvent): NewsItem | null {
   const base = {
-    id: `news_${event.timestamp}_${Math.random().toString(36).substr(2, 6)}`,
+    id: createStableId('news'),
     timestamp: event.timestamp,
     isNew: true,
   };
@@ -186,7 +187,7 @@ function eventToNewsItem(event: GameEvent): NewsItem | null {
  * Format relative time for display.
  */
 function formatRelativeTime(timestamp: number): string {
-  const seconds = Math.floor((Date.now() - timestamp) / 1000);
+  const seconds = Math.floor((nowMs() - timestamp) / 1000);
 
   if (seconds < 5) return 'just now';
   if (seconds < 60) return `${seconds}s ago`;

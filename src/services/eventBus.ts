@@ -186,7 +186,7 @@ class EventBus {
     const event: GameEvent<EventPayloads[T]> = {
       type: eventType,
       payload,
-      timestamp: Date.now(),
+      timestamp: nowMs(),
       source,
     };
 
@@ -345,3 +345,4 @@ export function useNewsEvents(count = 20): GameEvent[] {
 
   return events;
 }
+import { nowMs } from '../systems/time';

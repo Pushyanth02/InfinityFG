@@ -3,6 +3,8 @@ declare global {
     __INFINITYFG_TIME_SOURCE__?: () => number;
     __INFINITYFG_RANDOM_SOURCE__?: () => number;
   }
+  var __INFINITYFG_TIME_SOURCE__: (() => number) | undefined;
+  var __INFINITYFG_RANDOM_SOURCE__: (() => number) | undefined;
 }
 
 let simulationNow = 0;
@@ -26,10 +28,22 @@ let nowProvider: () => number = isSimulationMode
 
 let randomProvider: () => number = isSimulationMode ? deterministicRandom : () => Math.random();
 
-if (typeof window !== 'undefined') {
-  if (window.__INFINITYFG_TIME_SOURCE__) nowProvider = window.__INFINITYFG_TIME_SOURCE__;
-  if (window.__INFINITYFG_RANDOM_SOURCE__) randomProvider = window.__INFINITYFG_RANDOM_SOURCE__;
-}
+const globalNowSource =
+  typeof globalThis.__INFINITYFG_TIME_SOURCE__ === 'function'
+    ? globalThis.__INFINITYFG_TIME_SOURCE__
+    : typeof window !== 'undefined' && typeof window.__INFINITYFG_TIME_SOURCE__ === 'function'
+    ? window.__INFINITYFG_TIME_SOURCE__
+    : undefined;
+
+const globalRandomSource =
+  typeof globalThis.__INFINITYFG_RANDOM_SOURCE__ === 'function'
+    ? globalThis.__INFINITYFG_RANDOM_SOURCE__
+    : typeof window !== 'undefined' && typeof window.__INFINITYFG_RANDOM_SOURCE__ === 'function'
+    ? window.__INFINITYFG_RANDOM_SOURCE__
+    : undefined;
+
+if (globalNowSource) nowProvider = globalNowSource;
+if (globalRandomSource) randomProvider = globalRandomSource;
 
 export function configureDeterministicSources(sources: {
   now?: () => number;
@@ -37,6 +51,8 @@ export function configureDeterministicSources(sources: {
 }): void {
   if (sources.now) nowProvider = sources.now;
   if (sources.random) randomProvider = sources.random;
+  if (sources.now) globalThis.__INFINITYFG_TIME_SOURCE__ = sources.now;
+  if (sources.random) globalThis.__INFINITYFG_RANDOM_SOURCE__ = sources.random;
 }
 
 export function nowMs(): number {

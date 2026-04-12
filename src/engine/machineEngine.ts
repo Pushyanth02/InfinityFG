@@ -1,5 +1,6 @@
 import type { MachineDef } from '../data/machines';
 import { GAME_CONFIG } from '../config/gameConfig';
+import { nowMs } from '../systems/time';
 
 export type MachineState = 'idle' | 'active' | 'maintenance' | 'overclocked';
 
@@ -22,9 +23,9 @@ export interface AutomationTelemetry {
 
 // ── Configuration ────────────────────────────────────────────────────────────
 const CONFIG = {
-  wearPerSecActive: 0.1, // 1000 seconds (~16.6 mins) to reach 100 wear natively
-  baseMaintenanceDowntimeSec: 60,
-  workerEfficiencyBoostPerLevel: 0.03, // 3% per worker level
+  wearPerSecActive: GAME_CONFIG.MACHINE_WEAR_PER_SEC_ACTIVE, // 1000 seconds (~16.6 mins) to reach 100 wear natively
+  baseMaintenanceDowntimeSec: GAME_CONFIG.MACHINE_BASE_MAINTENANCE_DOWNTIME_SEC,
+  workerEfficiencyBoostPerLevel: GAME_CONFIG.MACHINE_WORKER_EFFICIENCY_BOOST_PER_LEVEL, // 3% per worker level
 };
 
 // ── State Machine Actions ───────────────────────────────────────────────────
@@ -43,7 +44,7 @@ export function createMachineInstance(instanceId: string, machineId: string): Ma
 export function assignWorker(inst: MachineInstance, workerLevel: number | null): AutomationTelemetry {
   inst.assignedWorkerLevel = workerLevel;
   return {
-    timestamp: Date.now(),
+    timestamp: nowMs(),
     instanceId: inst.instanceId,
     event: 'WORKER_ASSIGNED',
     data: { workerLevel },
@@ -56,7 +57,7 @@ export function startMachine(inst: MachineInstance, minWear = 100): AutomationTe
   if (inst.state === 'idle') {
     inst.state = 'active';
     return {
-      timestamp: Date.now(),
+      timestamp: nowMs(),
       instanceId: inst.instanceId,
       event: 'STATE_CHANGE',
       data: { from: 'idle', to: 'active' },
@@ -71,7 +72,7 @@ export function stopMachine(inst: MachineInstance): AutomationTelemetry | null {
     const old = inst.state;
     inst.state = 'idle';
     return {
-      timestamp: Date.now(),
+      timestamp: nowMs(),
       instanceId: inst.instanceId,
       event: 'STATE_CHANGE',
       data: { from: old, to: 'idle' },
@@ -88,7 +89,7 @@ export function overclockMachine(inst: MachineInstance, def: MachineDef): Automa
   if (inst.state === 'active') {
     inst.state = 'overclocked';
     return {
-      timestamp: Date.now(),
+      timestamp: nowMs(),
       instanceId: inst.instanceId,
       event: 'STATE_CHANGE',
       data: { from: 'active', to: 'overclocked', mult: def.overclockEffects?.speedMultiplier },
@@ -103,7 +104,7 @@ export function triggerMaintenance(inst: MachineInstance, isForced: boolean): Au
   inst.state = 'maintenance';
   inst.maintenanceTimerSec = CONFIG.baseMaintenanceDowntimeSec * (isForced ? 1.5 : 1.0); // Penalty for forcing it via 100% wear
   return {
-    timestamp: Date.now(),
+    timestamp: nowMs(),
     instanceId: inst.instanceId,
     event: 'MAINTENANCE_STARTED',
     data: { from: old, forced: isForced },
@@ -132,7 +133,7 @@ export function tickMachine(inst: MachineInstance, def: MachineDef, tickSec: num
       inst.state = 'idle';
       result.maintenanceCost = def.maintenanceCostPerHour * (CONFIG.baseMaintenanceDowntimeSec / 3600);
       result.telemetry.push({
-        timestamp: Date.now(),
+        timestamp: nowMs(),
         instanceId: inst.instanceId,
         event: 'MAINTENANCE_FINISHED',
         data: { cost: result.maintenanceCost },

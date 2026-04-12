@@ -1,4 +1,5 @@
 import { simulateGame, type SimulatableGameState } from '../src/simulation/balanceSim';
+import { GAME_CONFIG } from '../src/config/gameConfig';
 
 export interface BalanceRunResult {
   region: number;
@@ -13,9 +14,9 @@ export interface BalanceConfig {
 }
 
 const DEFAULT_CONFIG: BalanceConfig = {
-  cropValueScale: 1.8,
-  bossScale: 25,
-  machineScale: 1.15,
+  cropValueScale: GAME_CONFIG.CROP_VALUE_BASE,
+  bossScale: GAME_CONFIG.AI_BALANCER_BOSS_SCALE_BASE,
+  machineScale: GAME_CONFIG.AI_BALANCER_MACHINE_SCALE_BASE,
 };
 
 function createState(config: BalanceConfig): SimulatableGameState {
