@@ -1,4 +1,4 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# See https://help.github.com/articles/ignoring-files/ for more information about ignoring files.
 
 # dependencies
 node_modules
@@ -28,14 +28,13 @@ node_modules
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
+*.pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files
 .env*
 
 # vercel
 .vercel
-
 
 # typescript
 *.tsbuildinfo
@@ -46,9 +45,14 @@ local-*
 *.log
 dev.log
 dev.out.log
-test
-prompt
-
 server.log
+tool-results/
+upload/
+
+# sandbox / editor workspace (not part of the shipped game)
+/skills/
+/.zscripts/
+tests/
+
 # Skills directory
 /skills/
