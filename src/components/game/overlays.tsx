@@ -429,6 +429,7 @@ export function EndCreditsOverlay({ stats, onReturn, onFight }: EndCreditsProps)
           {credit("Waves endured", String(stats.wave))}
           {credit("Foes felled", stats.kills.toLocaleString())}
           {credit("Damage woven", stats.damage.toLocaleString())}
+          {credit("Aether glyphs claimed", String(stats.shards))}
           {credit("Resonances discovered", String(stats.newCombos.length))}
           {credit("Spell transmutations", String(stats.evolutions.length))}
           {credit("Fusions woven", String(stats.merges.length))}

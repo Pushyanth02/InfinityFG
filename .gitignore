@@ -30,7 +30,7 @@ yarn-debug.log*
 yarn-error.log*
 *.pnpm-debug.log*
 
-# env files
+# env files (local secrets — never ship)
 .env*
 
 # vercel
@@ -42,6 +42,8 @@ next-env.d.ts
 local-*
 .claude
 .z-ai-config
+
+# logs
 *.log
 dev.log
 dev.out.log
@@ -49,10 +51,14 @@ server.log
 tool-results/
 upload/
 
+# local database (the game persists to localStorage; prisma stays optional)
+db/
+
 # sandbox / editor workspace (not part of the shipped game)
 /skills/
 /.zscripts/
-tests/
-
-# Skills directory
-/skills/
+/tests/
+/download/
+/examples/
+/mini-services/
+Caddyfile

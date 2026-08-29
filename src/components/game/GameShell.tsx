@@ -12,7 +12,7 @@ import {
 import { useArchmageStore, sfx } from "@/game/store";
 import { RotateIcon, SpellIcon, UiIcon } from "./icons";
 import {
-  Corners, GameOverScreen, MenuScreen, PauseOverlay, RewardOverlay, SanctumScreen, SettingsScreen, ArcanumScreen,
+  Corners, GameOverScreen, MenuScreen, PauseOverlay, RewardOverlay, ReliquaryScreen, SettingsScreen, ArcanumScreen,
 } from "./screens";
 import { EndCreditsOverlay, EvolutionOverlay, MergeOverlay, SpellOfferOverlay } from "./overlays";
 import { TouchControls } from "./TouchControls";
@@ -52,6 +52,9 @@ export default function GameShell() {
   const [selectedSlot, setSelectedSlot] = useState(0);
   /* Patch 10.0 — end-credit epilogue stats (wave-50 triumph). */
   const [epilogueStats, setEpilogueStats] = useState<RunStats | null>(null);
+  /* V1.0 — live glyph-run counter (the violet "+N" beside the banked total;
+  ref-driven so the 30 Hz HUD path never re-renders React). */
+  const glyphRunText = useRef<HTMLSpanElement | null>(null);
   /* Patch 9.0 — effective Rift Mercy tier from the meta ladder (recomputed
      whenever the settings toggle, banked deaths, or manual tier change). */
   const mercyTier = effectiveMercyTier(meta);
@@ -215,6 +218,12 @@ export default function GameShell() {
       }
     }
     if (dashFill.current) dashFill.current.style.height = `${h.dashFrac * 100}%`;
+    /* V1.0 — THE GLYPH COUNTER: glyphs collected this run register live
+       beside the banked total (violet +N), so every pickup is seen + counted. */
+    if (glyphRunText.current) {
+      glyphRunText.current.textContent = `+${h.glyphs}`;
+      glyphRunText.current.style.opacity = h.glyphs > 0 ? "1" : "0";
+    }
     /* Patch 11.0 — the HUD mirror for the touch layer: TouchControls polls
        this ref at 10 Hz to drive its spell-strip cooldown/mana indicators and
        the dash-cooldown ring (zero re-renders on this 30 Hz hot path). */
@@ -628,9 +637,10 @@ export default function GameShell() {
               TouchControls action row. Shards + mute remain visible. */}
           <div className="absolute z-20 flex items-center gap-2"
                style={{ top: "calc(env(safe-area-inset-top) + 12px)", right: "calc(env(safe-area-inset-right) + 12px)", zoom: hudZoom }}>
-            <div className="rune-panel px-3 py-2 flex items-center gap-2 pointer-events-none">
+            <div className="rune-panel px-3 py-2 flex items-center gap-2 pointer-events-none" title="Aether glyphs — the Reliquary's currency">
               <span className="text-[#ffe9ad]"><UiIcon name="gem" size={16} /></span>
               <span className="font-display font-bold text-[#ffe9ad]">{meta.shards}</span>
+              <span ref={glyphRunText} className="text-[11px] font-black tabular-nums text-[#b9aee0]" style={{ opacity: 0, transition: "opacity 0.2s ease" }} aria-label="glyphs collected this trial">+0</span>
             </div>
             <button onClick={(e) => { e.currentTarget.blur(); const st = useArchmageStore.getState(); st.patchSettings({ master: st.meta.settings.master <= 0 ? 80 : 0 }); }} className="btn-ghost px-2.5 py-2" title="Sound (M)">
               <UiIcon name={meta.settings.master <= 0 ? "mute" : "sound"} size={16} />
@@ -840,7 +850,7 @@ export default function GameShell() {
         />
       )}
       {phase === "menu" && screen === "sanctum" && (
-        <SanctumScreen />
+        <ReliquaryScreen />
       )}
       {phase === "menu" && screen === "arcanum" && (
         <ArcanumScreen />

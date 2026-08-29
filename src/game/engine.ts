@@ -46,7 +46,7 @@ import {
   EQUIP_SLOTS, GameSettings, MERGE_INTERVAL, MetaBonuses, RNG, SLOT_KEYS, SPELL_ORDER, SPELLS,
   HEART_DROP_HEAL_FRAC, SPELL_DROP_WAVE_MAX, SPELL_DROP_WAVE_MIN, SPELL_DROP_NERF, SPELL_OFFER_COUNT, STARTER_SPELLS,
   UpgradeChoice, availableTypes, comboKey, eliteChance, endlessBossMult, endlessHpMult, generateArena, hashSeed, mercyForRound, mulberry32,
-  scaleEnemy, spawnCap, spawnWindow, waveBudget, VICTORY_WAVE, poolBias, DropKind,
+  scaleEnemy, spawnCap, spawnWindow, waveBudget, VICTORY_WAVE, poolBias, DropKind, attunement, bossHpMult, bossDmgMult, ELITE_BONUS,
   ActDef, actForWave, WORLD_W, WORLD_H,
   MERCY_ATTACK, MERCY_SPAWNS, MERCY_CAPLIVE, MERCY_HP, MERCY_SPD,
 } from "./content";
@@ -74,6 +74,7 @@ export interface HudData {
   mercy: number | null;      // Patch 9.0: live Rift Mercy assist fraction (null = off)
   mercyTier: number;         // Patch 9.0: active mercy tier (deaths ladder)
   threat: number;            // Patch 7.0: act progress 0..1 (fills toward the boss)
+  glyphs: number;            // V1.0: aether glyphs collected THIS RUN (motes)
 }
 
 export interface SpellOffer { pool: ElementId[] }
@@ -213,7 +214,7 @@ export const REWARD_POOL: UpgradeChoice[] = [
   { id: "speed",    kind: "mobility", name: "Windwalk",          desc: "+6% movement speed. Harder to catch, harder to hit.",              icon: "boot",    color: "#c9955a" },
   { id: "dash",     kind: "mobility", name: "Shadowstride",      desc: "Blink step recharges 15% faster.",                                 icon: "bolt",    color: "#ffe86b" },
   /* always available — never gated */
-  { id: "cache",    kind: "tribute",  name: "Aether Cache",       desc: "+400 score and +2 aether shards banked for the Sanctum.",          icon: "gem",     color: "#ffe9ad" },
+  { id: "cache",    kind: "tribute",  name: "Aether Cache",       desc: "+400 score and +2 aether glyphs banked for the Reliquary.",       icon: "gem",     color: "#ffe9ad" },
 ];
 
 const REWARD_MAX: Record<string, number> = {
@@ -307,7 +308,14 @@ export class ArchmageEngine {
     spread: 0, homing: 0, range: 1, bolts: 1, dr: 1,
   };
   private rewardTiers: Record<string, number> = {};
-  private bonusShards = 0;               // Patch 6.0: Aether Cache shards banked mid-run
+  private bonusShards = 0;               // Aether Cache glyphs banked mid-run
+  /* V1.0 — THE GLYPH LEDGER: slain foes shed aether glyphs (the gold motes).
+     Every pickup registers here, feeds the live HUD counter, and is paid
+     out post-game through buildStats(). */
+  private runGlyphs = 0;
+  /* V1.0 — attunement(wave), cached per wave (the mage's growing power; see
+     content.ts for the curve rationale). */
+  private att = 1;
 
   /* resonance + weave */
   private lastCast: { id: ElementId; t: number } | null = null;
@@ -432,6 +440,7 @@ export class ArchmageEngine {
     selected: 0, dashFrac: 0,
     attune: null, resonance: null, boss: null,
     timeSec: 0, weave: 0, surge: null, mercy: null, mercyTier: 0, threat: 0,
+    glyphs: 0,
   };
 
   constructor(o: EngineOpts) {
@@ -853,9 +862,13 @@ export class ArchmageEngine {
 
   get endlessMode(): boolean { return this.endless; }
 
-  /** Shared run-stats snapshot (victory + epilogue credits use the same math). */
+  /** Shared run-stats snapshot (victory + epilogue credits use the same math).
+      V1.0 — the GLYPH PAYOUT: every aether glyph collected mid-run (motes)
+      converts at 25% into the post-game award, ON TOP of the classic
+      score/wave/kill formula — collecting visibly pays. */
   private buildStats(triumph: boolean, endless = false): RunStats {
-    const shards = Math.max(1, Math.round((this.score / 100 + this.wave * 3 + this.kills * 0.15) * (triumph ? 1.5 : 1))) + this.bonusShards;
+    const shards = Math.max(1, Math.round((this.score / 100 + this.wave * 3 + this.kills * 0.15) * (triumph ? 1.5 : 1)))
+      + this.bonusShards + Math.round(this.runGlyphs * 0.25);
     return {
       wave: this.wave, score: Math.round(this.score), kills: this.kills,
       damage: Math.round(this.runDamage), shards, timeSec: this.t,
@@ -1140,6 +1153,10 @@ export class ArchmageEngine {
 
   private startWave(n: number) {
     this.wave = n;
+    /* V1.0 — the attunement curve rides with the wave: every spell the mage
+       casts this wave hits attunement(n)× harder, matched against the
+       softened enemy curve (see content.ts). Cached once per wave. */
+    this.att = attunement(n);
     this.spawnClock = 0;
     this.spawnQueue = [];
     this.sqHead = 0;
@@ -1350,14 +1367,17 @@ export class ArchmageEngine {
     if (type === "boss") {
       const boss = this.currentBoss();
       /* Patch 10.0 — ENDLESS ECHO: past wave 50 the returning tyrants wear
-         an "Echo of" prefix and escalate +22% per endless cycle. */
+         an "Echo of" prefix and escalate +22% per endless cycle.
+         V1.0 — tyrant HP/damage now scale with the wave (bossHpMult /
+         bossDmgMult, anchored to the attunement curve) so every act's
+         climax duel holds its hit-count wherever the shuffle places it. */
       const em = this.wave > VICTORY_WAVE ? endlessBossMult(this.wave) : 1;
       const echo = this.wave > VICTORY_WAVE;
       name = echo ? `Echo of ${boss.name}, ${boss.title}` : `${boss.name}, ${boss.title}`;
       color = boss.color;
       glow = boss.glow;
-      hp = boss.hp * DIFFICULTY_MULT * em;
-      damage = boss.damage * DIFFICULTY_MULT * em;
+      hp = boss.hp * DIFFICULTY_MULT * bossHpMult(this.wave) * em;
+      damage = boss.damage * DIFFICULTY_MULT * bossDmgMult(this.wave) * em;
       speed = boss.speed * (echo ? 1 + (em - 1) * 0.35 : 1);
       r = boss.radius;
       score = echo ? Math.round(500 * em) : 500;
@@ -1496,8 +1516,9 @@ export class ArchmageEngine {
   }
   private powerMult(id: ElementId): number {
     /* Patch 9.0: Rift Mercy's attack component — the assist ladder makes
-       every weave hit harder as it climbs. */
-    return this.mods.power * (this.attune?.id === id ? 1.5 : 1) * (this.surgeT > 0 ? 1.25 : 1)
+       every weave hit harder as it climbs. V1.0: the attunement curve keeps
+       pace with the rift itself, so magic never loses its bite. */
+    return this.mods.power * this.att * (this.attune?.id === id ? 1.5 : 1) * (this.surgeT > 0 ? 1.25 : 1)
       * (1 + this.mercyDr * MERCY_ATTACK);
   }
   private cdMult(): number {
@@ -1643,7 +1664,7 @@ export class ArchmageEngine {
         rx = Math.max(30, Math.min(WORLD_W - 30, rx));
         ry = Math.max(30, Math.min(WORLD_H - 30, ry));
         const eR = 26 * (m?.radius ?? 1);
-        const eHp = 130 * this.mods.power * (m?.special === "bastion" ? 2.2 : 1);
+        const eHp = 130 * this.mods.power * this.att * (m?.special === "bastion" ? 2.2 : 1);
         const eLife = 7 * (m?.life ?? 1);
         this.rocks.push({ x: rx, y: ry, r: eR, hp: eHp, maxHp: eHp, life: eLife, maxLife: eLife, grad: null, tick: 1 });
         this.shakeIt(3);
@@ -1860,7 +1881,7 @@ export class ArchmageEngine {
     const key = comboKey(a, b);
     const def = COMBOS[key];
     if (!def) return;
-    const dmg = (SPELLS[a].baseDamage + SPELLS[b].baseDamage) * 1.75 * this.mods.power * this.mods.comboDmg * this.o.bonuses.spellPower;
+    const dmg = (SPELLS[a].baseDamage + SPELLS[b].baseDamage) * 1.75 * this.mods.power * this.att * this.mods.comboDmg * this.o.bonuses.spellPower;
     const ca = SPELLS[a].color, cb = SPELLS[b].color;
     /* Patch 11.0 — RESONANCE DETONATION JUICE: a triple expanding ring
        (both element colors + the white seam between them), a swirling
@@ -1919,7 +1940,7 @@ export class ArchmageEngine {
         if (e.dead) continue;
         const ex = e.x - this.px, ey = e.y - this.py;
         const rr = 60 + e.r;
-        if (ex * ex + ey * ey < rr * rr) this.damageEnemy(e, this.mods.dashDmg * this.mods.power, "shadow", true);
+        if (ex * ex + ey * ey < rr * rr) this.damageEnemy(e, this.mods.dashDmg * this.mods.power * this.att, "shadow", true);
       }
     }
   }
@@ -2275,7 +2296,7 @@ export class ArchmageEngine {
       wave: this.wave,
       bossSoon: (this.wave + 1) % 10 === 0,
       enemiesAlive: alive,
-      power: this.mods.power,
+      power: this.mods.power * this.att,
       armor: 1 - this.mods.dr,
       crit: this.mods.crit,
       cdr: 1 - this.mods.cdr,
@@ -2408,7 +2429,9 @@ export class ArchmageEngine {
 
   private damageEnemy(e: Enemy, dmg: number, elem: ElementId, canCrit: boolean) {
     if (e.dead || e.hp <= 0) return;
-    let final = dmg * (1 - e.resist);
+    /* V1.0 — THE WEAVE HUNTS THE MARKED: elite foes take +35% spell damage
+       (ELITE_BONUS), so the golden-ringed ones read as prey, not walls. */
+    let final = dmg * (e.affix ? ELITE_BONUS : 1) * (1 - e.resist);
     let crit = false;
     if (canCrit && Math.random() < this.mods.crit) { final *= this.mods.critDmg; crit = true; }
     e.hp -= final;
@@ -2418,14 +2441,16 @@ export class ArchmageEngine {
     const kb = e.type === "boss" ? 14 : 110;
     e.vx += Math.cos(ang) * kb; e.vy += Math.sin(ang) * kb;
     if (elem === "ice") e.chillT = this.evoModFor("ice")?.special === "glacial" ? 3.5 : 2;
-    if (elem === "fire") { e.burnT = 3; e.burnDps = 12 * this.mods.power; }
+    if (elem === "fire") { e.burnT = 3; e.burnDps = 12 * this.mods.power * this.att; }
     /* Patch 4.0: blood no longer heals on hit (no healing spells). */
     const sp = SPELLS[elem];
     for (let i = 0; i < 4; i++) this.puff(e.x, e.y, crit ? "#ffe9ad" : sp.color, crit ? 170 : 110, crit ? 3.4 : 2.4);
     /* Patch 7.0: damage numbers are a setting (accessibility + perf — skips
-       floater allocations entirely when off). */
+       floater allocations entirely when off). V1.0: elite-marked hits read
+       gold and larger — the power spike is legible at a glance. */
     if (this.o.settings.dmgNumbers) {
-      this.floater(e.x + (Math.random() * 16 - 8), e.y - e.r - 6, String(Math.round(final)), crit ? "#ffe9ad" : "rgba(242,233,255,0.75)", crit ? 19 : 12.5);
+      const col = crit ? "#ffe9ad" : e.affix ? "#f5c96b" : "rgba(242,233,255,0.75)";
+      this.floater(e.x + (Math.random() * 16 - 8), e.y - e.r - 6, String(Math.round(final)), col, crit ? 19 : e.affix ? 15 : 12.5);
     }
     if (crit) { this.o.sfx.crit(); this.hitStop = Math.max(this.hitStop, 0.045); }
     else this.o.sfx.hit();
@@ -3027,7 +3052,7 @@ export class ArchmageEngine {
         for (const e of this.enemies) {
           if (e.dead) continue;
           const dx = e.x - r.x, dy = e.y - r.y;
-          if (dx * dx + dy * dy < tr * tr) this.damageEnemy(e, 14 * this.mods.power, "earth", false);
+          if (dx * dx + dy * dy < tr * tr) this.damageEnemy(e, 14 * this.mods.power * this.att, "earth", false);
         }
         this.ring(r.x, r.y, tr, "#c9955a", 2);
       }
@@ -3079,6 +3104,9 @@ export class ArchmageEngine {
       if (d < 20) {
         m.life = 0;
         this.score += m.val;
+        /* V1.0 — THE GLYPH LEDGER: every mote is one aether glyph. The pickup
+           registers live (HUD counter) and is paid out post-game. */
+        this.runGlyphs++;
         this.o.sfx.pickup();
         this.floater(m.x, m.y - 10, "+" + m.val, "#ffe9ad", 12);
       }
@@ -4102,6 +4130,7 @@ export class ArchmageEngine {
     h.actName = this.act.name;
     h.enemiesLeft = (this.spawnQueue.length - this.sqHead) + this.enemies.length;
     h.score = Math.round(this.score); h.kills = this.kills;
+    h.glyphs = this.runGlyphs;
     /* Patch 5.0: HUD mirrors the equipped spell slots (length = equipped.length),
        not the full 11-element pool. Each slot's id is the live element so the
        UI can render the correct icon. Merged slots include a `merged` array

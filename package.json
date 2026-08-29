@@ -1,7 +1,7 @@
 {
   "name": "archmage",
-  "version": "7.0.0",
-  "description": "Archmage — a pure arcade roguelike. Thirteen elements, seventy-eight resonances, five shuffled tyrants, adaptive procedural music.",
+  "version": "1.0.0",
+  "description": "Archmage — a pure arcade roguelike. Thirteen elements, seventy-eight resonances, five shuffled tyrants, adaptive procedural music. Version 1.0 — The Sealed Rift.",
   "private": true,
   "scripts": {
     "dev": "next dev -p 3000 2>&1 | tee dev.log",

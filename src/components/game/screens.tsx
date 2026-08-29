@@ -337,9 +337,9 @@ export function MenuScreen({ chapter, chapterSubtitle, onStart }: MenuProps) {
         </button>
 
         <div className="anim-fade-up-3 mt-4 flex flex-wrap justify-center gap-3">
-          <button onClick={() => setScreen("sanctum")} onMouseEnter={hover} className="btn-ghost px-5 py-2.5 text-sm flex items-center gap-2">
+          <button onClick={() => setScreen("sanctum")} onMouseEnter={hover} className="btn-ghost px-5 py-2.5 text-sm flex items-center gap-2" title="The Reliquary — permanent upgrades bought with aether glyphs">
             <UiIcon name="gem" size={16} />
-            Sanctum
+            Reliquary
             <span className="text-[#ffe9ad] font-black">{meta.shards}</span>
           </button>
           <button onClick={() => setScreen("arcanum")} onMouseEnter={hover} className="btn-ghost px-5 py-2.5 text-sm flex items-center gap-2">
@@ -426,20 +426,22 @@ export function MenuScreen({ chapter, chapterSubtitle, onStart }: MenuProps) {
           </div>
         </div>
 
+        {/* Version 1.0 — THE SEALED RIFT: release-feature panel (the patch
+            ledger is retired; one clean panel describes the shipped game). */}
         <div className="anim-fade-up-3 mt-4 w-full max-w-2xl border border-[rgba(154,123,255,0.28)] bg-[rgba(18,11,36,0.75)] px-6 py-3 text-left">
           <div className="flex items-center justify-between">
-            <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#6bf0c2]">Patch 11.0 — The Umbral Requiem</div>
-            <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6a5a99]">live</div>
+            <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#6bf0c2]">Version 1.0 — The Sealed Rift</div>
+            <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6a5a99]">release</div>
           </div>
           <ul className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1 text-[12.5px] text-[#c9bdf0] list-none">
-            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Dark-arcane rebrand — every spell, foe, tyrant and act renamed</li>
-            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> All-new rune icons redrawn for the black-grimoire lore</li>
-            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Score mixed loud — master compressor, dramatic unity bus</li>
-            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Boss music arcs: entry sting → enrage war-drone → collapse</li>
-            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Strict drop economy — exactly ONE drop type per wave</li>
-            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Resonance orbs demand a sacrifice — fuse exactly two spells</li>
-            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Projectile VFX overhaul — every element flies its own sigil</li>
-            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Cooldown + aether tithe readouts on every spell toggler</li>
+            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> The attunement curve — your magic grows with the rift</li>
+            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> The weave hunts the marked — elites take +35% spell damage</li>
+            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Aether glyphs — every pickup registers live and pays post-run</li>
+            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> The Reliquary — four permanent tracks bound to your soul</li>
+            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Wave 50 seals the rift — credits, then Return or endless Fight</li>
+            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Five tyrant minds — stampede, shockwave, waltz, spiral, storm</li>
+            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Strict drop economy — exactly one drop type per wave</li>
+            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> The Fateweaver — an autopilot that never casts through walls</li>
           </ul>
         </div>
       </div>
@@ -447,26 +449,29 @@ export function MenuScreen({ chapter, chapterSubtitle, onStart }: MenuProps) {
   );
 }
 
-/* -------------------------------- sanctum --------------------------------- */
+/* -------------------------------- reliquary -------------------------------- */
 
 export interface TrackDef { key: keyof MetaSave["upgrades"]; name: string; lore: string; icon: string; color: string; effect: (lvl: number) => string }
 
-/* Patch 5.0 — balanced scaling. Effects:
+/* Version 1.0 — THE RELIQUARY (formerly the Sanctum): balanced scaling.
+   Effects:
    - Vitality: +20/lvl (cap +120 HP at lvl 6)
    - Power:    +8%/lvl (cap +48% spell damage at lvl 6)
    - Focus:    +12 mana/lvl, +10%/lvl regen (cap +72 mana, +60% regen)
    - Swiftness: +6%/lvl (cap +36% move speed)
    trackCost curve: 20 + 18·lvl + 8·lvl² (lvl 0=20, 1=46, 2=84, 3=134, 4=196, 5=270, 6=356).
    MAX_UPGRADE_LEVEL=6 caps progression so high-tier players can fully max
-   every track without unbounded snowballing. */
+   every track without unbounded snowballing. All boosts apply LIVE from the
+   first frame of the next run (engine reads computeBonuses at construction:
+   max HP, max aether, spell power, aether regen, move speed). */
 export const TRACKS: TrackDef[] = [
   { key: "vitality", name: "Vitality", lore: "Heartwood grafts from the World-Root.", icon: "heart", color: "#ff4d6b", effect: (l) => `${100 + l * 20} → ${100 + (l + 1) * 20} max health` },
   { key: "power", name: "Power", lore: "Runes etched deeper into the staff.", icon: "sword", color: "#f5c96b", effect: (l) => `${100 + l * 8}% → ${100 + (l + 1) * 8}% spell damage` },
-  { key: "focus", name: "Focus", lore: "The well beneath the sanctum deepens.", icon: "mind", color: "#43e8d8", effect: (l) => `${100 + l * 12} mana, +${l * 10}% → +${(l + 1) * 10}% regen` },
+  { key: "focus", name: "Focus", lore: "The well beneath the reliquary deepens.", icon: "mind", color: "#43e8d8", effect: (l) => `${100 + l * 12} mana, +${l * 10}% → +${(l + 1) * 10}% regen` },
   { key: "swiftness", name: "Swiftness", lore: "Boots anointed with storm-oil.", icon: "boot", color: "#c9955a", effect: (l) => `+${l * 6}% → +${(l + 1) * 6}% move speed` },
 ];
 
-export function SanctumScreen() {
+export function ReliquaryScreen() {
   const meta = useArchmageStore((s) => s.meta);
   const buyUpgrade = useArchmageStore((s) => s.buyUpgrade);
   const setScreen = useArchmageStore((s) => s.setScreen);
@@ -479,14 +484,14 @@ export function SanctumScreen() {
         <div className="flex items-end justify-between anim-fade-up">
           <div>
             <div className="text-[11px] font-bold uppercase tracking-[0.34em] text-[#9a7bff]">Between trials</div>
-            <h2 className="font-display text-4xl md:text-5xl font-black text-[#f5e3b3] tracking-wide">THE SANCTUM</h2>
+            <h2 className="font-display text-4xl md:text-5xl font-black text-[#f5e3b3] tracking-wide">THE RELIQUARY</h2>
           </div>
           <div className="flex items-center gap-2 text-[#ffe9ad] font-display font-bold text-2xl">
             <UiIcon name="gem" size={22} /> {meta.shards}
-            <span className="text-[11px] font-sans font-bold uppercase tracking-wider text-[#8f7bff] ml-1">shards</span>
+            <span className="text-[11px] font-sans font-bold uppercase tracking-wider text-[#8f7bff] ml-1">glyphs</span>
           </div>
         </div>
-        <p className="mt-2 text-sm text-[#b9aee0] italic anim-fade-up-1">Spend aether shards to bind permanent boons to your soul.</p>
+        <p className="mt-2 text-sm text-[#b9aee0] italic anim-fade-up-1">Spend aether glyphs to bind permanent boons to your soul — every track applies live from your next trial's first breath.</p>
 
         <div className="mt-6 sm:mt-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
           {TRACKS.map((t, i) => {
@@ -521,7 +526,7 @@ export function SanctumScreen() {
                     : afford ? "btn-gold" : "opacity-40 cursor-not-allowed border border-[rgba(154,123,255,0.32)] text-[#8f7bff] bg-[#171029]"
                     }`}
                 >
-                  {maxed ? (<><UiIcon name="star" size={15} /> Maxed</>) : (<><UiIcon name="gem" size={15} /> {cost} shards — Empower</>)}
+                  {maxed ? (<><UiIcon name="star" size={15} /> Maxed</>) : (<><UiIcon name="gem" size={15} /> {cost} glyphs — Empower</>)}
                 </button>
               </div>
             );
@@ -849,8 +854,8 @@ export function ArcanumScreen() {
                   { v: `${meta.combosFound.length}/${COMBO_COUNT}`, l: "Resonances", c: "#6bf0c2" },
                   { v: `${seenEnemies.length}/${ENEMY_ORDER.length}`, l: "Bestiary known", c: "#d05bff" },
                   { v: `${seenBosses.length}/${BOSS_ORDER.length}`, l: "Tyrants known", c: "#ffb08a" },
-                  { v: meta.shards.toLocaleString(), l: "Shards held", c: "#f5c96b" },
-                  { v: `${meta.upgrades.vitality + meta.upgrades.power + meta.upgrades.focus + meta.upgrades.swiftness}/${MAX_UPGRADE_LEVEL * 4}`, l: "Sanctum pips", c: "#c9955a" },
+                  { v: meta.shards.toLocaleString(), l: "Glyphs held", c: "#f5c96b" },
+                  { v: `${meta.upgrades.vitality + meta.upgrades.power + meta.upgrades.focus + meta.upgrades.swiftness}/${MAX_UPGRADE_LEVEL * 4}`, l: "Reliquary pips", c: "#c9955a" },
                 ].map((r, i) => (
                   <div key={r.l} className={`rune-panel p-4 text-center arc-entry-hover anim-fade-up-${Math.min(4, (i % 4) + 1)}`}>
                     <div className="font-display text-2xl font-bold" style={{ color: r.c }}>{r.v}</div>
@@ -1138,7 +1143,7 @@ export function SettingsScreen({ onClose }: { onClose: () => void }) {
             <div className="flex items-center justify-between gap-3">
               <div>
                 <div className="text-[12px] font-bold uppercase tracking-[0.18em] text-[#ff8ba0]">Reset progress</div>
-                <div className="text-[10.5px] text-[#8f6a75] italic">Wipes shards, Sanctum upgrades, the Arcanum and every discovery. Settings are kept.</div>
+                <div className="text-[10.5px] text-[#8f6a75] italic">Wipes glyphs, Reliquary upgrades, the Arcanum and every discovery. Settings are kept.</div>
               </div>
               {!confirmReset ? (
                 <button onClick={() => { sfx.click(); setConfirmReset(true); }} className="btn-ghost px-4 py-2.5 text-sm text-[#ff8ba0] border-[rgba(255,77,107,0.4)] hover:bg-[rgba(255,77,107,0.12)] shrink-0">
@@ -1207,7 +1212,7 @@ export function PauseOverlay({ onResume, onRestart, onAbandon, onSettings }: {
 /* --------------------------------- game over ------------------------------- */
 
 /* Patch 7.0: no death quotes (story is gone) — the screen is a pure RUN
-   RECAP: stats, shards, merges, transmutations, resonances, plus a
+   RECAP: stats, glyphs claimed, merges, transmutations, resonances, plus a
    copy-seed button for sharing the run. */
 
 export function GameOverScreen({ stats, onRetry, onMenu }: { stats: RunStats; onRetry: () => void; onMenu: () => void }) {
@@ -1263,7 +1268,7 @@ export function GameOverScreen({ stats, onRetry, onMenu }: { stats: RunStats; on
         <div className="mt-4 flex items-center justify-center gap-3 border border-[rgba(245,201,107,0.4)] bg-[rgba(245,201,107,0.07)] py-3">
           <span className="text-[#ffe9ad]"><UiIcon name="gem" size={20} /></span>
           <span className="font-display text-2xl font-black text-[#ffe9ad]">+{stats.shards}</span>
-          <span className="text-[12px] uppercase tracking-wider text-[#b9aee0]">aether shards banked</span>
+          <span className="text-[12px] uppercase tracking-wider text-[#b9aee0]">aether glyphs claimed</span>
         </div>
 
         {/* Patch 9.0 — the Rift Mercy ladder readout */}

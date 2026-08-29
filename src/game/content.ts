@@ -609,19 +609,27 @@ export const ENEMY_DEFS: Record<EnemyType, EnemyDef> = {
 /* Enemy types in unlock order (stable list, avoids Object.keys per wave). */
 export const ENEMY_ORDER: EnemyType[] = (Object.keys(ENEMY_DEFS) as EnemyType[]).filter((t) => t !== "boss");
 
-/* ----------------------------- Elite affixes ---------------------------- */
+/* Elite affixes — Version 1.0 rebalance: elites are marked prey, not walls.
+   Bulwark lost over half of his effective pool (2.30/0.35 → 1.75/0.18) and
+   every affix shed HP, while the new ELITE_BONUS makes the weave itself hunt
+   the marked — spells strike +35% harder against any elite, so a golden-ringed
+   foe reads as a REWARD, never a bullet sponge. */
 export type EliteAffix = "blazing" | "swift" | "bulwark" | "leech";
 
 export interface EliteDef { name: string; color: string; hpMult: number; spdMult: number; resist: number }
 
 export const ELITE_DEFS: Record<EliteAffix, EliteDef> = {
-  blazing:  { name: "Blazing",  color: "#ff7847", hpMult: 1.45, spdMult: 1.05, resist: 0 },
-  swift:    { name: "Swift",    color: "#6bf0c2", hpMult: 1.10, spdMult: 1.65, resist: 0 },
-  bulwark:  { name: "Bulwark",  color: "#9aa7c9", hpMult: 2.30, spdMult: 0.82, resist: 0.35 },
-  leech:    { name: "Leech",    color: "#d05bff", hpMult: 1.50, spdMult: 1.00, resist: 0 },
+  blazing:  { name: "Blazing",  color: "#ff7847", hpMult: 1.30, spdMult: 1.05, resist: 0 },
+  swift:    { name: "Swift",    color: "#6bf0c2", hpMult: 1.06, spdMult: 1.65, resist: 0 },
+  bulwark:  { name: "Bulwark",  color: "#9aa7c9", hpMult: 1.75, spdMult: 0.82, resist: 0.18 },
+  leech:    { name: "Leech",    color: "#d05bff", hpMult: 1.30, spdMult: 1.00, resist: 0 },
 };
 
 export const ELITE_ORDER: EliteAffix[] = ["blazing", "swift", "bulwark", "leech"];
+
+/* Version 1.0 — the weave hunts the marked: every spell deals +35% damage
+   to elite foes. Replaces raw HP inflation with felt power. */
+export const ELITE_BONUS = 1.35;
 
 export function eliteChance(wave: number): number {
   /* Patch 9.0: the global −10% also trims elite pressure. */
@@ -635,16 +643,32 @@ export interface ScaledEnemy {
   score: number;
 }
 
-/* Patch 6.0 — difficulty eased 10% across the board: enemy HP and damage are
-   multiplied by DIFFICULTY_MULT (bosses apply it too, on top of their own
-   BOSS_DEFS stats). Speed is deliberately untouched so the arena reads the
-   same — only the numbers get kinder. */
+/* Version 1.0 — THE ATTUNEMENT CURVE (anti-bullet-sponge).
+   ----------------------------------------------------------------------
+   Enemy HP used to compound at 1.11^wave with a 420× cap while player
+   damage barely tripled by wave 50 — late foes were bullet sponges and
+   bosses were paper. Now BOTH sides ride matched curves:
+     · enemy HP   : linear 13%/wave × 1.09^wave, capped 150× (softer + lower)
+     · enemy dmg  : linear 4%/wave × 1.045^wave, capped 12× (survivable)
+     · the MAGE   : attunement(wave) — the rift itself teaches you; every
+       spell, burn, ward and resonance grows ×1.055^wave (capped ×44), so
+       magic stays CRISP against trash, ELITES melt under the +35% marked
+       bonus, and difficulty rises from pressure, not from HP walls.
+   Tyrants scale off the SAME curve (bossHpMult) so every act's climax
+   fight holds a constant hit-count regardless of shuffle position. */
+export function attunement(wave: number): number {
+  const w = Math.max(1, wave);
+  const lin = 1 + (w - 1) * 0.055;
+  const comp = w > 8 ? Math.pow(1.055, w - 8) : 1;
+  return Math.min(lin * comp, 44);
+}
+
 export function scaleEnemy(def: EnemyDef, wave: number): ScaledEnemy {
   const w = Math.max(1, wave);
   const lin = 1 + Math.max(0, w - 1) * 0.13;
-  const comp = w > 6 ? Math.pow(1.11, w - 6) : 1;
-  const hpMult = Math.min(lin * comp, 420) * DIFFICULTY_MULT;
-  const dmgMult = Math.min((1 + Math.max(0, w - 1) * 0.05) * (w > 8 ? Math.pow(1.07, w - 8) : 1), 70) * DIFFICULTY_MULT;
+  const comp = w > 6 ? Math.pow(1.09, w - 6) : 1;
+  const hpMult = Math.min(lin * comp, 150) * DIFFICULTY_MULT;
+  const dmgMult = Math.min((1 + Math.max(0, w - 1) * 0.04) * (w > 8 ? Math.pow(1.045, w - 8) : 1), 12) * DIFFICULTY_MULT;
   const spdMult = Math.min(1 + w * 0.012, 1.6);
   return {
     hp: def.hp * hpMult,
@@ -652,6 +676,16 @@ export function scaleEnemy(def: EnemyDef, wave: number): ScaledEnemy {
     speed: def.speed * spdMult,
     score: Math.round(def.score * (1 + w * 0.07)),
   };
+}
+
+/* Tyrant scaling — anchored to the attunement curve so every boss is a
+   proper duel at any shuffle position (×1.38 at wave 10 → ×20 at wave 50).
+   Endless echoes stack endlessBossMult() on top (engine spawnEnemy). */
+export function bossHpMult(wave: number): number {
+  return 1 + (attunement(wave) - 1) * 0.58;
+}
+export function bossDmgMult(wave: number): number {
+  return 1 + (attunement(wave) - 1) * 0.024;
 }
 
 /* --------------------------- Wave composition --------------------------- */
@@ -972,11 +1006,12 @@ export const DEFAULT_META: MetaSave = {
 
 export const META_KEY = "archmage_save_v1";
 
-/* Patch 5.0 — Sanctum scaling. Replaces the old exponential cost curve
+/* Version 1.0 — Reliquary scaling (formerly the Sanctum). Replaces the old
+   exponential cost curve
    (Math.pow(1.55, lvl)) with a gentler quadratic that stays affordable in
    the early-mid game and tapers at the cap. Effects were also rebalanced:
    vitality +20/lvl, power +8%/lvl, focus +12 mana + +10% regen per lvl,
-   swiftness +6%/lvl. The cap is MAX_UPGRADE_LEVEL — beyond it the Sanctum
+   swiftness +6%/lvl. The cap is MAX_UPGRADE_LEVEL — beyond it the Reliquary
    panel shows MAXED instead of an empower button. */
 export const MAX_UPGRADE_LEVEL = 6;
 
