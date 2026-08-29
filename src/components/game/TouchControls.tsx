@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ArchmageEngine } from "@/game/engine";
+import { ArchmageEngine, HudData } from "@/game/engine";
 import { SLOT_KEYS, SPELLS, STARTER_SPELLS, ElementId, COMBOS, comboKey } from "@/game/content";
 import { SpellIcon, UiIcon } from "./icons";
 
@@ -39,9 +39,10 @@ interface Props {
   equippedIds: (ElementId | { merged: ElementId[] } | null)[];
   /** Patch 9.0 — live selected slot index (drives the SPELL button icon). */
   selectedSlot: number;
-  /** Patch 10.1 — fullscreen toggle (touch action row). */
-  onToggleFullscreen: () => void;
-  isFullscreen: boolean;
+  /** Patch 11.0 — live HUD mirror (drives the strip's cooldown + mana
+      indicators and the dash-cooldown ring at a calm 10 Hz, ref-polled so
+      the 30 Hz HUD path never re-renders this tree). */
+  hudRef: React.MutableRefObject<HudData | null>;
 }
 
 interface StickState {
@@ -75,8 +76,7 @@ export function TouchControls({
   onSelectSlot, onDash, onSurge, onPause, onToggleAuto, autoMode,
   equippedIds = STARTER_SPELLS as ElementId[],
   selectedSlot = 0,
-  onToggleFullscreen,
-  isFullscreen = false,
+  hudRef,
 }: Props) {
   const moveStick = useRef<StickState | null>(null);
   const moveHomeRef = useRef<HTMLDivElement | null>(null);
@@ -88,6 +88,14 @@ export function TouchControls({
      surge button reflect readiness without violating react-hooks/refs. */
   const [weaveLocal, setWeaveLocal] = useState(0);
   const [surgeLocal, setSurgeLocal] = useState(false);
+  /* Patch 11.0 — per-slot cooldown veils + mana badges (the spell togglers)
+     and the dash cooldown veil. Refs only: the 10 Hz poll below writes them
+     directly, so the indicator updates cost zero React renders. */
+  const stripCds = useRef<(HTMLDivElement | null)[]>([]);
+  const stripCosts = useRef<(HTMLSpanElement | null)[]>([]);
+  const stripRoots = useRef<(HTMLButtonElement | null)[]>([]);
+  const dashCdFill = useRef<HTMLDivElement | null>(null);
+  const spellBtnCd = useRef<HTMLDivElement | null>(null);
 
   /* ------------------------------ move stick ------------------------------ */
   const beginMove = useCallback((id: number, clientX: number, clientY: number) => {
@@ -200,14 +208,54 @@ export function TouchControls({
      entirely and React clears our state for us. */
 
   /* HUD mirror poll — copy the parent's refs into local state at ~10Hz so
-     the surge button can light up when the weave meter is full. */
+     the surge button can light up when the weave meter is full.
+     Patch 11.0 — the same poll also drives the spell togglers' cooldown
+     veils + mana badges and the dash cooldown ring straight through refs
+     (no re-renders; the buttons themselves stay static React nodes). */
   useEffect(() => {
     const id = window.setInterval(() => {
       setWeaveLocal(weaveRef.current);
       setSurgeLocal(surgeActiveRef.current);
+      const h = hudRef.current;
+      if (!h) return;
+      for (let i = 0; i < h.spells.length; i++) {
+        const sp = h.spells[i];
+        const veil = stripCds.current[i];
+        if (veil) {
+          veil.style.height = `${Math.min(1, sp.cdFrac) * 100}%`;
+          veil.style.opacity = sp.cdFrac > 0.01 ? "1" : "0";
+        }
+        const cost = stripCosts.current[i];
+        if (cost) {
+          if (sp.empty) {
+            cost.textContent = "—";
+            cost.style.color = "#6a5a99";
+          } else {
+            cost.textContent = String(sp.cost);
+            cost.style.color = sp.cost === 0 ? "#6bf0c2" : sp.affordable ? "#9fd8ff" : "#ff8ba0";
+          }
+        }
+        const root = stripRoots.current[i];
+        if (root) {
+          root.style.opacity = sp.empty ? "0.5" : sp.affordable || sp.cdFrac > 0 ? "1" : "0.55";
+        }
+      }
+      /* the SPELL cycle button shares the selected slot's cooldown veil */
+      if (spellBtnCd.current) {
+        const sel = h.spells[h.selected];
+        if (sel) {
+          spellBtnCd.current.style.height = `${Math.min(1, sel.cdFrac) * 100}%`;
+          spellBtnCd.current.style.opacity = sel.cdFrac > 0.01 ? "1" : "0";
+        }
+      }
+      /* dash cooldown veil */
+      if (dashCdFill.current) {
+        dashCdFill.current.style.height = `${Math.min(1, h.dashFrac) * 100}%`;
+        dashCdFill.current.style.opacity = h.dashFrac > 0.01 ? "1" : "0";
+      }
     }, 100);
     return () => window.clearInterval(id);
-  }, [weaveRef, surgeActiveRef]);
+  }, [weaveRef, surgeActiveRef, hudRef]);
 
   /* Patch 9.0 — unmount safety: if the engine pauses (or the run ends) while
      FIRE is held, this layer unmounts WITHOUT a pointerup — release every
@@ -252,15 +300,19 @@ export function TouchControls({
         <div className="stick-inner" style={knobStyle(moveDraw)} />
       </div>
 
-      {/* ---- DASH — docked right of the move stick (left-thumb zone) ---- */}
+      {/* ---- DASH — docked right of the move stick (left-thumb zone).
+               Patch 11.0: a draining cooldown veil + READY glow tell the
+               player exactly when the next blink is live. ---- */}
       <button
         type="button"
-        className="touch-btn dash dash-dock"
+        className="touch-btn dash dash-dock touch-btn-cd"
         onPointerDown={(e) => { e.preventDefault(); onDash(); }}
         aria-label="Blink step"
       >
         <UiIcon name="bolt" size={22} />
         <span className="touch-btn-label">DASH</span>
+        <div ref={dashCdFill} className="cd-veil" style={{ height: "0%", opacity: "0" }} aria-hidden />
+        <span className="cd-ready" aria-hidden />
       </button>
 
       {/* ---- attack zone (bottom-right): FIRE at the thumb home, SPELL to
@@ -284,7 +336,7 @@ export function TouchControls({
         </button>
         <button
           type="button"
-          className={`touch-btn spell-btn${autoMode ? " is-auto" : ""}`}
+          className={`touch-btn spell-btn touch-btn-cd${autoMode ? " is-auto" : ""}`}
           onPointerDown={cycleSpell}
           aria-label="Cycle spell"
         >
@@ -299,6 +351,7 @@ export function TouchControls({
             <span style={{ color: SPELLS[selEntry].color }}><SpellIcon id={selEntry} size={24} /></span>
           )}
           <span className="touch-btn-label">SPELL</span>
+          <div ref={spellBtnCd} className="cd-veil" style={{ height: "0%", opacity: "0" }} aria-hidden />
         </button>
         <button
           type="button"
@@ -315,11 +368,12 @@ export function TouchControls({
         </button>
       </div>
 
-      {/* utility row — top-right, BELOW the shards HUD: ARCHMAGE · FULL ·
-          PAUSE. Patch 10.1 adds the fullscreen toggle (edge-to-edge play;
-          ENTER THE RIFT already auto-requests it — this is the manual exit
-          and re-entry). Compact horizontal buttons: nothing up here ever
-          collides with the attack zone below. */}
+      {/* utility row — top-right, BELOW the shards HUD: ARCHMAGE · PAUSE.
+          Patch 11.0 — the in-game FULLSCREEN button is REMOVED (the
+          landing-page enforcer owns fullscreen on every device; ENTER THE
+          RIFT still auto-requests it on touch as the fallback gesture).
+          Compact horizontal buttons: nothing up here ever collides with the
+          attack zone below. */}
       <div className="touch-actions">
         <button
           type="button"
@@ -330,17 +384,6 @@ export function TouchControls({
         >
           <UiIcon name="rings" size={19} />
           <span className="touch-btn-label">{autoMode ? "AUTO" : "MAGE"}</span>
-        </button>
-
-        <button
-          type="button"
-          className="touch-btn sm fullscreen"
-          onPointerDown={(e) => { e.preventDefault(); onToggleFullscreen(); }}
-          aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
-          aria-pressed={isFullscreen}
-        >
-          <UiIcon name={isFullscreen ? "compress" : "expand"} size={18} />
-          <span className="touch-btn-label">{isFullscreen ? "EXIT" : "FULL"}</span>
         </button>
 
         <button
@@ -366,7 +409,8 @@ export function TouchControls({
                 type="button"
                 role="tab"
                 disabled
-                className="touch-spell opacity-50"
+                ref={(el) => { stripRoots.current[i] = el; }}
+                className="touch-spell touch-spell-cd opacity-50"
                 title="Empty slot — pick up a spell drop to refill"
                 aria-label="Empty slot"
               >
@@ -374,6 +418,8 @@ export function TouchControls({
                   <UiIcon name="hourglass" size={20} />
                 </span>
                 <span className="touch-spell-key">{SLOT_KEYS[i]}</span>
+                <span ref={(el) => { stripCosts.current[i] = el; }} className="touch-spell-cost">—</span>
+                <div ref={(el) => { stripCds.current[i] = el; }} className="cd-veil" style={{ height: "0%", opacity: "0" }} aria-hidden />
               </button>
             );
           }
@@ -386,8 +432,9 @@ export function TouchControls({
                 key={i}
                 type="button"
                 role="tab"
+                ref={(el) => { stripRoots.current[i] = el; }}
                 onPointerDown={(e) => { e.preventDefault(); onSelectSlot(i); }}
-                className={`touch-spell${selected ? " is-selected" : ""}`}
+                className={`touch-spell touch-spell-cd${selected ? " is-selected" : ""}`}
                 title={`Merged: ${a.name} + ${b.name} — casts both in succession`}
                 aria-label={mergeName}
               >
@@ -396,6 +443,8 @@ export function TouchControls({
                   <span className="ml-[-4px]" style={{ color: b.color }}><SpellIcon id={ids[1]} size={20} /></span>
                 </span>
                 <span className="touch-spell-key text-[#ffe9ad]">{SLOT_KEYS[i]}</span>
+                <span ref={(el) => { stripCosts.current[i] = el; }} className="touch-spell-cost touch-spell-cost-merged" />
+                <div ref={(el) => { stripCds.current[i] = el; }} className="cd-veil" style={{ height: "0%", opacity: "0" }} aria-hidden />
               </button>
             );
           }
@@ -405,15 +454,18 @@ export function TouchControls({
               key={i}
               type="button"
               role="tab"
+              ref={(el) => { stripRoots.current[i] = el; }}
               onPointerDown={(e) => { e.preventDefault(); onSelectSlot(i); }}
-              className={`touch-spell${selected ? " is-selected" : ""}`}
+              className={`touch-spell touch-spell-cd${selected ? " is-selected" : ""}`}
               title={`${def.name} — ${def.desc}`}
-              aria-label={def.name}
+              aria-label={`${def.name} — ${def.manaCost} aether`}
             >
               <span style={{ color: def.color }}>
                 <SpellIcon id={entry} size={22} />
               </span>
               <span className="touch-spell-key">{SLOT_KEYS[i]}</span>
+              <span ref={(el) => { stripCosts.current[i] = el; }} className="touch-spell-cost">{def.manaCost}</span>
+              <div ref={(el) => { stripCds.current[i] = el; }} className="cd-veil" style={{ height: "0%", opacity: "0" }} aria-hidden />
             </button>
           );
         })}

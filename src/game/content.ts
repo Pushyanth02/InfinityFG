@@ -16,7 +16,13 @@
    layout archetypes (three new floor plans), and the Rift Seed now also
    drives an enemy ECOLOGY — poolBias() bends every foe type's spawn weight
    per seed (two "featured" stars surge, some fade), so altering the seed
-   reshapes both the map AND the monster pool. */
+   reshapes both the map AND the monster pool.
+   Patch 11.0 "The Umbral Requiem": full dark-arcane REBRAND — every spell,
+   tyrant, foe and act is renamed into the black-grimoire register (ids stay
+   stable so saves keep working), and the DROP ECONOMY becomes STRICT: each
+   wave fields exactly ONE drop type (spell / heart / resonance / tribute),
+   spell orbs no longer heal (hearts are their own drop), and resonance orbs
+   demand a sacrifice — two bound spells fused into one. */
 
 /* ------------------------------ Seeded RNG ------------------------------ */
 export interface RNG {
@@ -94,15 +100,24 @@ export const MERGE_INTERVAL = 10;          // merge-spell cadence (waves)
 /* Drop cadence is a strict [min,max] wave interval, rolled once at run start
    and re-rolled after each drop. NO per-kill % rolls — the user's directive.
    Patch 10.0: SPELL_DROP_NERF is a flat global nerf to the magic-spell drop
-   rate — exactly 10%. Each scheduled drop has a 10% chance to be reabsorbed
-   by the rift (silently skipped, cadence re-rolled), so the expected number
-   of spell drops over any stretch of waves is exactly 0.9× the pre-10.0
-   rate. Applies everywhere, every device, whole run. */
+   rate — exactly 10%. Patch 11.0 stacks a SECOND flat −10% on top
+   (1 − 0.9 × 0.9 = 0.19): each scheduled spell drop has a 19% chance to be
+   reabsorbed by the rift (silently skipped, cadence re-rolled), so the
+   expected number of spell drops over any stretch of waves is exactly
+   0.81× the pre-10.0 rate. Applies everywhere, every device, whole run.
+   Patch 11.0 STRICT ECONOMY: every wave resolves exactly ONE drop type —
+   spell, heart, resonance or tribute (see resolveWaveDrop in engine.ts).
+   Tribute waves pay out through the end-of-wave gate only; resonance orbs
+   open the sacrifice-two merge; hearts are the only source of drop healing
+   (spell orbs no longer mend). */
 export const SPELL_DROP_WAVE_MIN = 3;
 export const SPELL_DROP_WAVE_MAX = 5;
-export const SPELL_DROP_NERF = 0.10;        // exactly −10% global drop rate
-export const SPELL_DROP_HEAL_FRAC = 0.10;   // 10% max HP per drop
+export const SPELL_DROP_NERF = 0.19;        // two cumulative −10% nerfs (10.0 + 11.0)
+export const HEART_DROP_HEAL_FRAC = 0.25;   // hearts mend 25% max HP (the dedicated heal drop)
 export const SPELL_OFFER_COUNT = 3;        // spells shown per drop overlay
+
+/** The strict per-wave drop economy: a wave fields AT MOST one of these. */
+export type DropKind = "spell" | "heart" | "resonance" | "tribute" | "none";
 
 /* ------------------------- Patch 6.0 — balance knobs ------------------------- */
 
@@ -198,39 +213,39 @@ export interface BossDef {
 export const BOSS_DEFS: BossDef[] = [
   {
     id: "vorrac",
-    name: "Vorrac",
-    title: "the Gate-Sorrow",
+    name: "Malgrym",
+    title: "the Maw of Ruin",
     hp: 950, damage: 26, speed: 55, radius: 44,
     color: "#ff4d6b", glow: "#ffa3b5",
     mechanics: "Stampede charger — stalks, then chains two-to-three re-aimed lane dashes with aimed fan volleys between.",
   },
   {
     id: "korrath",
-    name: "Korrath",
-    title: "the Ash-Eaten",
+    name: "Ashgorim",
+    title: "the Unquenched Pyre",
     hp: 1300, damage: 30, speed: 50, radius: 46,
     color: "#ff7847", glow: "#ffb08a",
-    mechanics: "Immovable juggernaut — never charges; walks you down, slams expanding shockwave rings, and sheds cinder imps.",
+    mechanics: "Immovable juggernaut — never charges; walks you down, slams expanding shockwave rings, and sheds ashfiends.",
   },
   {
     id: "solenne",
-    name: "Solenne",
-    title: "the Last Note",
+    name: "Sylthara",
+    title: "the Reaving Waltz",
     hp: 1650, damage: 34, speed: 60, radius: 42,
     color: "#43e8d8", glow: "#aeeaf5",
     mechanics: "Blade dancer — orbits at fencing range on an accelerating tempo of triple fans, then chains lunges through you.",
   },
   {
     id: "ysed",
-    name: "Ysed",
-    title: "the Hour-Cradled",
+    name: "Ysolth",
+    title: "the Hollow Hour",
     hp: 2000, damage: 38, speed: 45, radius: 44,
     color: "#c0ffeb", glow: "#e0fff5",
     mechanics: "Blink fortress — anchors and channels rotating twin-arm spiral barrages, then blinks around you with a landing pulse.",
   },
   {
     id: "maelthar",
-    name: "Maelthar",
+    name: "Mordrax",
     title: "the First Sundering",
     hp: 2600, damage: 44, speed: 65, radius: 48,
     color: "#ff4d6b", glow: "#ffe9ad",
@@ -269,8 +284,8 @@ export interface ActDef {
 export const ACTS: ActDef[] = [
   {
     id: 1,
-    name: "The Weeping Gate",
-    subtitle: "Waves 1–10 · the outer rift",
+    name: "The Sunless Vestibule",
+    subtitle: "Waves 1–10 · the outer dark",
     waves: [1, 10],
     palette: {
       sky: "88,58,160",
@@ -278,11 +293,11 @@ export const ACTS: ActDef[] = [
       pillar: ["#2b1d4d", "#191030"],
       mote: "200,180,255",
     },
-    flavor: "The rift opens — ten trials to the first tyrant.",
+    flavor: "The dark opens — ten trials to the first tyrant.",
   },
   {
     id: 2,
-    name: "The Ashen Labyrinth",
+    name: "The Cinder Labyrinth",
     subtitle: "Waves 11–20 · burning halls",
     waves: [11, 20],
     palette: {
@@ -295,7 +310,7 @@ export const ACTS: ActDef[] = [
   },
   {
     id: 3,
-    name: "The Drowned Choir",
+    name: "The Drowned Necropolis",
     subtitle: "Waves 21–30 · sunken depths",
     waves: [21, 30],
     palette: {
@@ -308,7 +323,7 @@ export const ACTS: ActDef[] = [
   },
   {
     id: 4,
-    name: "The Silent Cradle",
+    name: "The Silent Sepulcher",
     subtitle: "Waves 31–40 · frozen stillness",
     waves: [31, 40],
     palette: {
@@ -321,7 +336,7 @@ export const ACTS: ActDef[] = [
   },
   {
     id: 5,
-    name: "The Heart of the Rift",
+    name: "The Heart of the Abyss",
     subtitle: "Waves 41–50 · the final wound",
     waves: [41, 50],
     palette: {
@@ -336,7 +351,7 @@ export const ACTS: ActDef[] = [
      choice, waves 51+ roll on forever inside a sealed-but-humming rift. */
   {
     id: 6,
-    name: "The Hollow Echo",
+    name: "The Endless Dirge",
     subtitle: "Waves 51+ · the endless echo",
     waves: [51, 99999],
     palette: {
@@ -372,70 +387,70 @@ export interface SpellDef {
 
 export const SPELLS: Record<ElementId, SpellDef> = {
   fire: {
-    id: "fire", name: "Fireball", tagline: "Emberwrath", color: "#ff7847", glow: "#ffb08a",
+    id: "fire", name: "Pyroclasm", tagline: "Hellmouth", color: "#ff7847", glow: "#ffb08a",
     manaCost: 14, cooldown: 0.48, baseDamage: 34,
-    desc: "Hurls an orb that detonates in a burning blast. Applies Burn.",
+    desc: "Hurls a searing orb that detonates in profane flame. Applies Smolder.",
   },
   ice: {
-    id: "ice", name: "Ice Shard", tagline: "Rimefang", color: "#7fd8ff", glow: "#c8efff",
+    id: "ice", name: "Gravefrost", tagline: "Rimefang", color: "#7fd8ff", glow: "#c8efff",
     manaCost: 12, cooldown: 0.36, baseDamage: 22,
-    desc: "Piercing shards that skewer the line and chill foes, slowing them.",
+    desc: "Impaling shards of grave-ice skewer the line and numb flesh to stillness.",
   },
   lightning: {
-    id: "lightning", name: "Stormcall", tagline: "Voltaic Lash", color: "#ffe86b", glow: "#fff6c0",
+    id: "lightning", name: "Wraithbolt", tagline: "Gallows Spark", color: "#ffe86b", glow: "#fff6c0",
     manaCost: 20, cooldown: 1.0, baseDamage: 30,
-    desc: "Instant chain lightning leaping between the nearest foes.",
+    desc: "Instant chain-lightning that leaps between the nearest souls.",
   },
   earth: {
-    id: "earth", name: "Bulwark", tagline: "Stonebound", color: "#c9955a", glow: "#eec390",
+    id: "earth", name: "Gravewarden", tagline: "Ossuary", color: "#c9955a", glow: "#eec390",
     manaCost: 18, cooldown: 3.0, baseDamage: 0,
-    desc: "Raises a stone ward that blocks enemies and hostile bolts.",
+    desc: "Raises a bone-stone ward that blocks enemies and hostile bolts.",
   },
   shadow: {
-    id: "shadow", name: "Umbral Step", tagline: "Nightblade", color: "#b06bff", glow: "#d9b3ff",
+    id: "shadow", name: "Umbral Passage", tagline: "The Long Dark", color: "#b06bff", glow: "#d9b3ff",
     manaCost: 16, cooldown: 2.0, baseDamage: 40,
-    desc: "Blink through shadows, striking everything near your arrival.",
+    desc: "Blink through the long dark, striking everything near your arrival.",
   },
   light: {
-    id: "light", name: "Radiant Lance", tagline: "Dawnfire", color: "#fff3b0", glow: "#fffbe0",
+    id: "light", name: "Lance of Judgment", tagline: "Wrathlight", color: "#fff3b0", glow: "#fffbe0",
     manaCost: 22, cooldown: 1.45, baseDamage: 70,
-    desc: "A searing beam that pierces in a straight line, scorching every foe in its column.",
+    desc: "A searing shaft of wrathlight that pierces in a straight line, scorching every foe in its column.",
   },
   time: {
-    id: "time", name: "Chrono Lock", tagline: "Stillwater", color: "#6bf0c2", glow: "#c0ffe6",
+    id: "time", name: "Chronoshroud", tagline: "The Frozen Hour", color: "#6bf0c2", glow: "#c0ffe6",
     manaCost: 24, cooldown: 4.2, baseDamage: 8,
-    desc: "Freezes time in a bubble — caught foes crawl at a tenth speed.",
+    desc: "Freezes time in a shroud — caught foes crawl at a tenth speed.",
   },
   void: {
-    id: "void", name: "Void Pulse", tagline: "Hungering Deep", color: "#d05bff", glow: "#ecb3ff",
+    id: "void", name: "Null Rift", tagline: "Hungering Dark", color: "#d05bff", glow: "#ecb3ff",
     manaCost: 22, cooldown: 2.6, baseDamage: 26,
-    desc: "A collapsing singularity that drags nearby foes inward and crushes them.",
+    desc: "A collapsing wound in the world that drags nearby foes inward and crushes them.",
   },
   arcane: {
-    id: "arcane", name: "Prism Fan", tagline: "Thousandfold Light", color: "#9a7bff", glow: "#c9baff",
+    id: "arcane", name: "Hexweave Fan", tagline: "Thousand Eyes", color: "#9a7bff", glow: "#c9baff",
     manaCost: 19, cooldown: 0.8, baseDamage: 13,
-    desc: "Sprays a fan of seeking bolts in a wide cone. Never misses for long.",
+    desc: "Sprays a fan of hex-seekers in a wide cone. Never misses for long.",
   },
   blood: {
-    id: "blood", name: "Crimson Lance", tagline: "Crimson Tithe", color: "#ff4d6b", glow: "#ffa3b5",
+    id: "blood", name: "Crimson Requiem", tagline: "The Tithe", color: "#ff4d6b", glow: "#ffa3b5",
     manaCost: 26, cooldown: 1.6, baseDamage: 110,
     desc: "A heavy piercing javelin of congealed blood. Skewers everything in its line.",
   },
   nature: {
-    id: "nature", name: "Spore Bloom", tagline: "Verdant Rot", color: "#7ed957", glow: "#b9f29a",
+    id: "nature", name: "Blightspore", tagline: "Rotgarden", color: "#7ed957", glow: "#b9f29a",
     manaCost: 17, cooldown: 2.0, baseDamage: 15,
-    desc: "Lobs a spore pod that bursts into a choking cloud — poison and slow within.",
+    desc: "Lobs a rot pod that bursts into a choking blight — poison and slow within.",
   },
   /* Patch 9.0 — the rift exhales two new elements. */
   wind: {
-    id: "wind", name: "Gale Cutter", tagline: "Stormscythe", color: "#8ce8dc", glow: "#d2fff8",
+    id: "wind", name: "Soulscythe", tagline: "The Hollow Gale", color: "#8ce8dc", glow: "#d2fff8",
     manaCost: 13, cooldown: 0.55, baseDamage: 18,
-    desc: "Three crescent blades of compressed wind — piercing, and they shove foes backwards.",
+    desc: "Three crescent blades of hollow wind — piercing, and they shove foes backwards.",
   },
   sonic: {
-    id: "sonic", name: "Echo Pulse", tagline: "The Rift's Voice", color: "#ff9ede", glow: "#ffd6f2",
+    id: "sonic", name: "Dirge Nova", tagline: "The Banshee's Cry", color: "#ff9ede", glow: "#ffd6f2",
     manaCost: 15, cooldown: 1.15, baseDamage: 30,
-    desc: "A resonant nova around you — damages, slows and hurls every nearby foe away.",
+    desc: "A banshee's requital around you — damages, slows and hurls every nearby foe away.",
   },
 };
 
@@ -563,29 +578,32 @@ export interface EnemyDef {
   flying?: boolean;
 }
 
+/* Patch 11.0 — the bestiary is re-registered in the black-grimoire register:
+   every foe keeps its mechanical id (saves stay valid) but answers to a
+   darker name. */
 export const ENEMY_DEFS: Record<EnemyType, EnemyDef> = {
-  goblin:      { type: "goblin", name: "Gutter Goblin", hp: 26, speed: 126, damage: 8, radius: 13, color: "#7ed957", glow: "#b9f29a", score: 10, cost: 1, unlockWave: 1 },
-  archer:      { type: "archer", name: "Bone Archer", hp: 20, speed: 96, damage: 5, radius: 12, color: "#d9a05b", glow: "#f2c99a", score: 14, cost: 1.4, unlockWave: 2, ranged: true, shootsEvery: 2.6 },
-  swarm:       { type: "swarm", name: "Hex Wisp", hp: 8, speed: 148, damage: 3, radius: 8, color: "#b06bff", glow: "#d9b3ff", score: 5, cost: 0.5, unlockWave: 3, flying: true },
-  imp:         { type: "imp", name: "Cinder Imp", hp: 18, speed: 116, damage: 6, radius: 11, color: "#ff8a5c", glow: "#ffc4a3", score: 12, cost: 1.3, unlockWave: 4, flying: true },
+  goblin:      { type: "goblin", name: "Gutter Ghoul", hp: 26, speed: 126, damage: 8, radius: 13, color: "#7ed957", glow: "#b9f29a", score: 10, cost: 1, unlockWave: 1 },
+  archer:      { type: "archer", name: "Ossuary Archer", hp: 20, speed: 96, damage: 5, radius: 12, color: "#d9a05b", glow: "#f2c99a", score: 14, cost: 1.4, unlockWave: 2, ranged: true, shootsEvery: 2.6 },
+  swarm:       { type: "swarm", name: "Gravemote", hp: 8, speed: 148, damage: 3, radius: 8, color: "#b06bff", glow: "#d9b3ff", score: 5, cost: 0.5, unlockWave: 3, flying: true },
+  imp:         { type: "imp", name: "Ashfiend", hp: 18, speed: 116, damage: 6, radius: 11, color: "#ff8a5c", glow: "#ffc4a3", score: 12, cost: 1.3, unlockWave: 4, flying: true },
   /* Patch 9.0 — five new normal enemy types, slotted between the existing
      unlocks so the bestiary paces out to 19 across the five acts. */
-  skitter:     { type: "skitter", name: "Rift Skitter", hp: 10, speed: 168, damage: 3, radius: 9, color: "#e8c46b", glow: "#ffe9a8", score: 6, cost: 0.5, unlockWave: 5 },
-  knight:      { type: "knight", name: "Rust Knight", hp: 72, speed: 62, damage: 14, radius: 17, color: "#9aa7c9", glow: "#d4ddf2", score: 24, cost: 2.4, unlockWave: 6 },
-  assassin:    { type: "assassin", name: "Veil Assassin", hp: 30, speed: 135, damage: 12, radius: 12, color: "#6ee7c8", glow: "#b7f5e5", score: 26, cost: 2.6, unlockWave: 8 },
-  bomber:      { type: "bomber", name: "Cinder Bomber", hp: 24, speed: 132, damage: 16, radius: 12, color: "#ff6b3d", glow: "#ffb08a", score: 18, cost: 1.8, unlockWave: 9 },
-  mage:        { type: "mage", name: "Hedge Sorcerer", hp: 30, speed: 84, damage: 6, radius: 13, color: "#8f7bff", glow: "#c6baff", score: 28, cost: 2.6, unlockWave: 10, ranged: true, shootsEvery: 3.0 },
-  tank:        { type: "tank", name: "Grave Golem", hp: 160, speed: 42, damage: 20, radius: 22, color: "#8a6f5a", glow: "#c4a98d", score: 40, cost: 3.4, unlockWave: 11 },
-  lancer:      { type: "lancer", name: "Rift Lancer", hp: 46, speed: 92, damage: 14, radius: 14, color: "#43e8d8", glow: "#aef2ea", score: 30, cost: 2.8, unlockWave: 12 },
-  elemental:   { type: "elemental", name: "Wandering Elemental", hp: 55, speed: 88, damage: 10, radius: 15, color: "#5bd0e7", glow: "#aeeaf5", score: 34, cost: 3.0, unlockWave: 13 },
-  necromancer: { type: "necromancer", name: "Grave Binder", hp: 42, speed: 70, damage: 6, radius: 14, color: "#b7d95b", glow: "#ddf29a", score: 38, cost: 3.2, unlockWave: 15, ranged: true, shootsEvery: 3.4 },
-  warden:      { type: "warden", name: "Storm Warden", hp: 58, speed: 76, damage: 8, radius: 15, color: "#7fb2ff", glow: "#c9e0ff", score: 44, cost: 3.4, unlockWave: 16, ranged: true, shootsEvery: 3.2 },
-  shadow:      { type: "shadow", name: "Umbra Stalker", hp: 38, speed: 122, damage: 13, radius: 13, color: "#7a5cff", glow: "#bfaeff", score: 36, cost: 3.0, unlockWave: 17 },
-  timewalker:  { type: "timewalker", name: "Time Walker", hp: 48, speed: 100, damage: 11, radius: 14, color: "#6bf0c2", glow: "#c0ffe6", score: 42, cost: 3.4, unlockWave: 19 },
-  mender:      { type: "mender", name: "Grave Mender", hp: 40, speed: 66, damage: 5, radius: 13, color: "#f2a6ff", glow: "#ffd6f6", score: 46, cost: 3.6, unlockWave: 21, ranged: true, shootsEvery: 2.8 },
-  golem:       { type: "golem", name: "Crystal Golem", hp: 120, speed: 52, damage: 16, radius: 20, color: "#7fd8ff", glow: "#d5f4ff", score: 50, cost: 4.0, unlockWave: 22 },
-  voidbeast:   { type: "voidbeast", name: "Void Beast", hp: 90, speed: 76, damage: 15, radius: 18, color: "#d05bff", glow: "#ecb3ff", score: 55, cost: 4.2, unlockWave: 25 },
-  boss:        { type: "boss", name: "Rift Tyrant", hp: 950, speed: 55, damage: 26, radius: 44, color: "#ff4d6b", glow: "#ffa3b5", score: 500, cost: 0, unlockWave: 10 },
+  skitter:     { type: "skitter", name: "Gloom Skitter", hp: 10, speed: 168, damage: 3, radius: 9, color: "#e8c46b", glow: "#ffe9a8", score: 6, cost: 0.5, unlockWave: 5 },
+  knight:      { type: "knight", name: "Rustbound Knight", hp: 72, speed: 62, damage: 14, radius: 17, color: "#9aa7c9", glow: "#d4ddf2", score: 24, cost: 2.4, unlockWave: 6 },
+  assassin:    { type: "assassin", name: "Shroud Stalker", hp: 30, speed: 135, damage: 12, radius: 12, color: "#6ee7c8", glow: "#b7f5e5", score: 26, cost: 2.6, unlockWave: 8 },
+  bomber:      { type: "bomber", name: "Pyrehusk", hp: 24, speed: 132, damage: 16, radius: 12, color: "#ff6b3d", glow: "#ffb08a", score: 18, cost: 1.8, unlockWave: 9 },
+  mage:        { type: "mage", name: "Umbra Cultist", hp: 30, speed: 84, damage: 6, radius: 13, color: "#8f7bff", glow: "#c6baff", score: 28, cost: 2.6, unlockWave: 10, ranged: true, shootsEvery: 3.0 },
+  tank:        { type: "tank", name: "Bone Colossus", hp: 160, speed: 42, damage: 20, radius: 22, color: "#8a6f5a", glow: "#c4a98d", score: 40, cost: 3.4, unlockWave: 11 },
+  lancer:      { type: "lancer", name: "Abyssal Lancer", hp: 46, speed: 92, damage: 14, radius: 14, color: "#43e8d8", glow: "#aef2ea", score: 30, cost: 2.8, unlockWave: 12 },
+  elemental:   { type: "elemental", name: "Errant Wraith", hp: 55, speed: 88, damage: 10, radius: 15, color: "#5bd0e7", glow: "#aeeaf5", score: 34, cost: 3.0, unlockWave: 13 },
+  necromancer: { type: "necromancer", name: "Bonespeaker", hp: 42, speed: 70, damage: 6, radius: 14, color: "#b7d95b", glow: "#ddf29a", score: 38, cost: 3.2, unlockWave: 15, ranged: true, shootsEvery: 3.4 },
+  warden:      { type: "warden", name: "Tempest Herald", hp: 58, speed: 76, damage: 8, radius: 15, color: "#7fb2ff", glow: "#c9e0ff", score: 44, cost: 3.4, unlockWave: 16, ranged: true, shootsEvery: 3.2 },
+  shadow:      { type: "shadow", name: "Nightmare Shade", hp: 38, speed: 122, damage: 13, radius: 13, color: "#7a5cff", glow: "#bfaeff", score: 36, cost: 3.0, unlockWave: 17 },
+  timewalker:  { type: "timewalker", name: "Chronowraith", hp: 48, speed: 100, damage: 11, radius: 14, color: "#6bf0c2", glow: "#c0ffe6", score: 42, cost: 3.4, unlockWave: 19 },
+  mender:      { type: "mender", name: "Corpseweaver", hp: 40, speed: 66, damage: 5, radius: 13, color: "#f2a6ff", glow: "#ffd6f6", score: 46, cost: 3.6, unlockWave: 21, ranged: true, shootsEvery: 2.8 },
+  golem:       { type: "golem", name: "Voidcage Golem", hp: 120, speed: 52, damage: 16, radius: 20, color: "#7fd8ff", glow: "#d5f4ff", score: 50, cost: 4.0, unlockWave: 22 },
+  voidbeast:   { type: "voidbeast", name: "Nullmaw Beast", hp: 90, speed: 76, damage: 15, radius: 18, color: "#d05bff", glow: "#ecb3ff", score: 55, cost: 4.2, unlockWave: 25 },
+  boss:        { type: "boss", name: "Umbral Tyrant", hp: 950, speed: 55, damage: 26, radius: 44, color: "#ff4d6b", glow: "#ffa3b5", score: 500, cost: 0, unlockWave: 10 },
 };
 
 /* Enemy types in unlock order (stable list, avoids Object.keys per wave). */
@@ -911,9 +929,10 @@ export interface GameSettings {
 
 export const DEFAULT_SETTINGS: GameSettings = {
   aimAssist: 1, mercy: false, dmgNumbers: true,
-  /* Patch 10.0 — music louder by default: the score is meant to be HEARD
-     (the music bus headroom was also raised in audio.ts: ×0.5 → ×0.85). */
-  master: 80, music: 70, sfx: 90, gfx: 2, screenShake: true,
+  /* Patch 11.0 — the score is mixed LOUD and dramatic: music default raised
+     to 85 and the music bus runs at unity into a master compressor (see
+     audio.ts), so the requiem reads as a score, not a whisper. */
+  master: 80, music: 85, sfx: 90, gfx: 2, screenShake: true,
   /* Patch 10.1 — HUD 10% smaller out of the box (less screen furniture,
      more arena); the Settings slider lets each player re-scale it. */
   hudScale: 0.9,

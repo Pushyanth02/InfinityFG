@@ -9,6 +9,7 @@ import { useArchmageStore, sfx } from "@/game/store";
 import { BoonIcon, SpellIcon, UiIcon } from "./icons";
 import { BossSigil } from "./overlays";
 import { useIsTouchDevice } from "./useIsTouchDevice";
+import { useFullscreen } from "./useFullscreen";
 
 /* ------------------------------ shared bits ------------------------------ */
 
@@ -222,6 +223,11 @@ export function MenuScreen({ chapter, chapterSubtitle, onStart }: MenuProps) {
      device actually uses: keyboard/mouse rite on desktop, touch rite on
      phones/tablets. Never both. */
   const isTouch = useIsTouchDevice();
+  /* Patch 11.0 — THE FULLSCREEN ENFORCER: a landing-page button that takes
+     the whole experience edge-to-edge on ANY device (this tap is the user
+     gesture the Fullscreen API demands). The old in-game FULL toggle is
+     gone — this is the one true switch, and it flips live. */
+  const fs = useFullscreen();
   const muted = meta.settings.master <= 0;
   const toggleMute = () => patchSettings({ master: muted ? 80 : 0 });
   const hover = () => sfx.uiHover();
@@ -265,8 +271,8 @@ export function MenuScreen({ chapter, chapterSubtitle, onStart }: MenuProps) {
           ARCHMAGE
         </h1>
         <p className="anim-fade-up-2 mt-2 max-w-xl text-[15px] leading-relaxed text-[#b9aee0] italic">
-          Thirteen elements. Seventy-eight resonances. Five tyrants that shuffle with every seed.
-          Weave spells fast enough and the rift itself sings your name.
+          Thirteen dark arts. Seventy-eight resonances. Five tyrants that shuffle with every seed.
+          Weave the requiem fast enough and the abyss itself learns your name.
         </p>
 
         {/* chapter progress */}
@@ -305,7 +311,27 @@ export function MenuScreen({ chapter, chapterSubtitle, onStart }: MenuProps) {
           </button>
         </div>
 
-        <button onClick={onStart} onMouseEnter={hover} className="anim-fade-up-3 btn-gold mt-4 px-12 py-4 text-lg flex items-center gap-3">
+        {/* Patch 11.0 — FULLSCREEN ENFORCER: any device, one tap, immediate.
+            When active it offers the exit; when the browser refuses (iPhone
+            Safari), the button quietly reports the windowed truth. */}
+        {fs.supported && (
+          <button
+            onClick={() => { sfx.click(); void fs.toggle(); }}
+            onMouseEnter={hover}
+            aria-pressed={fs.isFullscreen}
+            className={`anim-fade-up-2 mt-4 px-6 py-2.5 text-[12px] font-black uppercase tracking-[0.22em] flex items-center gap-2.5 border transition-all duration-300 ease-[cubic-bezier(0.22,0.68,0.32,1)] ${
+              fs.isFullscreen
+                ? "border-[rgba(107,240,194,0.55)] text-[#6bf0c2] bg-[rgba(107,240,194,0.07)] hover:bg-[rgba(107,240,194,0.14)]"
+                : "border-[rgba(154,123,255,0.45)] text-[#c9baff] bg-[rgba(20,12,40,0.6)] hover:border-[rgba(245,201,107,0.65)] hover:text-[#ffe9ad]"
+            }`}
+            title={fs.isFullscreen ? "Leave fullscreen" : "Play edge-to-edge — fullscreen on any device"}
+          >
+            <UiIcon name={fs.isFullscreen ? "compress" : "expand"} size={15} />
+            {fs.isFullscreen ? "Fullscreen Engaged — Exit" : "Enter Fullscreen"}
+          </button>
+        )}
+
+        <button onClick={onStart} onMouseEnter={hover} className="anim-fade-up-3 btn-gold mt-3 px-12 py-4 text-lg flex items-center gap-3">
           <UiIcon name="gate" size={22} />
           Enter the Rift
         </button>
@@ -402,18 +428,18 @@ export function MenuScreen({ chapter, chapterSubtitle, onStart }: MenuProps) {
 
         <div className="anim-fade-up-3 mt-4 w-full max-w-2xl border border-[rgba(154,123,255,0.28)] bg-[rgba(18,11,36,0.75)] px-6 py-3 text-left">
           <div className="flex items-center justify-between">
-            <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#6bf0c2]">Patch 10.2 — The Thinking Rift</div>
+            <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#6bf0c2]">Patch 11.0 — The Umbral Requiem</div>
             <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6a5a99]">live</div>
           </div>
           <ul className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1 text-[12.5px] text-[#c9bdf0] list-none">
-            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Every tyrant rebuilt — five fully distinct boss kits</li>
-            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Zero boss cutscenes — no cards, no banners, pure telegraphs</li>
-            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Archmage Mode now respects walls — true line-of-sight casting</li>
-            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> The Fateweaver: calculated casts, resonance hunts, no spam</li>
-            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Boons picked from live context — wounds, mana, incoming tyrants</li>
-            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Pathfinding hardened — no corner jams, no foes stuck on terrain</li>
-            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> The rift grows to 2560×1600 with eight layout archetypes</li>
-            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Rift Seeds reshape the monster pool — every seed, a new ecology</li>
+            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Dark-arcane rebrand — every spell, foe, tyrant and act renamed</li>
+            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> All-new rune icons redrawn for the black-grimoire lore</li>
+            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Score mixed loud — master compressor, dramatic unity bus</li>
+            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Boss music arcs: entry sting → enrage war-drone → collapse</li>
+            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Strict drop economy — exactly ONE drop type per wave</li>
+            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Resonance orbs demand a sacrifice — fuse exactly two spells</li>
+            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Projectile VFX overhaul — every element flies its own sigil</li>
+            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Cooldown + aether tithe readouts on every spell toggler</li>
           </ul>
         </div>
       </div>
@@ -1018,7 +1044,7 @@ export function SettingsScreen({ onClose }: { onClose: () => void }) {
                   onChange={(e) => { sfx.click(); patchSettings({ hudScale: Number(e.target.value) / 100 }); }}
                   className="settings-slider"
                 />
-                <div className="text-[10.5px] text-[#6a5a99] italic mt-0.5">Size of the combat interface — vitals, wave plate, spell bar and status chips</div>
+                <div className="text-[10.5px] text-[#6a5a99] italic mt-0.5">Size of the combat interface — vitals, wave plate, spell bar and touch controls</div>
               </div>
             </div>
           </div>

@@ -88,10 +88,6 @@ export default function GameShell() {
   const slotCosts = useRef<(HTMLSpanElement | null)[]>([]);
   const slotEvos = useRef<(HTMLSpanElement | null)[]>([]);
   const dashFill = useRef<HTMLDivElement | null>(null);
-  const resWrap = useRef<HTMLDivElement | null>(null);
-  const resFill = useRef<HTMLDivElement | null>(null);
-  const attWrap = useRef<HTMLDivElement | null>(null);
-  const attFill = useRef<HTMLDivElement | null>(null);
   const bossWrap = useRef<HTMLDivElement | null>(null);
   const bossFill = useRef<HTMLDivElement | null>(null);
   const bossLabel = useRef<HTMLDivElement | null>(null);
@@ -104,17 +100,15 @@ export default function GameShell() {
   /* touch detection — drives whether the virtual twin-stick layer renders */
   const isTouch = useIsTouchDevice();
   /* Patch 10.1 — fullscreen mechanism: touch devices auto-enter fullscreen
-     on run start (the ENTER tap is the user gesture the API demands), and a
-     FULL button in the touch action row toggles it. Desktops stay windowed. */
+     on run start (the ENTER tap is the user gesture the API demands).
+     Patch 11.0 — the in-game FULL toggle button is GONE; the landing-page
+     enforcer (MenuScreen) owns fullscreen on every device now. */
   const fs = useFullscreen();
-  /* Patch 10.1 — icon status notifications: the resonance-primed / attuned
-     messages render as compact glyph chips instead of text lines. The primed
-     element changes rarely, so React state is fine here — the 30 Hz decay
-     bars still write refs directly (zero re-renders on the hot path). */
-  const [resNotif, setResNotif] = useState<ElementId | null>(null);
-  const [attNotif, setAttNotif] = useState<ElementId | null>(null);
-  const resIdRef = useRef<ElementId | null>(null);
-  const attIdRef = useRef<ElementId | null>(null);
+  /* Patch 11.0 — icon status notifications are REMOVED from the interface
+     entirely (no glyph chips, no decay bars). The spell bar itself carries
+     the live state via refs, and a new hudRef mirror feeds TouchControls'
+     cooldown/mana/dash indicators at a calm 10 Hz without re-renders. */
+  const hudRef = useRef<HudData | null>(null);
 
   /* weave / surge mirror refs so TouchControls can read live state without
      subscribing to HUD callbacks (which would force re-renders). */
@@ -221,44 +215,10 @@ export default function GameShell() {
       }
     }
     if (dashFill.current) dashFill.current.style.height = `${h.dashFrac * 100}%`;
-    if (resWrap.current && resFill.current) {
-      if (h.resonance) {
-        const def = SPELLS[h.resonance.id];
-        resWrap.current.style.opacity = "1";
-        resFill.current.style.width = `${h.resonance.frac * 100}%`;
-        resFill.current.style.background = def.color;
-        /* Patch 10.1 — icon chip: swap the glyph only when the primed
-           element actually changes (state writes stay off the hot path). */
-        if (resIdRef.current !== h.resonance.id) {
-          resIdRef.current = h.resonance.id;
-          setResNotif(h.resonance.id);
-        }
-      } else {
-        resWrap.current.style.opacity = "0";
-        if (resIdRef.current !== null) {
-          resIdRef.current = null;
-          setResNotif(null);
-        }
-      }
-    }
-    if (attWrap.current && attFill.current) {
-      if (h.attune) {
-        const def = SPELLS[h.attune.id];
-        attWrap.current.style.opacity = "1";
-        attFill.current.style.width = `${h.attune.frac * 100}%`;
-        attFill.current.style.background = def.color;
-        if (attIdRef.current !== h.attune.id) {
-          attIdRef.current = h.attune.id;
-          setAttNotif(h.attune.id);
-        }
-      } else {
-        attWrap.current.style.opacity = "0";
-        if (attIdRef.current !== null) {
-          attIdRef.current = null;
-          setAttNotif(null);
-        }
-      }
-    }
+    /* Patch 11.0 — the HUD mirror for the touch layer: TouchControls polls
+       this ref at 10 Hz to drive its spell-strip cooldown/mana indicators and
+       the dash-cooldown ring (zero re-renders on this 30 Hz hot path). */
+    hudRef.current = h;
     if (bossWrap.current && bossFill.current) {
       if (h.boss) {
         bossWrap.current.style.display = "block";
@@ -629,7 +589,7 @@ export default function GameShell() {
           <div className="absolute left-1/2 -translate-x-1/2 z-20 text-center pointer-events-none"
                style={{ top: "calc(env(safe-area-inset-top) + 12px)", zoom: hudZoom }}>
             <div className="hud-wave-plate rune-panel px-6 py-2 min-w-[190px]">
-              <div ref={actText} className="hud-act-label text-[9px] font-bold uppercase tracking-[0.24em] text-[#6bf0c2]">The Weeping Gate</div>
+              <div ref={actText} className="hud-act-label text-[9px] font-bold uppercase tracking-[0.24em] text-[#6bf0c2]">The Sunless Vestibule</div>
               <div className="hud-wave-label text-[10px] font-bold uppercase tracking-[0.34em] text-[#9a7bff]">Wave</div>
               <div ref={waveText} className="hud-wave-num font-display font-black text-4xl leading-none text-[#ffe9ad]" style={{ textShadow: "0 0 22px rgba(245,201,107,0.5)" }}>01</div>
               {/* Patch 7.0 — act threat meter: fills toward the act's tyrant */}
@@ -680,43 +640,6 @@ export default function GameShell() {
                 <UiIcon name="pause" size={16} />
               </button>
             )}
-          </div>
-
-          {/* Patch 10.1 — ICON STATUS CHIPS: the old text lines ("FIREBALL
-              primed — cast another element" / "RADIANT LANCE attuned — free
-              casts +50% power") are now compact glyph chips: spell icon +
-              pulsing + for a primed resonance, spell icon + bolt +50% for an
-              attunement. Full sentences remain as aria-labels for screen
-              readers; the decay timer bars still animate via refs. */}
-          <div className="absolute left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1.5 pointer-events-none w-[380px] max-w-[86vw]"
-               style={{ bottom: isTouch ? "calc(168px + env(safe-area-inset-bottom))" : "128px", zoom: hudZoom }}>
-            <div ref={resWrap} className="w-full transition-opacity duration-200" style={{ opacity: 0 }}
-                 role="status"
-                 aria-label={resNotif ? `${SPELLS[resNotif].name} primed — cast another element to weave the resonance` : undefined}>
-              <div className="status-chip">
-                {resNotif && (
-                  <>
-                    <span style={{ color: SPELLS[resNotif].color }}><SpellIcon id={resNotif} size={15} /></span>
-                    <span className="chip-glyph chip-pulse" style={{ color: SPELLS[resNotif].color }} aria-hidden>+</span>
-                  </>
-                )}
-                <div className="bar chip-bar"><div ref={resFill} className="bar-fill" style={{ width: "100%" }} /></div>
-              </div>
-            </div>
-            <div ref={attWrap} className="w-full transition-opacity duration-300" style={{ opacity: 0 }}
-                 role="status"
-                 aria-label={attNotif ? `${SPELLS[attNotif].name} attuned — free casts at +50% power` : undefined}>
-              <div className="status-chip">
-                {attNotif && (
-                  <>
-                    <span style={{ color: SPELLS[attNotif].color }}><SpellIcon id={attNotif} size={15} /></span>
-                    <span className="chip-glyph" aria-hidden><UiIcon name="bolt" size={11} /></span>
-                    <span className="chip-glyph" aria-hidden>+50%</span>
-                  </>
-                )}
-                <div className="bar chip-bar"><div ref={attFill} className="bar-fill" style={{ width: "100%" }} /></div>
-              </div>
-            </div>
           </div>
 
           {/* spell bar — hidden on touch devices (TouchControls renders its own strip)
@@ -832,6 +755,7 @@ export default function GameShell() {
           paused={phase !== "running"}
           weaveRef={weaveRef}
           surgeActiveRef={surgeActiveRef}
+          hudRef={hudRef}
           onSelectSlot={onSelectSlot}
           onDash={onDash}
           onSurge={onSurge}
@@ -840,8 +764,6 @@ export default function GameShell() {
           onToggleAuto={onToggleAuto}
           equippedIds={equippedIds}
           selectedSlot={selectedSlot}
-          onToggleFullscreen={fs.toggle}
-          isFullscreen={fs.isFullscreen}
         />
       )}
 

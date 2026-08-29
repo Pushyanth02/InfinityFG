@@ -24,99 +24,133 @@ function base(props: IconProps) {
   };
 }
 
-/* ------------------------------ Element glyphs ------------------------------ */
+/* ------------------------------ Element glyphs ------------------------------
+   Patch 11.0 "The Umbral Requiem" — every element glyph is redrawn to match
+   the dark-arcane rebrand: hellmouth flames, grave-ice, gallows sparks,
+   ossuary wards, umbral gates, wrathlight, hollow hours, null rifts,
+   hexagram eyes, blood tithes, blightspores, soulscythes and banshee dirges.
+   Still stroke-based inline SVG, still inheriting currentColor. */
 
+/* Pyroclasm — a three-tongued hellmouth flame with a devouring inner maw. */
 export function FireIcon(p: IconProps) {
   return (
     <svg {...base(p)}>
-      <path d="M12 3c1 3-3 4.5-3 8a3.9 3.9 0 0 0 1.2 2.9C10 12.5 11 11.6 11 10c2.5 1.5 4.5 3.6 4.5 6.2A5.6 5.6 0 0 1 12 21.5 6.3 6.3 0 0 1 6 15c0-5 4.5-7 6-12z" />
-      <path d="M12 21.5c-1.6-.8-2.4-2.3-2-4 .3-1.3 1.4-2 2-3.4.8 1.5 2.2 2.4 2.3 4.2.1 1.5-.8 2.6-2.3 3.2z" />
+      <path d="M12 2.5c.6 2.6 3.9 4.4 3.9 8.2 0 1.6-.6 2.9-1.5 3.9.1-1.5-.5-2.6-1.5-3.2.1 2.6-1.3 4-2.9 4.7 1-2.2.6-3.7-.4-4.8-1.5 1.5-2.6 3-2.6 5 0 .5.05 1 .2 1.5A5.7 5.7 0 0 1 6.3 14c0-5 4.9-6.6 5.7-11.5z" />
+      <path d="M9.9 17.8c.5-1.7 1.6-2.6 3.1-2.7-.4 1.9.3 3.3 1.9 4.1-1.3.7-3.2 1.4-4.4-.4-.3-.5-.5-.7-.6-1z" />
     </svg>
   );
 }
 
+/* Gravefrost — a coffin-slab of grave-ice, fractured down the seam. */
 export function IceIcon(p: IconProps) {
   return (
     <svg {...base(p)}>
-      <path d="M12 2v20M4.5 6.5l15 11M19.5 6.5l-15 11" />
-      <path d="M12 2l-2.4 2.6M12 2l2.4 2.6M12 22l-2.4-2.6M12 22l2.4-2.6" />
+      <path d="M9 2.5h6l2.5 4-3 12h-5l-3-12z" />
+      <path d="M10.2 4.5h3.6l1.6 2.6-2.2 8.6h-2.4l-2.2-8.6z" opacity="0.55" />
+      <path d="M12 4.5v15" />
+      <path d="M12 4.5 10.6 8l1.4 1.6L10.4 12l1.6 2-1.2 2.6M12 4.5l1.4 3.5L12 9.6l1.6 2.4-1.6 2 1.2 2.6" opacity="0.7" />
     </svg>
   );
 }
 
+/* Wraithbolt — a gallows spark: jagged bolt trailed by a spectral echo. */
 export function BoltIcon(p: IconProps) {
   return (
     <svg {...base(p)}>
       <path d="M13.5 2 5 13.5h5L9.5 22 19 10h-5.5L13.5 2z" />
+      <path d="M17.5 5.5 15.5 8" opacity="0.5" />
+      <path d="M19 8.5l-1.4 1.8" opacity="0.4" />
     </svg>
   );
 }
 
+/* Gravewarden — an ossuary tombstone ward with rune scratch. */
 export function EarthIcon(p: IconProps) {
   return (
     <svg {...base(p)}>
-      <path d="M3.5 19 9 8l3.5 5L16 7l4.5 12z" />
-      <path d="M2 19h20" />
+      <path d="M7 20V9a5 5 0 0 1 10 0v11" />
+      <path d="M4.5 20h15" />
+      <path d="M12 7.5v3M10.5 9h3" />
+      <path d="M9.5 13.5l1.6 1.6M14.5 13.5l-1.6 1.6" opacity="0.7" />
     </svg>
   );
 }
 
+/* Umbral Passage — the archway into the long dark, hemmed by shadow. */
 export function ShadowIcon(p: IconProps) {
   return (
     <svg {...base(p)}>
-      <path d="M19.5 14.5A8.5 8.5 0 0 1 9.5 4.3a8.5 8.5 0 1 0 10 10.2z" />
-      <path d="M15 5.5h.01M18.5 8.5h.01" />
+      <path d="M6.5 21V12a5.5 5.5 0 0 1 11 0v9" />
+      <path d="M3.5 21h17" />
+      <path d="M12 8.2v6" opacity="0.8" />
+      <path d="M12 15.8c-1.3 0-2.2-.9-2.4-2.1M12 15.8c1.3 0 2.2-.9 2.4-2.1" opacity="0.6" />
     </svg>
   );
 }
 
+/* Lance of Judgment — wrathlight: a piercing shaft crowned with a halo. */
 export function LightIcon(p: IconProps) {
   return (
     <svg {...base(p)}>
-      <circle cx="12" cy="12" r="4.2" />
-      <path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5 5l2.1 2.1M16.9 16.9 19 19M19 5l-2.1 2.1M7.1 16.9 5 19" />
+      <path d="M12 2v20" />
+      <path d="M12 2 9.8 6.4M12 2l2.2 4.4" />
+      <path d="M8.4 9.6 12 7.6l3.6 2" />
+      <path d="M6 12h12" />
+      <path d="M7.6 16.5h8.8" opacity="0.7" />
+      <path d="M9.2 20h5.6" opacity="0.45" />
     </svg>
   );
 }
 
+/* Chronoshroud — an hourglass wrapped in the frozen hour's circle. */
 export function TimeIcon(p: IconProps) {
   return (
     <svg {...base(p)}>
-      <path d="M6.5 2.5h11M6.5 21.5h11" />
-      <path d="M8 2.5v3.2c0 2.8 4 4.3 4 6.3s-4 3.5-4 6.3v3.2M16 2.5v3.2c0 2.8-4 4.3-4 6.3s4 3.5 4 6.3v3.2" />
+      <circle cx="12" cy="12" r="9.4" opacity="0.55" />
+      <path d="M8 3.5h8M8 20.5h8" />
+      <path d="M8 3.5v3.2c0 2.8 4 4.3 4 5.3s-4 2.5-4 5.3v3.2M16 3.5v3.2c0 2.8-4 4.3-4 5.3s4 2.5 4 5.3v3.2" />
+      <path d="M12 12.6v3.4" opacity="0.7" />
     </svg>
   );
 }
 
+/* Null Rift — a vertical tear in the world, matter bending into it. */
 export function VoidIcon(p: IconProps) {
   return (
     <svg {...base(p)}>
-      <circle cx="12" cy="12" r="9" />
-      <path d="M12 6.5a5.5 5.5 0 0 1 5.5 5.5M12 9.5a2.5 2.5 0 0 1 2.5 2.5M12 17.5A5.5 5.5 0 0 1 6.5 12" />
+      <path d="M12 3.5c2.2 3.4 3.6 5.4 3.6 8.5s-1.4 5.1-3.6 8.5c-2.2-3.4-3.6-5.4-3.6-8.5S9.8 6.9 12 3.5z" />
+      <path d="M12 7.5v9" opacity="0.7" />
+      <path d="M4.5 8c1.8.8 2.9 2.2 3.3 4M19.5 8c-1.8.8-2.9 2.2-3.3 4" opacity="0.6" />
+      <path d="M3.5 13.5c2 .2 3.4 1 4.2 2.3M20.5 13.5c-2 .2-3.4 1-4.2 2.3" opacity="0.4" />
       <circle cx="12" cy="12" r="0.6" fill="currentColor" />
     </svg>
   );
 }
 
+/* Hexweave Fan — the thousand-eye hexagram, a watching rune knot. */
 export function ArcaneIcon(p: IconProps) {
   return (
     <svg {...base(p)}>
-      <path d="M12 21 4 5l8 4 8-4-8 16z" />
-      <path d="M12 9v6" />
+      <path d="M12 3.6 4.8 16.2h14.4z" />
+      <path d="M12 20.4 4.8 7.8h14.4z" />
+      <circle cx="12" cy="12" r="2.2" />
+      <circle cx="12" cy="12" r="0.7" fill="currentColor" />
     </svg>
   );
 }
 
+/* Crimson Requiem — the tithe: a blood drop transfixed by a thorn. */
 export function BloodIcon(p: IconProps) {
   return (
     <svg {...base(p)}>
       <path d="M12 2.5s7 7.5 7 12.2a7 7 0 0 1-14 0C5 10 12 2.5 12 2.5z" />
-      <path d="M9.5 13.5c0 1.8 1 3.2 2.5 3.7" />
-      <path d="M12 7.5v4" opacity="0.7" />
+      <path d="M8.2 14.5c0 1.9 1.2 3.4 2.9 3.9" />
+      <path d="M9.5 8.5l5 8M14.5 8.5l-5 8" opacity="0.55" />
     </svg>
   );
 }
 
+/* Blightspore — a wilted bloom dropping rot into the garden. */
 export function NatureIcon(p: IconProps) {
   return (
     <svg {...base(p)}>
@@ -125,27 +159,34 @@ export function NatureIcon(p: IconProps) {
       <path d="M12 13c0-3-2-5-5.4-5.3.3 3.6 2.2 5.3 5.4 5.3z" />
       <circle cx="7" cy="19" r="0.7" fill="currentColor" />
       <circle cx="17.5" cy="18" r="0.7" fill="currentColor" />
+      <circle cx="15" cy="21.3" r="0.7" fill="currentColor" opacity="0.6" />
     </svg>
   );
 }
 
-/* Patch 9.0 — wind & sonic glyphs */
+/* Patch 9.0 glyphs — Soulscythe & Dirge Nova (redrawn for the rebrand). */
+
+/* Soulscythe — the hollow gale: a reaping crescent trailed by wind lines. */
 export function WindIcon(p: IconProps) {
   return (
     <svg {...base(p)}>
-      <path d="M3 8h10.5a2.75 2.75 0 1 0-2.7-3.3" />
-      <path d="M3 12.5h14.5a2.9 2.9 0 1 1-2.8 3.6" />
-      <path d="M3 17h7.5a2.3 2.3 0 1 1-2.2 2.9" />
+      <path d="M20.5 4.5A9 9 0 1 0 20.5 16" />
+      <path d="M20.5 4.5v4h-4" />
+      <path d="M8 12h6.5" opacity="0.6" />
+      <path d="M6.5 16h5" opacity="0.45" />
     </svg>
   );
 }
 
+/* Dirge Nova — the banshee's cry: a tolling bell wrapped in sound rings. */
 export function SonicIcon(p: IconProps) {
   return (
     <svg {...base(p)}>
-      <circle cx="8" cy="12" r="1.6" fill="currentColor" stroke="none" />
-      <path d="M11.5 8.2a5.4 5.4 0 0 1 0 7.6M14.4 5.4a9.4 9.4 0 0 1 0 13.2" />
-      <path d="M17.3 2.8a13.2 13.2 0 0 1 0 18.4" opacity="0.55" />
+      <path d="M12 3.5c3 0 5 2.2 5 5.5l1.2 5.5H5.8L7 9c0-3.3 2-5.5 5-5.5z" />
+      <path d="M10 17.5a2 2 0 0 0 4 0" />
+      <path d="M3.5 8.5a2.6 2.6 0 0 1 2-2.4M20.5 8.5a2.6 2.6 0 0 0-2-2.4" opacity="0.55" />
+      <path d="M2.5 13a6.5 6.5 0 0 1 2.5-4.5M21.5 13a6.5 6.5 0 0 0-2.5-4.5" opacity="0.35" />
+      <circle cx="12" cy="9.5" r="0.9" fill="currentColor" stroke="none" />
     </svg>
   );
 }

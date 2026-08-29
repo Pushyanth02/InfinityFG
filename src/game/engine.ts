@@ -31,14 +31,22 @@
    archetypes, and the Rift Seed drives a per-seed enemy ecology (poolBias).
    Optimized replica: dead-flag entities + in-place compaction (zero per-frame
    array allocation), squared-distance hot paths, cached gradients, seeded
-   reward drafts, head-indexed spawn queue, throttled preallocated HUD payload. */
+   reward drafts, head-indexed spawn queue, throttled preallocated HUD payload.
+   Patch 11.0 "The Umbral Requiem": STRICT DROP ECONOMY (exactly one drop type
+   per wave — spell / heart / resonance / tribute — unclaimed orbs dissolve at
+   wave end), resonance orbs demand a SACRIFICE of exactly two bound spells
+   (mid-wave merge, wave resumes after), spell drops no longer heal (hearts are
+   their own drop), a projectile-VFX overhaul (distinct additive silhouettes
+   per element + animated beams + eased rings + a triple-ring resonance
+   detonation), and full boss-music triggers (entry sting, ENRAGE war-drone,
+   instant collapse on the kill). */
 
 import {
   Arena, TRIBUTE_INTERVAL, BOSS_DEFS, BossDef, COMBOS, DIFFICULTY_MULT, ELITE_DEFS, ELITE_ORDER, ElementId, EliteAffix, EnemyType, ENEMY_DEFS,
   EQUIP_SLOTS, GameSettings, MERGE_INTERVAL, MetaBonuses, RNG, SLOT_KEYS, SPELL_ORDER, SPELLS,
-  SPELL_DROP_HEAL_FRAC, SPELL_DROP_WAVE_MAX, SPELL_DROP_WAVE_MIN, SPELL_DROP_NERF, SPELL_OFFER_COUNT, STARTER_SPELLS,
+  HEART_DROP_HEAL_FRAC, SPELL_DROP_WAVE_MAX, SPELL_DROP_WAVE_MIN, SPELL_DROP_NERF, SPELL_OFFER_COUNT, STARTER_SPELLS,
   UpgradeChoice, availableTypes, comboKey, eliteChance, endlessBossMult, endlessHpMult, generateArena, hashSeed, mercyForRound, mulberry32,
-  scaleEnemy, spawnCap, spawnWindow, waveBudget, VICTORY_WAVE, poolBias,
+  scaleEnemy, spawnCap, spawnWindow, waveBudget, VICTORY_WAVE, poolBias, DropKind,
   ActDef, actForWave, WORLD_W, WORLD_H,
   MERCY_ATTACK, MERCY_SPAWNS, MERCY_CAPLIVE, MERCY_HP, MERCY_SPD,
 } from "./content";
@@ -155,10 +163,17 @@ interface Rock { x: number; y: number; r: number; hp: number; maxHp: number; lif
 interface Bubble { x: number; y: number; r: number; life: number; maxLife: number; grad: CanvasGradient | null; rewind: boolean }
 interface Cloud { x: number; y: number; r: number; life: number; maxLife: number; dps: number; tick: number; grad: CanvasGradient | null; slow: boolean; dark: boolean }
 interface Mote { x: number; y: number; vx: number; vy: number; val: number; life: number }
-/* Patch 4.0 — floating spell drop glyph: heals 10% HP and opens the
-   spell-offer overlay (replace one of your 3 equipped spells). Patch 5.0:
-   drops are SCHEDULED every 3-5 waves (no per-kill % rolls). */
-interface SpellDrop { x: number; y: number; vx: number; vy: number; life: number; id: ElementId; grad: CanvasGradient | null; wob: number }
+/* Patch 11.0 — PICKUP ENTITIES for the strict drop economy. A wave fields
+   exactly ONE drop type; the orb on the floor is one of:
+     spell      → opens the spell-offer overlay (no heal — hearts are their own drop)
+     heart      → mends HEART_DROP_HEAL_FRAC of max HP on touch
+     resonance  → demands a SACRIFICE: exactly two bound spells fused into one
+   (tribute waves pay out through the end-of-wave gate — no orb spawns). */
+interface SpellDrop {
+  kind: "spell" | "heart" | "resonance";
+  x: number; y: number; vx: number; vy: number; life: number; id: ElementId;
+  grad: CanvasGradient | null; wob: number;
+}
 
 /* Patch 5.0 — equipped slot. A slot holds a list of SPELL_ORDER indices.
    Length 0 → empty (free for a drop refill). Length 1 → single spell.
@@ -271,7 +286,11 @@ export class ArchmageEngine {
   private bossShuffle: BossDef[] = [];
   private runMerges: string[] = [];              // merge names woven this run
   private nextDropWave = 0;                       // wave on which the next scheduled drop will appear
-  private dropSpawnedThisWave = false;            // tracks whether the current wave's scheduled drop has spawned
+  /* Patch 11.0 — STRICT DROP ECONOMY: each wave resolves exactly ONE drop
+     type (spell / heart / resonance / tribute / none). Tribute waves pay out
+     through the end-of-wave gate; the other three spawn a single orb that
+     DISSOLVES at wave end if unclaimed, so no wave ever carries two types. */
+  private waveDrop: DropKind = "none";
   /* Patch 10.0 — ENDLESS MODE: set the moment the player chooses FIGHT at
      the end-credit gate. From then on waves 51+ roll forever with compounding
      escalation (budget/HP/boss multipliers in content.ts), tyrants return as
@@ -447,7 +466,7 @@ export class ArchmageEngine {
     this.reshuffleSpellPool();
 
     /* Patch 5.0: shuffle the 5 unique bosses via the seed so each restart
-       sees a different tyrant order through the 5 acts (e.g. Maelthar at
+       sees a different tyrant order through the 5 acts (e.g. Mordrax at
        wave 10 of one run, wave 50 of another). Also schedule the first
        spell drop (every 3-5 waves, strict — no per-kill % rolls). */
     this.reshuffleBosses();
@@ -728,19 +747,31 @@ export class ArchmageEngine {
        - boss wave (every 10th)        → act banner + spell evolution offer
        - every TRIBUTE_INTERVAL-th non-boss wave → tribute gate (3 scalable
                                           stat rewards — one MUST be taken)
-       - wave 9/19/29/39/49 (i.e. wave
-         % 10 === 9 — one wave before
-         each boss)                   → merge intermission (fuse 2 equipped spells)
        - any other wave                → brief "wave cleared" banner, then next wave
-     HP is no longer auto-healed on clear — only spell drops heal. */
+     HP is no longer auto-healed on clear — only HEART drops heal (Patch 11.0).
+     Patch 11.0: the merge intermission is GONE from the router — merges now
+     happen mid-wave through RESONANCE ORB pickups (the wave's single drop),
+     and every unclaimed orb dissolves here so no drop type ever bleeds into
+     the next wave (strict economy). */
   private completeWave() {
     const bonus = 40 + this.wave * 12;
     this.score += bonus;
     this.o.sfx.waveClear();
     this.shrine = null;
-    /* If a scheduled drop is still on the ground (player skipped it), advance
-       the schedule so the next drop still comes 3-5 waves later. */
-    if (this.dropSpawnedThisWave) this.scheduleNextDrop(this.wave);
+    /* Patch 11.0 — STRICT ECONOMY enforcement: dissolve any unclaimed orb of
+       this wave (the mage's loss — reach the drop before the wave ends). If
+       the unclaimed orb was the scheduled SPELL drop, the cadence re-rolls so
+       the next tear still comes 3-5 waves later. */
+    if (this.spellDrops.length > 0) {
+      for (const d of this.spellDrops) {
+        if (d.life > 0) {
+          this.ring(d.x, d.y, 46, d.kind === "heart" ? "#ff4d6b" : d.kind === "resonance" ? "#ffe9ad" : SPELLS[d.id].color, 2.5);
+          for (let i = 0; i < 10; i++) this.puff(d.x, d.y, d.kind === "spell" ? SPELLS[d.id].glow : "#a99bd8", 120, 2.6);
+        }
+      }
+      if (this.waveDrop === "spell") this.scheduleNextDrop(this.wave);
+      this.spellDrops.length = 0;
+    }
     if (this.wave > 0 && this.wave % 10 === 0) {
       if (this.wave === VICTORY_WAVE && !this.endless) {
         this.startEpilogue();
@@ -751,17 +782,10 @@ export class ArchmageEngine {
       this.offerEvolutionsOrNext();
       return;
     }
-    /* Patch 5.0: merge intermission at waves 9/19/29/39/49 (one wave before
-       each boss). Triggers the merge overlay if the player has ≥ 2 single
-       spells available; otherwise rolls straight into the boss wave (whose
-       intro is the in-game title card — Patch 6.0). */
-    if (this.wave > 0 && this.wave % MERGE_INTERVAL === 9) {
-      this.triggerMergeOrBossIntro();
-      return;
-    }
     /* Patch 6.0: tribute gate every TRIBUTE_INTERVAL waves (skipping boss
        waves which are % 10). e.g. waves 5, 15, 25, 35, 45. Mandatory — the
-       overlay has no skip; one reward must be claimed. */
+       overlay has no skip; one reward must be claimed. (Patch 11.0: this
+       gate IS the wave's single drop type — no orb spawns on tribute waves.) */
     if (this.wave > 0 && this.wave % TRIBUTE_INTERVAL === 0 && this.wave % 10 !== 0) {
       this.phase = "intermission";
       this.o.sfx.fanfare();
@@ -773,26 +797,20 @@ export class ArchmageEngine {
     this.startNextWave();
   }
 
-  /* Patch 6.0 — fires the merge intermission overlay (if the player has
-      ≥ 2 single spells available) or, when there's nothing to merge,
-      rolls straight into the boss wave. The boss's intro is now an IN-GAME
-      title card rendered over live combat when startWave pushes the boss —
-      no full-screen cutscene, immersion preserved. */
-  private triggerMergeOrBossIntro() {
+  /* Patch 11.0 — fires the SACRIFICE merge overlay from a resonance-orb
+      pickup (mid-wave). The player must sacrifice exactly two bound single
+      spells; they fuse into one merged slot and the wave resumes. Only
+      reachable when mergeableSlots() ≥ 2 — the orb never spawns otherwise. */
+  private openResonanceMerge() {
     const mergeable = this.mergeableSlots();
-    if (mergeable.length >= 2) {
-      this.phase = "mergeoffer";
-      const offer: MergeOffer = {
-        slots: mergeable,
-        equipped: this.equipped.map((s, i) => ({ id: s.spells.length === 1 ? SPELL_ORDER[s.spells[0]] : (s.spells.length === 0 ? "fire" : SPELL_ORDER[s.spells[0]]), slot: i })),
-      };
-      this.o.onPhase("mergeoffer", { merge: offer });
-      this.o.onMerge(offer);
-    } else {
-      /* nothing to merge (everything is already merged or empty) — go
-         straight to the boss wave. */
-      this.startNextWave();
-    }
+    if (mergeable.length < 2) return;
+    this.phase = "mergeoffer";
+    const offer: MergeOffer = {
+      slots: mergeable,
+      equipped: this.equipped.map((s, i) => ({ id: s.spells.length === 1 ? SPELL_ORDER[s.spells[0]] : (s.spells.length === 0 ? "fire" : SPELL_ORDER[s.spells[0]]), slot: i })),
+    };
+    this.o.onPhase("mergeoffer", { merge: offer });
+    this.o.onMerge(offer);
   }
 
   /* ========================================================================
@@ -920,14 +938,45 @@ export class ArchmageEngine {
       % rolls — drops are scheduled. */
   private scheduleNextDrop(fromWave: number) {
     this.nextDropWave = this.rollDropWave(fromWave);
-    this.dropSpawnedThisWave = false;
   }
 
-  /** Shared cadence roll: skip boon waves (5,15,25…) and boss waves (10,20…). */
+  /** Shared cadence roll: skip tribute waves (5,15,25…) and boss waves (10,20…). */
   private rollDropWave(fromWave: number): number {
     let n = fromWave + this.rng.int(SPELL_DROP_WAVE_MIN, SPELL_DROP_WAVE_MAX);
     while (n % 5 === 0 || n % 10 === 0) n++;
     return n;
+  }
+
+  /** Patch 11.0 — THE STRICT DROP ECONOMY. Resolve exactly ONE drop type for
+      wave n, in priority order:
+        1. tribute waves (every 5th non-boss wave) — the end-of-wave gate IS
+           the drop; nothing else spawns.
+        2. resonance waves (one wave before each boss, 9/19/29/…) — a
+           resonance orb spawns (if ≥2 single spells can be sacrificed);
+           otherwise a heart when wounded.
+        3. the scheduled spell drop (every 3–5 waves, −19% global nerf) —
+           if the rift reabsorbs the tear, the wave fields NO drop.
+        4. a heart when the mage bleeds (HP < 70%).
+      No other pickup may spawn during the wave, and any unclaimed orb
+      dissolves at wave end — one type, strictly enforced. */
+  private resolveWaveDrop(n: number): DropKind {
+    if (n > 0 && n % TRIBUTE_INTERVAL === 0 && n % 10 !== 0) return "tribute";
+    if (n > 0 && n % MERGE_INTERVAL === 9) {
+      if (this.mergeableSlots().length >= 2) return "resonance";
+      return this.hp < this.maxHp * 0.7 ? "heart" : "none";
+    }
+    if (n === this.nextDropWave) {
+      /* Patch 11.0: the −10% global spell-drop nerf compounds (10.0 + 11.0 →
+         a flat 19% reabsorption chance). On a reabsorb the cadence re-rolls
+         and this wave fields no drop at all. */
+      if (this.rng.chance(SPELL_DROP_NERF)) {
+        this.scheduleNextDrop(n);
+        return "none";
+      }
+      return "spell";
+    }
+    if (this.hp < this.maxHp * 0.7) return "heart";
+    return "none";
   }
 
   /** Live settings update — aim assist / graphics toggles mid-run. Patch 9.0:
@@ -1174,9 +1223,13 @@ export class ArchmageEngine {
       this.o.onBanner(`WAVE ${n}`, shift ? null : this.waveFlavor(n), "#f5c96b");
     }
 
-    /* rift shrine — surprise transmutation entrance */
+    /* rift shrine — surprise transmutation entrance.
+       Patch 11.0 — strict economy: no shrine on tribute or resonance waves
+       (those waves already field their one drop type; a second reward source
+       would break the "exactly one" rule). */
     this.shrine = null;
-    if (n >= 3 && n % 10 !== 0 && this.rng.chance(SHRINE_CHANCE)) {
+    this.waveDrop = this.resolveWaveDrop(n);
+    if (n >= 3 && n % 10 !== 0 && this.waveDrop !== "tribute" && this.waveDrop !== "resonance" && this.rng.chance(SHRINE_CHANCE)) {
       let sx = 0, sy = 0, ok = false;
       for (let attempt = 0; attempt < 12 && !ok; attempt++) {
         sx = this.rng.range(0.14, 0.86) * WORLD_W;
@@ -1188,25 +1241,24 @@ export class ArchmageEngine {
       this.o.onBanner("A RIFT SHRINE TEARS OPEN", "Touch it to transmute a spell", "#43e8d8");
     }
 
-    /* Patch 5.0 — scheduled spell drop (strict cadence: every 3-5 waves,
-       rolled fresh after each drop). The drop spawns at a random arena
-       location at the start of the wave and floats until the player picks
-       it up (heals 10% HP + opens the spell-offer overlay). NO per-kill %
-       rolls — the user's directive is explicit.
-       Patch 10.0 — GLOBAL −10% DROP RATE: when the scheduled wave arrives,
-       the rift has a flat SPELL_DROP_NERF (exactly 10%) chance to reabsorb
-       the tear before it forms — no drop, cadence re-rolls. Expected drops
-       over any stretch = exactly 0.9× the pre-10.0 rate, globally. */
-    if (n === this.nextDropWave && !this.dropSpawnedThisWave) {
-      this.dropSpawnedThisWave = true;
-      if (this.rng.chance(SPELL_DROP_NERF)) {
-        /* reabsorbed by the rift — the tear never forms */
-        this.scheduleNextDrop(this.wave);
+    /* Patch 11.0 — THE STRICT DROP ECONOMY: resolve this wave's ONE drop
+       type (computed once above, before the shrine gate — resolveWaveDrop
+       rolls rng and must never run twice) and spawn its orb (tribute waves
+       pay out through the end-of-wave gate instead — no orb). Hearts mend
+       25% max HP; resonance orbs demand the sacrifice of exactly two bound
+       spells; spell tears no longer heal. Unclaimed orbs dissolve when the
+       wave clears (completeWave), so no drop type ever bleeds into the
+       next wave. */
+    if (this.waveDrop === "spell" || this.waveDrop === "heart" || this.waveDrop === "resonance") {
+      const dx = this.rng.range(0.16, 0.84) * WORLD_W;
+      const dy = this.rng.range(0.18, 0.82) * WORLD_H;
+      this.spawnSpellDrop(dx, dy, this.waveDrop);
+      if (this.waveDrop === "spell") {
+        this.o.onBanner("A SPELL TEAR FORMS", "Walk over it to bind a new spell — no heal, the rift is strict", "#7ed957");
+      } else if (this.waveDrop === "heart") {
+        this.o.onBanner("A HEART OF THE FALLEN FORMS", "Walk over it to mend your wounds", "#ff4d6b");
       } else {
-        const dx = this.rng.range(0.16, 0.84) * WORLD_W;
-        const dy = this.rng.range(0.18, 0.82) * WORLD_H;
-        this.spawnSpellDrop(dx, dy);
-        this.o.onBanner("A SPELL TEAR FORMS", "Walk over it to heal 10% HP and swap a spell", "#7ed957");
+        this.o.onBanner("A RESONANCE ORB FORMS", "Touch it to sacrifice two bound spells and fuse them", "#ffe9ad");
       }
     }
   }
@@ -1247,7 +1299,7 @@ export class ArchmageEngine {
     const hpEndless = this.wave > VICTORY_WAVE ? endlessHpMult(this.wave) : 1;
     const dmgEndless = this.wave > VICTORY_WAVE ? 1 + (endlessHpMult(this.wave) - 1) * 0.5 : 1;
     /* Spawn position — Patch 10.2 adds an optional anchored origin (used by
-       Korrath's imp-shedding); the default is the Patch 9.0 player ring. */
+       Ashgorim's imp-shedding); the default is the Patch 9.0 player ring. */
     let x = 0, y = 0;
     if (ox !== undefined && oy !== undefined) {
       /* Patch 10.2 — anchored spawn: scatter in a small ring around the
@@ -1810,11 +1862,19 @@ export class ArchmageEngine {
     if (!def) return;
     const dmg = (SPELLS[a].baseDamage + SPELLS[b].baseDamage) * 1.75 * this.mods.power * this.mods.comboDmg * this.o.bonuses.spellPower;
     const ca = SPELLS[a].color, cb = SPELLS[b].color;
+    /* Patch 11.0 — RESONANCE DETONATION JUICE: a triple expanding ring
+       (both element colors + the white seam between them), a swirling
+       two-color particle storm with white-hot sparks, and a heavier hit-stop
+       — the weave SINGS when two elements kiss. */
     this.ring(this.px, this.py, 150, ca, 4);
     this.ring(this.px, this.py, 110, cb, 3);
-    for (let i = 0; i < 26; i++) { this.puff(this.px, this.py, i % 2 ? ca : cb, 260, 4); }
-    this.shakeIt(9);
-    this.hitStop = Math.max(this.hitStop, 0.08);
+    this.ring(this.px, this.py, 74, "#ffffff", 2);
+    for (let i = 0; i < 34; i++) {
+      const col = i % 3 === 0 ? "#ffffff" : i % 2 ? ca : cb;
+      this.puff(this.px, this.py, col, 280, 4.2);
+    }
+    this.shakeIt(11);
+    this.hitStop = Math.max(this.hitStop, 0.1);
     this.mana = Math.min(this.maxMana, this.mana + 8);
     this.o.sfx.combo();
     this.floater(this.px, this.py - 44, def.name.toUpperCase(), "#ffe9ad", 20);
@@ -1982,7 +2042,7 @@ export class ArchmageEngine {
       if (d < 105 && closing > 120) boltDanger = true;
     }
     /* Patch 9.0 — boss-volley anticipation (Patch 10.2: the tyrants' volley
-       cadences still ride shootT — Vorrac's fan, Solenne's tempo, Maelthar's
+       cadences still ride shootT — Malgrym's fan, Sylthara's tempo, Mordrax's
        spiral — so the pilot keeps threading the gaps whenever one is due). */
     for (const e of this.enemies) {
       if (e.dead || e.type !== "boss") continue;
@@ -1994,8 +2054,8 @@ export class ArchmageEngine {
         sy += (by / bl) * 0.8 + (bx / bl) * this.autoStrafeDir * 1.6;
       }
       /* Patch 10.2 — WINDUP AWARENESS: every tyrant's bespoke pattern roots
-         or rears in state 1 before it strikes (Vorrac's charge, Korrath's
-         slam, Solenne's lunge, Maelthar's stampede). The Fateweaver reads
+         or rears in state 1 before it strikes (Malgrym's charge, Ashgorim's
+         slam, Sylthara's lunge, Mordrax's stampede). The Fateweaver reads
          that tell and opens distance while sliding — pre-dodging instead of
          reacting to the hit. */
       if (e.actState === 1) {
@@ -2003,7 +2063,7 @@ export class ArchmageEngine {
         sx += (bx / bl) * push - (by / bl) * this.autoStrafeDir * 1.2;
         sy += (by / bl) * push + (bx / bl) * this.autoStrafeDir * 1.2;
       }
-      /* Patch 10.2 — SHOCKWAVE BAND: Korrath's traveling slam ring (radius
+      /* Patch 10.2 — SHOCKWAVE BAND: Ashgorim's traveling slam ring (radius
          rides e.wob) cannot be outrun — the calculated answer is to blink
          THROUGH it with dash invulnerability the instant it arrives. */
       if (e.wob > 0) {
@@ -2041,14 +2101,19 @@ export class ArchmageEngine {
       }
     }
 
-    /* magnets — spell drops are top priority, shrines and thirsty fountains next */
+    /* magnets — Patch 11.0 strict-economy pickups: resonance orbs first (a
+       free fusion), hearts only while bleeding, spell tears otherwise.
+       Shrines and thirsty fountains come next. */
+    const hpNow = this.hp / this.maxHp;
     for (const d of this.spellDrops) {
       if (d.life <= 0) continue;
+      if (d.kind === "heart" && hpNow > 0.72) continue;
       const dx = d.x - px, dy = d.y - py;
       const d2 = dx * dx + dy * dy;
       if (d2 < 460 * 460 && d2 > 1) {
         const d1 = Math.sqrt(d2);
-        sx += (dx / d1) * 3.2; sy += (dy / d1) * 3.2;
+        const w = d.kind === "resonance" ? 3.6 : d.kind === "heart" ? 3.0 : 3.2;
+        sx += (dx / d1) * w; sy += (dy / d1) * w;
       }
     }
     if (this.shrine) {
@@ -2370,16 +2435,19 @@ export class ArchmageEngine {
        speed (Dead Cells rule). Patch 10.2: the shared text banner and the
        generic spiral burst are GONE — no boss message boxes. The moment
        reads purely through audio + visuals (roar, shake, flare rings), and
-       every tyrant's OWN pattern densifies from here: Vorrac chains a third
-       re-aimed charge and tightens his fan, Korrath slams harder and sheds
-       more imps, Solenne doubles her tempo and adds a third lunge, Ysed
-       blinks faster behind a triple arm, Maelthar's storm gains a fourth
+       every tyrant's OWN pattern densifies from here: Malgrym chains a third
+       re-aimed charge and tightens his fan, Ashgorim slams harder and sheds
+       more imps, Sylthara doubles her tempo and adds a third lunge, Ysolth
+       blinks faster behind a triple arm, Mordrax's storm gains a fourth
        arm and a wider nova. */
     if (e.type === "boss" && !e.enraged && e.hp > 0 && e.hp < e.maxHp * 0.5) {
       e.enraged = true;
       e.speed *= 1.35;
       e.shootT = Math.min(e.shootT, 0.8);
       this.o.sfx.bossRoar();
+      /* Patch 11.0 — the ENRAGE musical trigger: the ostinato accelerates
+         and the tritone war-drone rises under the fight. */
+      this.o.sfx.bossEnrage();
       this.shakeIt(16);
       this.hitStop = Math.max(this.hitStop, 0.12);
       this.ring(e.x, e.y, 150, e.color, 5);
@@ -2391,8 +2459,8 @@ export class ArchmageEngine {
 
   /* Flag-and-honor removal: sets dead, does death juice once; the array is
      compacted at the start of the next frame. Patch 5.0: removed the per-kill
-     spell-drop roll — drops are SCHEDULED every 3-5 waves via the
-     dropSpawnedThisWave flag set in startWave. Patch 7.0: fires the bestiary
+     spell-drop roll — drops are SCHEDULED by the strict Patch-11.0 wave
+     economy (resolveWaveDrop in startWave). Patch 7.0: fires the bestiary
      discovery callback (once per kind per run) for the Arcanum. */
   private killEnemy(e: Enemy) {
     if (e.dead) return;
@@ -2433,6 +2501,10 @@ export class ArchmageEngine {
       this.hitStop = Math.max(this.hitStop, 0.22);
       this.floater(e.x, e.y - e.r - 14, "+250", "#ffe9ad", 22);
       this.floater(this.px, this.py - 46, "TYRANT FELLED", "#ffe9ad", 18);
+      /* Patch 11.0 — the boss theme collapses the instant the tyrant falls
+         (no waiting for the next wave): the war-drone and ostinato tear down
+         and the score drops back to combat intensity. */
+      this.o.sfx.setIntensity(1);
     }
   }
 
@@ -2460,25 +2532,45 @@ export class ArchmageEngine {
     return out;
   }
 
-  /** Spawn a floating spell-drop glyph at (x, y). The glyph's color is the
-      element it represents; the full pool of 3 is rolled at pickup time. */
-  private spawnSpellDrop(x: number, y: number) {
-    const id = this.spellPool[this.poolCursor % this.spellPool.length];
-    this.poolCursor++;
+  /** Spawn a floating spell-drop glyph at (x, y) — Patch 11.0: the orb's
+      kind is set by the strict wave economy (startWave); spell orbs carry
+      the element they represent. */
+  private spawnSpellDrop(x: number, y: number, kind: "spell" | "heart" | "resonance") {
+    const id = kind === "spell"
+      ? this.spellPool[this.poolCursor % this.spellPool.length]
+      : "blood";
+    if (kind === "spell") this.poolCursor++;
     this.spellDrops.push({
-      x, y, vx: 0, vy: -40, life: 14, id, grad: null,
+      kind, x, y, vx: 0, vy: -40, life: 14, id, grad: null,
       wob: this.rng.range(0, TAU),
     });
   }
 
-  /** Player walked over a drop — heal 10% HP + open the spell-offer overlay.
-      Patch 5.0: schedules the next drop (every 3-5 waves, strict) so the
-      cadence continues. */
-  private pickUpSpellDrop(d: SpellDrop) {
-    const heal = this.maxHp * SPELL_DROP_HEAL_FRAC;
-    this.healPlayer(heal);
-    this.floater(this.px, this.py - 32, "+" + Math.round(heal) + " HP", "#7ed957", 17);
+  /** Patch 11.0 — the player touched the wave's ONE drop. Three kinds:
+      heart  → mend HEART_DROP_HEAL_FRAC of max HP (no overlay, wave flows on)
+      spell  → open the spell-offer overlay (NO heal — hearts are their own
+               drop type now) and re-roll the spell cadence
+      resonance → THE SACRIFICE: open the merge prompt — exactly two bound
+               spells fuse into one merged slot, the wave resumes after. */
+  private pickUpDrop(d: SpellDrop) {
     this.o.sfx.pickup();
+    if (d.kind === "heart") {
+      const heal = this.maxHp * HEART_DROP_HEAL_FRAC;
+      this.healPlayer(heal);
+      this.floater(this.px, this.py - 32, "+" + Math.round(heal) + " HP", "#ff8ba0", 17);
+      this.ring(this.px, this.py, 74, "#ff4d6b", 3);
+      for (let i = 0; i < 18; i++) this.puff(this.px, this.py, i % 2 ? "#ff4d6b" : "#ffa3b5", 210, 3);
+      this.o.onBanner("THE HEART IS CLAIMED", "+" + Math.round(heal) + " vitality restored", "#ff4d6b");
+      return;
+    }
+    if (d.kind === "resonance") {
+      this.ring(this.px, this.py, 84, "#ffe9ad", 3.5);
+      this.ring(this.px, this.py, 56, "#b06bff", 2.5);
+      for (let i = 0; i < 22; i++) this.puff(this.px, this.py, i % 2 ? "#ffe9ad" : "#b06bff", 230, 3.4);
+      this.openResonanceMerge();
+      return;
+    }
+    /* spell tear — no heal (Patch 11.0 strict economy) */
     this.ring(this.px, this.py, 70, SPELLS[d.id].color, 3);
     for (let i = 0; i < 18; i++) this.puff(this.px, this.py, i % 2 ? SPELLS[d.id].color : SPELLS[d.id].glow, 200, 3);
     /* Build the offer pool: the dropped element + 2 random others not equipped. */
@@ -2523,7 +2615,8 @@ export class ArchmageEngine {
   }
 
   /* Patch 6.0 — "Back to Game" on the spell-offer overlay: the player may
-     skip the swap entirely (the 10% heal was already applied at pickup).
+     skip the swap entirely. Patch 11.0: no heal rides the tear anymore
+     (hearts are their own drop type) — skipping is purely a loadout choice.
      The scheduled next drop is unaffected — it was rolled at pickup. */
   skipSpellOffer() {
     if (this.phase !== "spelloffer") return;
@@ -2566,9 +2659,12 @@ export class ArchmageEngine {
     this.floater(this.px, this.py - 44, mergeName.toUpperCase(), "#ffe9ad", 18);
     this.ring(this.px, this.py, 120, "#ffe9ad", 4);
     for (let i = 0; i < 26; i++) this.puff(this.px, this.py, i % 2 ? SPELLS[aId].color : SPELLS[bId].color, 260, 4);
-    /* Patch 6.0: after the merge, roll straight into the boss wave — the
-       boss's intro is the in-game title card (see startWave). */
-    this.startNextWave();
+    /* Patch 11.0: merges are now MID-WAVE events (resonance-orb pickups),
+       so the sacrifice resolves and the SAME wave resumes — enemies were
+       frozen behind the overlay and carry on exactly where they stood. */
+    this.phase = "running";
+    this.last = performance.now();
+    this.o.onPhase("running");
   }
 
   private healPlayer(n: number) {
@@ -2812,7 +2908,7 @@ export class ArchmageEngine {
         const dx = this.px - d.x, dy = this.py - d.y;
         if (dx * dx + dy * dy < 30 * 30) {
           d.life = 0;
-          this.pickUpSpellDrop(d);
+          this.pickUpDrop(d);
           break;
         }
       }
@@ -3009,7 +3105,12 @@ export class ArchmageEngine {
       d.y += d.vy * dt + Math.sin(d.wob) * 6 * dt;
       d.x = Math.max(16, Math.min(WORLD_W - 16, d.x));
       d.y = Math.max(16, Math.min(WORLD_H - 16, d.y));
-      if (Math.random() < dt * 14) this.puff(d.x, d.y, SPELLS[d.id].glow, 30, 1.8);
+      /* Patch 11.0 — kind-aware idle sparkle: element glow for spell tears,
+         crimson motes for hearts, prismatic gold/violet for resonance orbs. */
+      if (Math.random() < dt * 14) {
+        const col = d.kind === "heart" ? "#ffa3b5" : d.kind === "resonance" ? (Math.random() < 0.5 ? "#ffe9ad" : "#b06bff") : SPELLS[d.id].glow;
+        this.puff(d.x, d.y, col, 30, 1.8);
+      }
     }
     this.compact(this.spellDrops, (d) => d.life > 0);
     if (this.spellDrops.length > 12) this.spellDrops.splice(0, this.spellDrops.length - 12);
@@ -3051,7 +3152,7 @@ export class ArchmageEngine {
     e.hitFlash = Math.max(0, e.hitFlash - dt);
     e.contactCd = Math.max(0, e.contactCd - dt);
     /* Patch 10.2 — the generic wobble is for rendering bobbing/flap; bosses
-       are exempt because Korrath OWNS wob as his shockwave radius now. */
+       are exempt because Ashgorim OWNS wob as his shockwave radius now. */
     if (e.type !== "boss") e.wob += dt * 6;
     if (e.poisonT > 0) e.poisonT -= dt;
     if (e.burnT > 0) {
@@ -3170,13 +3271,13 @@ export class ArchmageEngine {
         this.ring(e.x, e.y, 30, "#6bf0c2", 2);
       }
     } else if (e.type === "skitter") {
-      /* Patch 9.0 — Rift Skitter: fast, cheap, jittery pursuit. Darts in a
+      /* Patch 9.0 — Gloom Skitter: fast, cheap, jittery pursuit. Darts in a
          weaving path so lone skitters are hard to kite in a straight line. */
       const weave = Math.sin(e.wob * 2.6) * 0.55;
       tvx = (nx - ny * weave) * e.speed;
       tvy = (ny + nx * weave) * e.speed;
     } else if (e.type === "bomber") {
-      /* Patch 9.0 — Cinder Bomber: kamikaze. Closes in, then lights a
+      /* Patch 9.0 — Pyrehusk: kamikaze. Closes in, then lights a
          0.75s fuse (flashing ring) and detonates in a heavy AoE. Killing it
          before the fuse burns out cancels the blast. */
       e.actT -= dt;
@@ -3201,7 +3302,7 @@ export class ArchmageEngine {
         }
       }
     } else if (e.type === "lancer") {
-      /* Patch 9.0 — Rift Lancer: telegraphed skewer charge. Holds a medium
+      /* Patch 9.0 — Abyssal Lancer: telegraphed skewer charge. Holds a medium
          band, flashes a lane telegraph, then dashes through the player's
          position at 4× speed. */
       e.actT -= dt;
@@ -3224,7 +3325,7 @@ export class ArchmageEngine {
         if (e.actT <= 0) { e.actState = 0; e.actT = 2.4 + Math.random() * 1.2; }
       }
     } else if (e.type === "warden") {
-      /* Patch 9.0 — Storm Warden: orbits at bolt range and fires 3-way
+      /* Patch 9.0 — Tempest Herald: orbits at bolt range and fires 3-way
        spreads. Never stops strafing — its dance is the tell. */
       const want = 280;
       if (dist < want - 60) { tvx = -nx * e.speed; tvy = -ny * e.speed; }
@@ -3242,7 +3343,7 @@ export class ArchmageEngine {
         this.o.sfx.hit();
       }
     } else if (e.type === "mender") {
-      /* Patch 9.0 — Grave Mender: field medic. Keeps its distance and lances
+      /* Patch 9.0 — Corpseweaver: field medic. Keeps its distance and lances
          healing light into the most wounded ally (elites and bosses first).
          If everyone is healthy it plinks a bolt at the player instead —
          kill it early or the pack never dies. */
@@ -3349,7 +3450,7 @@ export class ArchmageEngine {
        • actState 2 is ALWAYS a dashing/charging state, so the shared
          contact-damage ×1.45 rule keeps working unchanged.
        • subT doubles as a sub-timer/flag, count as a repeat/phase counter,
-         armAng as the spiral arm angle, wob as Korrath's shockwave radius.
+         armAng as the spiral arm angle, wob as Ashgorim's shockwave radius.
        • Enrage (below half HP) never just speeds old attacks up — each
          pattern densifies or adds (Dead Cells rule).
      ========================================================================== */
@@ -3358,16 +3459,16 @@ export class ArchmageEngine {
     const tv = this.bossTv;
     tv.x = nx * e.speed; tv.y = ny * e.speed;
     switch (this.currentBoss().id) {
-      case "korrath": this.bossKorrath(e, dt, nx, ny, dist); return;
-      case "solenne": this.bossSolenne(e, dt, nx, ny, dist); return;
-      case "ysed": this.bossYsed(e, dt, nx, ny, dist); return;
-      case "maelthar": this.bossMaelthar(e, dt, nx, ny, dist); return;
-      default: this.bossVorrac(e, dt, nx, ny, dist); return;
+      case "korrath": this.bossAshgorim(e, dt, nx, ny, dist); return;
+      case "solenne": this.bossSylthara(e, dt, nx, ny, dist); return;
+      case "ysed": this.bossYsolth(e, dt, nx, ny, dist); return;
+      case "maelthar": this.bossMordrax(e, dt, nx, ny, dist); return;
+      default: this.bossMalgrym(e, dt, nx, ny, dist); return;
     }
   }
 
   /* VORRAC, the Gate-Sorrow — the Stampede Charger. */
-  private bossVorrac(e: Enemy, dt: number, nx: number, ny: number, dist: number) {
+  private bossMalgrym(e: Enemy, dt: number, nx: number, ny: number, dist: number) {
     const tv = this.bossTv;
     e.actT -= dt;
     if (e.actState === 0) {
@@ -3413,7 +3514,7 @@ export class ArchmageEngine {
   }
 
   /* KORRATH, the Ash-Eaten — the Immovable Juggernaut. */
-  private bossKorrath(e: Enemy, dt: number, nx: number, _ny: number, dist: number) {
+  private bossAshgorim(e: Enemy, dt: number, nx: number, _ny: number, dist: number) {
     const tv = this.bossTv;
     e.actT -= dt;
     /* relentless walk — no strafe, no charge, no mercy */
@@ -3460,7 +3561,7 @@ export class ArchmageEngine {
   }
 
   /* SOLENNE, the Last Note — the Blade Dancer. */
-  private bossSolenne(e: Enemy, dt: number, nx: number, ny: number, dist: number) {
+  private bossSylthara(e: Enemy, dt: number, nx: number, ny: number, dist: number) {
     const tv = this.bossTv;
     e.actT -= dt;
     if (e.actState === 0) {
@@ -3511,7 +3612,7 @@ export class ArchmageEngine {
   }
 
   /* YSED, the Hour-Cradled — the Blink Fortress. */
-  private bossYsed(e: Enemy, dt: number, nx: number, ny: number, _dist: number) {
+  private bossYsolth(e: Enemy, dt: number, nx: number, ny: number, _dist: number) {
     const tv = this.bossTv;
     e.actT -= dt;
     if (e.actState === 0) {
@@ -3566,7 +3667,7 @@ export class ArchmageEngine {
   }
 
   /* MAELTHAR, the First Sundering — the Apex Storm. */
-  private bossMaelthar(e: Enemy, dt: number, nx: number, ny: number, dist: number) {
+  private bossMordrax(e: Enemy, dt: number, nx: number, ny: number, dist: number) {
     const tv = this.bossTv;
     e.actT -= dt;
     if (e.actState === 0) {
@@ -3808,10 +3909,15 @@ export class ArchmageEngine {
     const m = this.evoModFor("fire");
     const cataclysm = m?.special === "cataclysm";
     const R = (62 + this.mods.spread * 5) * (m?.radius ?? 1);
+    /* Patch 11.0 — the detonation JUICES: triple expanding ring (shock, fire
+       crown, white-hot core), a directional ember shower along the impact
+       vector, and a lingering scorch flash. All within the particle cap. */
     this.ring(p.x, p.y, R, "#ff7847", 4);
     this.ring(p.x, p.y, R * 0.64, "#ffe86b", 2.5);
-    for (let i = 0; i < 16; i++) this.puff(p.x, p.y, i % 2 ? "#ff7847" : "#ffe86b", 240, 3.4);
+    this.ring(p.x, p.y, R * 0.38, "#fff6c0", 2);
+    for (let i = 0; i < 22; i++) this.puff(p.x, p.y, i % 3 === 0 ? "#fff6c0" : i % 2 ? "#ff7847" : "#ffe86b", 260, 3.6);
     this.shakeIt(4);
+    this.hitStop = Math.max(this.hitStop, 0.03);
     for (const e of this.enemies) {
       if (e.dead) continue;
       const dx = e.x - p.x, dy = e.y - p.y;
@@ -4094,7 +4200,7 @@ export class ArchmageEngine {
     for (const m of this.motes) { if (inView(m.x, m.y, 20)) this.drawMote(c, m); }
     /* Patch 4.0 — spell drops are drawn above motes / below enemies so they
        read clearly as pickup-able glyphs even during heavy combat. */
-    for (const d of this.spellDrops) { if (d.life > 0 && inView(d.x, d.y, 40)) this.drawSpellDrop(c, d); }
+    for (const d of this.spellDrops) { if (d.life > 0 && inView(d.x, d.y, 40)) this.drawDrop(c, d); }
     for (const e of this.enemies) { if (!e.dead && inView(e.x, e.y, e.r + 20)) this.drawEnemy(c, e); }
     this.drawPlayer(c);
     for (const p of this.projs) { if (inView(p.x, p.y, 30)) this.drawProj(c, p); }
@@ -4107,14 +4213,27 @@ export class ArchmageEngine {
     for (const b of this.beams) {
       if (!inView((b.x1 + b.x2) / 2, (b.y1 + b.y2) / 2, Math.max(Math.abs(b.x2 - b.x1), Math.abs(b.y2 - b.y1)) / 2 + 20)) continue;
       const a = b.life / b.maxLife;
-      c.strokeStyle = b.color; c.globalAlpha = a * 0.9; c.lineWidth = b.w;
+      /* Patch 11.0 — WRATHLIGHT beams: soft glow halo + bright core + an
+         animated dash pass that travels down the shaft (the light MOVES). */
+      c.strokeStyle = b.color; c.globalAlpha = a * 0.45; c.lineWidth = b.w * 2.1;
       c.beginPath(); c.moveTo(b.x1, b.y1); c.lineTo(b.x2, b.y2); c.stroke();
+      c.globalAlpha = a * 0.95; c.lineWidth = b.w;
+      c.beginPath(); c.moveTo(b.x1, b.y1); c.lineTo(b.x2, b.y2); c.stroke();
+      c.globalAlpha = a * 0.85; c.lineWidth = Math.max(1.2, b.w * 0.4);
+      c.setLineDash([16, 22]);
+      c.lineDashOffset = -this.t * 340;
+      c.beginPath(); c.moveTo(b.x1, b.y1); c.lineTo(b.x2, b.y2); c.stroke();
+      c.setLineDash([]);
     }
     for (const r of this.rings) {
       if (!inView(r.x, r.y, r.maxR + 20)) continue;
+      /* Patch 11.0 — eased expansion: the radius grows on an ease-out curve
+         and the alpha follows its square, so rings bloom fast then melt
+         smoothly instead of draining at a constant rate. */
       const k = 1 - r.life / r.maxLife;
-      c.strokeStyle = r.color; c.globalAlpha = (1 - k) * 0.85; c.lineWidth = r.w * (1 - k * 0.5);
-      c.beginPath(); c.arc(r.x, r.y, 6 + k * r.maxR, 0, TAU); c.stroke();
+      const ke = 1 - (1 - k) * (1 - k);
+      c.strokeStyle = r.color; c.globalAlpha = (1 - ke) * (1 - ke) * 0.9; c.lineWidth = r.w * (1 - ke * 0.5);
+      c.beginPath(); c.arc(r.x, r.y, 6 + ke * r.maxR, 0, TAU); c.stroke();
     }
     for (const p of this.particles) {
       if (!inView(p.x, p.y, 8)) continue;
@@ -4498,17 +4617,119 @@ export class ArchmageEngine {
     c.restore();
   }
 
-  /* Patch 4.0 — spell-drop glyph: a pulsing diamond rune in the spell's
-     element color, with a faint outer halo and a slowly-rotating sigil ring.
-     Floats and bobs; drifts toward the player when they're close. */
-  private drawSpellDrop(c: CanvasRenderingContext2D, d: SpellDrop) {
+  /* Patch 11.0 — DROP ORBS, one distinct silhouette per drop type:
+     • SPELL TEAR — the element-tinted diamond rune with its rotating sigil
+       ring (the classic glyph, now with an additive outer bloom).
+     • HEART OF THE FALLEN — a pulsing crimson heart inside a slow triquetra
+       halo; trailing vitality motes rise off it.
+     • RESONANCE ORB — twin interlocked diamonds (gold × violet) rotating
+       against each other inside a prismatic ring — it reads as MERGE before
+       you ever read the banner. */
+  private drawDrop(c: CanvasRenderingContext2D, d: SpellDrop) {
     if (d.life <= 0) return;
-    const sp = SPELLS[d.id];
     const a = Math.min(1, d.life / 1.5);
-    const pulse = 1 + Math.sin(this.t * 4 + d.wob) * 0.08;
     c.save();
     c.translate(d.x, d.y);
-    /* outer halo */
+
+    if (d.kind === "heart") {
+      const pulse = 1 + Math.sin(this.t * 4.6 + d.wob) * 0.1;
+      const halo = c.createRadialGradient(0, 0, 4, 0, 0, 30);
+      halo.addColorStop(0, "rgba(255,77,107,0.75)");
+      halo.addColorStop(1, "rgba(255,77,107,0)");
+      c.globalAlpha = a * 0.9;
+      c.fillStyle = halo;
+      c.beginPath(); c.arc(0, 0, 30, 0, TAU); c.fill();
+      /* slow triquetra halo — three sweeping arcs */
+      c.strokeStyle = "rgba(255,163,181,0.75)";
+      c.lineWidth = 1.6;
+      for (let i = 0; i < 3; i++) {
+        const ph = this.t * 0.9 + (i / 3) * TAU;
+        c.beginPath();
+        c.arc(Math.cos(ph) * 7, Math.sin(ph) * 7, 15, ph + 0.6, ph + 2.6);
+        c.stroke();
+      }
+      /* the heart itself (two lobes + tip), beating */
+      c.globalAlpha = a;
+      c.fillStyle = "#ff4d6b";
+      c.shadowColor = "#ffa3b5";
+      c.shadowBlur = 16;
+      const hr = 8.5 * pulse;
+      c.beginPath();
+      c.moveTo(0, hr * 0.95);
+      c.bezierCurveTo(-hr * 1.35, -hr * 0.15, -hr * 0.62, -hr * 1.25, 0, -hr * 0.42);
+      c.bezierCurveTo(hr * 0.62, -hr * 1.25, hr * 1.35, -hr * 0.15, 0, hr * 0.95);
+      c.closePath(); c.fill();
+      c.shadowBlur = 0;
+      /* gleam */
+      c.fillStyle = "rgba(255,255,255,0.85)";
+      c.globalAlpha = a * 0.85;
+      c.beginPath(); c.arc(-2.4, -3.4, 2, 0, TAU); c.fill();
+      c.restore();
+      c.globalAlpha = 1;
+      return;
+    }
+
+    if (d.kind === "resonance") {
+      /* prismatic twin diamonds — gold and violet rotating against each other */
+      const halo = c.createRadialGradient(0, 0, 4, 0, 0, 32);
+      halo.addColorStop(0, "rgba(255,233,173,0.7)");
+      halo.addColorStop(0.55, "rgba(176,107,255,0.35)");
+      halo.addColorStop(1, "rgba(176,107,255,0)");
+      c.globalAlpha = a * 0.9;
+      c.fillStyle = halo;
+      c.beginPath(); c.arc(0, 0, 32, 0, TAU); c.fill();
+      /* counter-rotating sigil ticks — reads as "fusion" at a glance */
+      c.strokeStyle = "#ffe9ad";
+      c.lineWidth = 1.5;
+      c.save();
+      c.rotate(this.t * 1.1);
+      for (let i = 0; i < 8; i++) {
+        c.rotate(TAU / 8);
+        c.beginPath(); c.moveTo(14, 0); c.lineTo(18, 0); c.stroke();
+      }
+      c.restore();
+      c.strokeStyle = "rgba(176,107,255,0.9)";
+      c.save();
+      c.rotate(-this.t * 0.8);
+      for (let i = 0; i < 6; i++) {
+        c.rotate(TAU / 6);
+        c.beginPath(); c.moveTo(11, 0); c.lineTo(14, 0); c.stroke();
+      }
+      c.restore();
+      /* the twin diamonds */
+      const rr = 9 + Math.sin(this.t * 3.4 + d.wob) * 0.9;
+      c.globalAlpha = a;
+      c.shadowBlur = 14;
+      c.fillStyle = "#ffe9ad";
+      c.shadowColor = "#ffe9ad";
+      c.save();
+      c.rotate(this.t * 1.6);
+      c.beginPath();
+      c.moveTo(0, -rr); c.lineTo(rr * 0.62, 0); c.lineTo(0, rr); c.lineTo(-rr * 0.62, 0);
+      c.closePath(); c.fill();
+      c.restore();
+      c.fillStyle = "#b06bff";
+      c.shadowColor = "#b06bff";
+      c.save();
+      c.rotate(-this.t * 1.1 + Math.PI / 4);
+      const r2 = rr * 0.78;
+      c.beginPath();
+      c.moveTo(0, -r2); c.lineTo(r2 * 0.62, 0); c.lineTo(0, r2); c.lineTo(-r2 * 0.62, 0);
+      c.closePath(); c.fill();
+      c.restore();
+      c.shadowBlur = 0;
+      /* white-hot seam where the two runes kiss */
+      c.fillStyle = "rgba(255,255,255,0.9)";
+      c.globalAlpha = a * 0.9;
+      c.beginPath(); c.arc(0, 0, 2.2, 0, TAU); c.fill();
+      c.restore();
+      c.globalAlpha = 1;
+      return;
+    }
+
+    /* ——— SPELL TEAR — the classic element glyph, now with an additive bloom ——— */
+    const sp = SPELLS[d.id];
+    const pulse = 1 + Math.sin(this.t * 4 + d.wob) * 0.08;
     const halo = c.createRadialGradient(0, 0, 4, 0, 0, 28);
     halo.addColorStop(0, sp.color + "cc");
     halo.addColorStop(1, sp.color + "00");
@@ -5163,6 +5384,17 @@ export class ArchmageEngine {
     return g;
   }
 
+  /* Patch 11.0 — PROJECTILE VFX OVERHAUL. Every element now flies a
+     DISTINCT silhouette with an additive (lighter) glow pass, so a
+     Pyroclasm comet never reads as a Gravefrost sliver at combat speed:
+       fire    — comet: white-hot core + layered flame tail streaming behind
+       ice     — grave-ice sliver: faceted shard + refracted core line
+       void    — null rift: black heart, rotating accretion arms, devouring ring
+       arcane  — hex star: spinning rune knot + orbiting familiar mote
+       blood   — the tithe lance: barbed javelin with a trailing blood mist
+       nature  — blight pod: pulsing seed sack with orbiting spores
+       wind    — soulscythe: twin crescents + a hollow-gale streak
+     All cheap path work — no allocations, gradient cache respected. */
   private drawProj(c: CanvasRenderingContext2D, p: Proj) {
     if (p.kind === "void") {
       c.save();
@@ -5177,12 +5409,24 @@ export class ArchmageEngine {
       }
       c.fillStyle = g;
       c.beginPath(); c.arc(0, 0, 26, 0, TAU); c.fill();
+      /* rotating accretion arms — the rift visibly devours */
       c.strokeStyle = "rgba(236,179,255,0.9)";
       c.lineWidth = 2;
-      c.setLineDash([5, 7]);
+      for (let arm = 0; arm < 2; arm++) {
+        const a0 = this.t * (arm === 0 ? 2.6 : -2.2) + arm * Math.PI;
+        c.beginPath();
+        c.arc(0, 0, 15, a0, a0 + 2.2);
+        c.stroke();
+      }
+      c.strokeStyle = "rgba(236,179,255,0.5)";
+      c.lineWidth = 1.4;
+      c.setLineDash([4, 8]);
       c.lineDashOffset = -this.t * 60;
-      c.beginPath(); c.arc(0, 0, 15, 0, TAU); c.stroke();
+      c.beginPath(); c.arc(0, 0, 19, 0, TAU); c.stroke();
       c.setLineDash([]);
+      /* the black heart */
+      c.fillStyle = "#0a0410";
+      c.beginPath(); c.arc(0, 0, 6.5, 0, TAU); c.fill();
       c.restore();
       return;
     }
@@ -5191,12 +5435,31 @@ export class ArchmageEngine {
       c.save();
       c.translate(p.x, p.y);
       c.rotate(ang);
+      /* trailing blood mist (additive) */
+      c.globalCompositeOperation = "lighter";
+      let mist = this.projGrads.get("bloodmist:24");
+      if (!mist) {
+        mist = c.createRadialGradient(-14, 0, 2, -14, 0, 24);
+        mist.addColorStop(0, "rgba(255,77,107,0.5)");
+        mist.addColorStop(1, "rgba(255,77,107,0)");
+        this.projGrads.set("bloodmist:24", mist);
+      }
+      c.fillStyle = mist;
+      c.beginPath(); c.arc(-14, 0, 24, 0, TAU); c.fill();
+      c.globalCompositeOperation = "source-over";
+      /* the barbed javelin */
       c.strokeStyle = "rgba(255,77,107,0.55)";
       c.lineWidth = 7;
       c.beginPath(); c.moveTo(-20, 0); c.lineTo(12, 0); c.stroke();
       c.strokeStyle = "#ffa3b5";
       c.lineWidth = 3;
       c.beginPath(); c.moveTo(-18, 0); c.lineTo(16, 0); c.stroke();
+      /* barbs */
+      c.lineWidth = 2;
+      c.beginPath();
+      c.moveTo(-8, -3); c.lineTo(-4, 0); c.lineTo(-8, 3);
+      c.moveTo(2, -3); c.lineTo(6, 0); c.lineTo(2, 3);
+      c.stroke();
       c.fillStyle = "#ffffff";
       c.beginPath();
       c.moveTo(24, 0); c.lineTo(12, -4); c.lineTo(12, 4);
@@ -5207,15 +5470,52 @@ export class ArchmageEngine {
     c.save();
     c.translate(p.x, p.y);
     c.rotate(ang);
+
+    /* additive bloom pass — every bolt carries its own light */
+    c.globalCompositeOperation = "lighter";
     c.fillStyle = this.projGrad(p.kind, p.r);
     c.beginPath(); c.arc(0, 0, p.r * 2.4, 0, TAU); c.fill();
+    c.globalCompositeOperation = "source-over";
+
+    if (p.kind === "fire") {
+      /* COMET — layered flame tail streaming behind the white-hot core */
+      const fl = 1 + Math.sin(this.t * 22 + p.x * 0.05) * 0.18;
+      c.globalAlpha = 0.75;
+      c.fillStyle = "rgba(255,120,71,0.65)";
+      c.beginPath();
+      c.moveTo(p.r * 1.3, 0);
+      c.quadraticCurveTo(-p.r * 2.4 * fl, -p.r * 0.95, -p.r * 4.4 * fl, 0);
+      c.quadraticCurveTo(-p.r * 2.4 * fl, p.r * 0.95, p.r * 1.3, 0);
+      c.closePath(); c.fill();
+      c.globalAlpha = 1;
+      c.fillStyle = "#ffb08a";
+      c.beginPath();
+      c.moveTo(p.r * 1.1, 0);
+      c.quadraticCurveTo(-p.r * 1.2 * fl, -p.r * 0.5, -p.r * 2.6 * fl, 0);
+      c.quadraticCurveTo(-p.r * 1.2 * fl, p.r * 0.5, p.r * 1.1, 0);
+      c.closePath(); c.fill();
+      c.fillStyle = "#fff6c0";
+      c.beginPath(); c.arc(p.r * 0.25, 0, p.r * 0.62, 0, TAU); c.fill();
+    }
     if (p.kind === "ice") {
+      /* GRAVEFROST sliver — faceted shard with a refracted core line */
       c.fillStyle = SPELLS.ice.color;
       c.beginPath();
       c.moveTo(p.r * 2.2, 0); c.lineTo(-p.r, p.r * 0.8); c.lineTo(-p.r * 0.5, 0); c.lineTo(-p.r, -p.r * 0.8);
       c.closePath(); c.fill();
+      c.strokeStyle = "rgba(255,255,255,0.85)";
+      c.lineWidth = 1.1;
+      c.beginPath();
+      c.moveTo(p.r * 1.9, 0); c.lineTo(-p.r * 0.6, 0);
+      c.stroke();
+      /* side glints */
+      c.strokeStyle = "rgba(200,239,255,0.8)";
+      c.beginPath();
+      c.moveTo(p.r * 0.7, -p.r * 0.34); c.lineTo(p.r * 0.1, -p.r * 0.42);
+      c.stroke();
     }
     if (p.kind === "arcane") {
+      /* HEX STAR — spinning rune knot + orbiting familiar mote */
       c.rotate(this.t * 9);
       c.fillStyle = SPELLS.arcane.color;
       c.beginPath();
@@ -5225,18 +5525,32 @@ export class ArchmageEngine {
         c.lineTo(Math.cos(a + Math.PI / 4) * p.r * 0.8, Math.sin(a + Math.PI / 4) * p.r * 0.8);
       }
       c.closePath(); c.fill();
+      c.fillStyle = "#e9e2ff";
+      const oa = this.t * 6;
+      c.beginPath(); c.arc(Math.cos(oa) * p.r * 2.2, Math.sin(oa) * p.r * 2.2, 1.8, 0, TAU); c.fill();
     }
     if (p.kind === "nature") {
+      /* BLIGHT POD — pulsing seed sack with orbiting spores */
+      const throb = 1 + Math.sin(this.t * 8 + p.x * 0.03) * 0.12;
       c.fillStyle = "#4f9c37";
-      c.beginPath(); c.arc(0, 0, p.r, 0, TAU); c.fill();
+      c.beginPath(); c.arc(0, 0, p.r * throb, 0, TAU); c.fill();
       c.fillStyle = SPELLS.nature.glow;
       for (let i = 0; i < 3; i++) {
         const a = this.t * 5 + i * 2.1;
-        c.beginPath(); c.arc(Math.cos(a) * p.r * 0.5, Math.sin(a) * p.r * 0.5, 2.2, 0, TAU); c.fill();
+        c.beginPath(); c.arc(Math.cos(a) * p.r * 1.6, Math.sin(a) * p.r * 1.6, 2.2, 0, TAU); c.fill();
       }
+      c.strokeStyle = "rgba(185,242,154,0.7)";
+      c.lineWidth = 1;
+      c.beginPath(); c.arc(0, 0, p.r * throb, 0, TAU); c.stroke();
     }
-    /* Patch 9.0 — gale cutters: twin crescents scything through the air */
+    /* Patch 11.0 — soulscythe: twin crescents + a hollow-gale streak */
     if (p.kind === "wind") {
+      c.strokeStyle = "rgba(210,255,248,0.4)";
+      c.lineWidth = 2;
+      c.beginPath();
+      c.moveTo(-p.r * 3.4, -p.r * 0.5); c.lineTo(-p.r * 0.6, -p.r * 0.5);
+      c.moveTo(-p.r * 3.4, p.r * 0.5); c.lineTo(-p.r * 0.6, p.r * 0.5);
+      c.stroke();
       c.strokeStyle = "#d2fff8";
       c.lineWidth = 2.6;
       for (let i = 0; i < 2; i++) {

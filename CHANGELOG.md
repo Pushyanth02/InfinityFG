@@ -3,6 +3,96 @@
 All notable changes to **Archmage — Rift Survivor** are documented here.
 The game itself reports the live patch on its menu screen.
 
+## Patch 11.0 — The Umbral Requiem
+
+The dark-arcane rebrand, the loud score, and the strict drop economy.
+
+### Thematic rebrand — the black-grimoire register
+- **Every spell renamed** (ids unchanged, saves unaffected): Pyroclasm,
+  Gravefrost, Wraithbolt, Gravewarden, Umbral Passage, Lance of Judgment,
+  Chronoshroud, Null Rift, Hexweave Fan, Crimson Requiem, Blightspore,
+  Soulscythe, Dirge Nova — each with a new tagline and description.
+- **Every foe renamed**: Gutter Ghoul, Ossuary Archer, Gravemote, Ashfiend,
+  Gloom Skitter, Rustbound Knight, Shroud Stalker, Pyrehusk, Umbra Cultist,
+  Bone Colossus, Abyssal Lancer, Errant Wraith, Bonespeaker, Tempest Herald,
+  Nightmare Shade, Chronowraith, Corpseweaver, Voidcage Golem, Nullmaw Beast.
+- **Every tyrant renamed**: Malgrym the Maw of Ruin, Ashgorim the Unquenched
+  Pyre, Sylthara the Reaving Waltz, Ysolth the Hollow Hour, Mordrax the First
+  Sundering (boss ids and kits untouched — 10.2's five distinct brains live on).
+- **Every act renamed**: The Sunless Vestibule, The Cinder Labyrinth, The
+  Drowned Necropolis, The Silent Sepulcher, The Heart of the Abyss, The
+  Endless Dirge.
+- **All 13 element icons redrawn** to match the lore — hellmouth flames,
+  coffin-slab grave-ice, gallows sparks, ossuary tombstone wards, umbral
+  archways, wrathlight shafts, shrouded hourglasses, rift tears, hexagram
+  eyes, thorn-struck tithe drops, wilted blooms, reaping crescents and
+  tolling bells.
+
+### Audio engineering — loud, dramatic, boss-aware
+- **Master-bus DynamicsCompressor** added (industry-standard loudness stage)
+  and the music bus raised to **unity** — the score is dramatically louder
+  with zero hard clipping. Default music volume raised to 85.
+- **Distinct boss-encounter music triggers**, engine-driven:
+  - **ENTRY** — the big low sting + bright cutoff + kick ostinato (480ms) +
+    tremolo saw + a darker PHRYGIAN pluck ladder replacing the pentatonic.
+  - **ENRAGE** (below half HP) — the ostinato accelerates to 360ms and a
+    dissonant **tritone war-drone** (root × flat-fifth saws) rises under
+    the fight.
+  - **DEATH** — the theme collapses instantly back to combat intensity
+    (no more waiting for the next wave).
+- **Repairs**: the music bus now adopts the *current* intensity cutoff when
+  the score spins up mid-fight (was hardcoded 620 Hz); the ostinato tempo is
+  proper state so intensity flapping can never double-schedule beats.
+
+### VFX & animation overhaul
+- **Every projectile flies its own distinct silhouette** with an additive
+  glow pass: Pyroclasm is a layered comet with a streaming flame tail,
+  Gravefrost a faceted sliver with a refracted core line, Null Rift a black
+  heart wrapped in rotating accretion arms, Hexweave Fan a spinning rune knot
+  with an orbiting familiar mote, Crimson Requiem a barbed javelin trailing
+  blood mist, Blightspore a throbbing seed sack, Soulscythe twin crescents
+  with gale streaks.
+- **Wrathlight beams** gain a glow halo, a bright core and an animated dash
+  pass that travels down the shaft.
+- **Resonance detonations** bloom into a triple expanding ring (both element
+  colors + the white seam), a 34-particle two-color storm with white-hot
+  sparks, and a heavier hit-stop.
+- **Pyroclasm blasts** detonate in triple rings (shock / fire crown /
+  white-hot core) with an ember shower and a micro hit-stop.
+- **Rings expand on an eased curve** (fast bloom, smooth melt) and every HUD
+  bar glides on an eased cubic-bezier instead of stepping linearly.
+
+### Strict drop economy — exactly one drop type per wave
+- Each wave resolves **exactly ONE drop type** — spell, heart, resonance or
+  tribute — in priority order: tribute waves (5/15/25/35/45) pay through the
+  end-of-wave gate; waves 9/19/29/39/49 field a **resonance orb**; the
+  scheduled spell tear lands every 3–5 waves; a **heart** forms when the
+  mage bleeds below 70% HP. Unclaimed orbs **dissolve at wave end** — no drop
+  type ever bleeds into the next wave. Rift shrines never spawn on tribute
+  or resonance waves.
+- **Spell drop rates nerfed another flat −10%** (compounding the 10.0 nerf:
+  19% reabsorption chance per scheduled tear).
+- **Spell tears no longer heal** — hearts are the dedicated mend, restoring
+  25% max HP on touch with their own crimson orb silhouette.
+- **Resonance orbs demand a sacrifice**: touching one opens the merge tithe
+  — sacrifice **exactly two bound spells** and they fuse into one merged slot
+  (the old end-of-wave merge intermission is gone; the wave resumes the
+  moment the tithe resolves). The Fateweaver autopilot hunts resonance orbs,
+  grabs hearts while wounded, and auto-resolves the tithe.
+
+### Interface
+- **Icon status chips removed** from the interface entirely (no glyph
+  notifications, no decay bars).
+- **Cooldown + aether-cost indicators on every spell toggler**: the desktop
+  bar keeps its draining cooldown veil + live cost badge; the touch spell
+  strip gains both, plus a cooldown veil on the SPELL cycle button.
+- **Dash cooldown display** on both layouts — a draining veil on the touch
+  DASH button and the desktop SPC slot.
+- **Fullscreen enforcer on the landing page** — one prominent button engages
+  edge-to-edge fullscreen on ANY device (live state, graceful fallback where
+  unsupported). The old in-game FULL toggle is removed; ENTER THE RIFT still
+  auto-requests fullscreen on touch as the gesture-path fallback.
+
 ## Patch 10.2 — The Thinking Rift
 
 The AI & procedural overhaul patch.

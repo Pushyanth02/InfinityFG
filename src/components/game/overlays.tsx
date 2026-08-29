@@ -128,9 +128,11 @@ export function EvolutionOverlay({ choices, onPick }: { choices: EvolutionDef[];
 /* ============================================================================
    SpellOfferOverlay — drop pickup (skip = Back to Game, Patch 6.0 rule kept).
    ----------------------------------------------------------------------------
-   Shown when the player walks over a spell-drop glyph. Three random spells
-   are offered (the dropped element is always the first card). The player
-   picks which equipped slot (1/2/3) to replace — or skips via Back to Game. */
+   Shown when the player walks over a spell-tear orb. Three random spells are
+   offered (the dropped element is always the first card). The player picks
+   which equipped slot (1/2/3) to replace — or skips via Back to Game.
+   Patch 11.0: the tear no longer heals (hearts are their own drop type in
+   the strict economy) — this overlay is purely a loadout decision. */
 
 export interface SpellOfferState {
   pool: ElementId[];
@@ -193,7 +195,7 @@ export function SpellOfferOverlay({ offer, onPick, onSkip }: SpellOfferOverlayPr
           CLAIM A SPELL
         </h2>
         <p className="anim-fade-up-1 text-sm text-[#b9aee0] italic mt-2">
-          +10% Vitality restored. Choose which slot to replace with your pick — or return to the fight as you are.
+          Choose which slot to replace with your pick — or return to the fight as you are. The tear mends nothing; hearts are the rift's only mercy.
         </p>
 
         {/* slot picker — shows the player's current spells (single/merged/empty) */}
@@ -254,7 +256,7 @@ export function SpellOfferOverlay({ offer, onPick, onSkip }: SpellOfferOverlayPr
             <UiIcon name="play" size={14} /> Back to Game
           </button>
           <p className="anim-fade-up-2 text-[11px] text-[#6a5a99] italic">
-            Click any spell to bind it to slot {targetSlot + 1} — the heal is already yours either way.
+            Click any spell to bind it to slot {targetSlot + 1} — skipping keeps the loadout you carry.
           </p>
         </div>
       </div>
@@ -263,11 +265,13 @@ export function SpellOfferOverlay({ offer, onPick, onSkip }: SpellOfferOverlayPr
 }
 
 /* ============================================================================
-   MergeOverlay — merge-spell intermission (waves 9/19/29/39/49).
+   MergeOverlay — THE RESONANCE SACRIFICE (Patch 11.0).
    ----------------------------------------------------------------------------
-   The player picks two single-spell slots to fuse into one merged slot that
-   casts both spells in succession. The other slot is emptied — drops can
-   refill it later. The merged spell name comes from the COMBOS dictionary. */
+   Opened by touching a RESONANCE ORB (the single drop of waves 9/19/29/39/49
+   — the old end-of-wave merge intermission is gone). The resonance demands a
+   tithe: the player sacrifices EXACTLY two bound single spells; they fuse
+   into one merged slot that casts both in succession, and the freed slot
+   opens for a future drop. The fused name comes from the COMBOS dictionary. */
 
 export interface MergeOfferState {
   /** indices of single-spell slots eligible for the merge */
@@ -299,12 +303,12 @@ export function MergeOverlay({ offer, onMerge }: { offer: MergeOfferState; onMer
   return (
     <div className="absolute inset-0 z-30 flex items-center justify-center px-4" style={{ background: "rgba(6,4,14,0.78)" }}>
       <div className="text-center w-full max-w-3xl max-h-full overflow-y-auto py-6">
-        <div className="anim-fade-up text-[11px] font-bold uppercase tracking-[0.38em] text-[#ffe9ad]">The merge gate opens</div>
+        <div className="anim-fade-up text-[11px] font-bold uppercase tracking-[0.38em] text-[#ffe9ad]">The resonance demands its tithe</div>
         <h2 className="anim-fade-up font-display text-4xl md:text-5xl font-black text-[#f5e3b3] tracking-wide mt-1" style={{ textShadow: "0 0 30px rgba(245,201,107,0.4)" }}>
-          MERGE SPELLS
+          SACRIFICE TWO SPELLS
         </h2>
         <p className="anim-fade-up-1 text-sm text-[#b9aee0] italic mt-2">
-          Pick two single spells to fuse into one merged slot — it casts both in succession. The second slot is emptied for a future drop.
+          Offer exactly two bound spells to the resonance — they are consumed and fuse into one merged slot that casts both in succession. The freed slot awaits a future drop.
         </p>
 
         {/* slot cards — show every equipped slot; mergeable (single) slots are clickable */}
@@ -333,7 +337,7 @@ export function MergeOverlay({ offer, onMerge }: { offer: MergeOfferState; onMer
                           </span>}
                   </span>
                   <span className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: mergeable ? "#7ed957" : "#6a5a99" }}>
-                    {mergeable ? (isPicked ? "picked" : "single") : (entry === null ? "empty" : "merged")}
+                    {mergeable ? (isPicked ? "offered" : "single") : (entry === null ? "empty" : "merged")}
                   </span>
                 </div>
                 <div className="font-display font-bold text-lg text-[#f0e8ff] tracking-wide mt-3">
@@ -351,11 +355,11 @@ export function MergeOverlay({ offer, onMerge }: { offer: MergeOfferState; onMer
           })}
         </div>
 
-        {/* merge preview + confirm */}
+        {/* sacrifice preview + confirm */}
         <div className="anim-fade-up-2 mt-5 rune-panel px-5 py-3 inline-block">
-          <div className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#6a5a99]">Result</div>
+          <div className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#6a5a99]">The resonance forges</div>
           <div className="font-display font-black text-xl text-[#ffe9ad] mt-1">
-            {previewName ?? "— pick two single spells —"}
+            {previewName ?? "— sacrifice exactly two spells —"}
           </div>
         </div>
         <div className="mt-4">
@@ -364,11 +368,11 @@ export function MergeOverlay({ offer, onMerge }: { offer: MergeOfferState; onMer
             disabled={picked.length !== 2}
             className={`btn-gold px-8 py-3 ${picked.length !== 2 ? "opacity-40 cursor-not-allowed" : ""}`}
           >
-            <UiIcon name="rings" size={16} /> Fuse
+            <UiIcon name="rings" size={16} /> Sacrifice & Fuse
           </button>
         </div>
         <p className="anim-fade-up-3 text-[11px] text-[#6a5a99] italic mt-3">
-          The merged slot will replace slot {picked[0] !== undefined ? picked[0] + 1 : "?"}; slot {picked.length === 2 ? picked[1] + 1 : "?"} will be emptied.
+          The fused slot replaces slot {picked[0] !== undefined ? picked[0] + 1 : "?"}; sacrificed slot {picked.length === 2 ? picked[1] + 1 : "?"} is consumed and emptied.
         </p>
       </div>
     </div>
