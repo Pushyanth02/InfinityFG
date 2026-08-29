@@ -59,8 +59,12 @@ export default function GameShell() {
      whenever the settings toggle, banked deaths, or manual tier change). */
   const mercyTier = effectiveMercyTier(meta);
   /* Patch 10.1 — custom UI scaling (Settings → HUD scale; default 0.9 so the
-     HUD ships smaller). Clamped defensively against corrupt saves. */
-  const hudZoom = Math.max(0.75, Math.min(1.25, meta.settings.hudScale || 0.9));
+     HUD ships smaller). Clamped defensively against corrupt saves.
+     V1.0 final — range widened to 1.5, joined by the announcement text scale
+     (Settings → Accessibility) and the high-contrast HUD switch. */
+  const hudZoom = Math.max(0.75, Math.min(1.5, meta.settings.hudScale || 0.9));
+  const textZoom = Math.max(0.75, Math.min(1.5, meta.settings.textScale || 1));
+  const highContrast = !!meta.settings.highContrast;
 
   const metaRef = useRef(meta);
   useEffect(() => { metaRef.current = meta; }, [meta]);
@@ -534,7 +538,7 @@ export default function GameShell() {
   /* --------------------------------- render --------------------------------- */
 
   return (
-    <div className="fixed inset-0 w-full h-full overflow-hidden select-none" style={{ background: "#0b0716" }}>
+    <div className={`fixed inset-0 w-full h-full overflow-hidden select-none${highContrast ? " a11y-hc" : ""}`} style={{ background: "#0b0716" }}>
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" style={{ cursor: inRun && phase !== "gameover" ? "crosshair" : "default" }} aria-label="ArchMage arena" />
 
       {/* ============ Patch 9.0 — FORCED LANDSCAPE GUARD ============
@@ -792,17 +796,31 @@ export default function GameShell() {
         />
       )}
 
-      {/* banner */}
+      {/* banner — V1.0 final: EVERY in-game announcement (wave calls, spawn
+          whispers, boss alerts, rift events) renders through this one compact
+          plate, PERFECTLY CENTERED on screen and scaled by the Accessibility
+          text-size setting. Small footprint, zero obstruction on any device. */}
       {banner && phase !== "gameover" && phase !== "epilogue" && (
-        <div key={"banner-" + banner.key} className="banner-pop absolute top-[26%] left-1/2 -translate-x-1/2 z-30 text-center pointer-events-none px-4">
-          <div className="font-display font-black text-4xl md:text-5xl tracking-[0.1em]" style={{ color: banner.color, textShadow: `0 0 34px ${banner.color}aa, 0 2px 0 rgba(0,0,0,0.6)` }}>
-            {banner.title}
-          </div>
-          {banner.sub && (
-            <div className="mt-2 text-[13px] font-bold uppercase tracking-[0.24em] text-[#e9e2ff]" style={{ textShadow: "0 2px 6px rgba(0,0,0,0.8)" }}>
-              {banner.sub}
+        <div
+          key={"banner-" + banner.key}
+          className="banner-pop absolute top-1/2 left-1/2 z-30 text-center pointer-events-none"
+        >
+          <div style={{ zoom: textZoom }} className="px-4">
+            <div
+              className="banner-title font-display font-black text-[15px] sm:text-base md:text-lg tracking-[0.14em] whitespace-nowrap"
+              style={{ color: banner.color, textShadow: `0 0 14px ${banner.color}66, 0 1px 0 rgba(0,0,0,0.75)` }}
+            >
+              {banner.title}
             </div>
-          )}
+            {banner.sub && (
+              <div
+                className="banner-sub mt-1 text-[9.5px] sm:text-[10.5px] font-bold uppercase tracking-[0.18em] text-[#e9e2ff] max-w-[70vw] mx-auto"
+                style={{ textShadow: "0 1px 3px rgba(0,0,0,0.9)" }}
+              >
+                {banner.sub}
+              </div>
+            )}
+          </div>
         </div>
       )}
 

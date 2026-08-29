@@ -41,12 +41,16 @@ no cutscenes, no story, no filler.
 | 🎯 **The weave hunts the marked** | Elite foes (Blazing / Swift / Bulwark / Leech) take **+35 % spell damage** and read gold on impact — marked prey, never walls. |
 | 👑 **Tyrants that scale with the act** | Boss HP rides the same curve as your power, so every tenth-wave duel holds its hit-count wherever the shuffle places it. Five genuinely distinct minds: stampede charger, shockwave juggernaut, blade dancer, blink fortress, apex storm. |
 | 💎 **Strict one-drop-per-wave** | Each wave fields **exactly one** drop type — a spell tear, a heart (25 % mend), a resonance orb, or the every-5-wave tribute gate. Unclaimed orbs dissolve at wave end. Scheduled tears carry a flat 19 % reabsorb chance. |
+| 🧭 **Loadout-aware loot pools** | The drop economy **reads your equipped inventory live**. Standard loadout (3 base spells): resonances, boons, new spells and transmutations all stay in the pool. **Apex loadout** (2 resonance spells bound): resonances and spell upgrades are removed instantly — only new base spells and boons remain. |
+| 🎲 **Fair-cycling RNG** | Spell tears draw from a seeded **shuffle-bag** (every eligible element tears once per cycle before any repeat); tribute boons and transmutations draft with `1/(1+n)` recency weights so every eligible card surfaces. Strict drop *rates* untouched — only the drafts got fair. |
 | 🜂 **The sacrifice merge** | Resonance orbs demand a tithe: sacrifice **exactly two** bound spells; they fuse into one merged slot that casts both in succession. |
 | ✨ **Aether glyphs** | Foes shed glyphs — every pickup registers on the live HUD counter (`+N` beside your bank) and pays out post-game at 25 % conversion. |
 | 🏛️ **The Reliquary** | Spend glyphs on four permanent tracks — Vitality / Power / Focus / Swiftness — six levels each. Every boost applies live from your next run's first breath. |
 | 📖 **The Arcanum** | Spellbook, 78-resonance codex, **first-kill bestiary**, tyrant gallery and lifetime records — behind rerollable procedural cover sigils. |
 | ⚖️ **Rift Mercy** | Opt-in per-death assist ladder (Hades-style dignity): tiers bank with every fall, clear on triumph; manual tier selection in Settings with a live HUD readout. |
 | 🧠 **The Fateweaver** | Archmage Mode autopilot: line-of-sight-disciplined casting, resonance hunting, surge discipline, context-aware boon picks. Press `T` and watch a clean run. |
+| 📢 **Compact centered announcements** | Every in-game call — wave plates, spawn whispers, boss alerts, rift events — renders through one small plate at the **exact center** of the screen. Non-intrusive by design on every device; resize it in Settings. |
+| ♿ **Accessibility suite** | UI size (75–150 %), announcement text size (75–150 %), reduce flashes (dampens the red damage vignette), high-contrast HUD, screen-shake toggle, damage-number toggle, three-level aim assist, Rift Mercy assist ladder, and full `prefers-reduced-motion` respect — all live, no restart. |
 | 🎼 **The score** | Fully synthesized (Web Audio API) and **mixed loud** through a master compressor — an act-tinted drone with plucks that calms in the menu, sharpens in combat, and the instant a tyrant enters: sting → driving ostinato → tritone war-drone at half health → instant collapse on the kill. |
 
 ## 🎮 Controls
@@ -87,6 +91,10 @@ The game is tuned like an action game, not a spreadsheet:
 - **Fluid UI motion** — eased cubic-bezier HUD bars, staggered fade-up
   panels, pulsing weave meters, drifting menu motes, rotating sigil rings.
   All of it respects `prefers-reduced-motion`.
+- **Announcements that never block the eye** — every call (wave start, spawn
+  whisper, boss alert, shrine, surge) pops at the exact viewport center in a
+  compact plate with a short 3 % overshoot and a whisper-quiet fade, sized
+  by the Accessibility text-scale slider.
 - **A living arena** — bobbing foes with velocity lean, footstep dust, rift
   shifts that rearrange the entire floor plan every five waves, ambient motes
   tinted by the act.

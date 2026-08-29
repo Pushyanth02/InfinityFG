@@ -957,8 +957,18 @@ export interface GameSettings {
   screenShake: boolean;   // camera shake on impacts
   /* Patch 10.1 — custom UI scaling: multiplies the entire HUD layer
      (vitals / wave plate / spell bar / status chips). 0.75–1.25, default
-     0.9 — the HUD ships SMALLER by default for maximum arena legibility. */
-  hudScale: number;       // 0.75..1.25 UI scale multiplier
+     0.9 — the HUD ships SMALLER by default for maximum arena legibility.
+     V1.0 final: range widened to 1.5 and joined by the full accessibility
+     suite below (textScale / reduceFlash / highContrast). */
+  hudScale: number;       // 0.75..1.5 UI scale multiplier
+  /* V1.0 final — ACCESSIBILITY SUITE. textScale sizes every in-game
+     announcement (wave calls, spawn whispers, boss alerts, rift events);
+     reduceFlash softens the red damage vignette for photosensitive players;
+     highContrast hardens the HUD panels against the arena for low-vision
+     legibility. All three live-update from the Settings screen. */
+  textScale: number;      // 0.75..1.5 announcement text scale multiplier
+  reduceFlash: boolean;   // dampen the red damage vignette / hit flashes
+  highContrast: boolean;  // high-contrast HUD panels + banner text
 }
 
 export const DEFAULT_SETTINGS: GameSettings = {
@@ -970,6 +980,11 @@ export const DEFAULT_SETTINGS: GameSettings = {
   /* Patch 10.1 — HUD 10% smaller out of the box (less screen furniture,
      more arena); the Settings slider lets each player re-scale it. */
   hudScale: 0.9,
+  /* V1.0 final — announcements ship compact at 100%; scale up to 150% for
+     readability or down to 75% for a near-silent arena. */
+  textScale: 1,
+  reduceFlash: false,
+  highContrast: false,
 };
 
 export interface MetaSave {

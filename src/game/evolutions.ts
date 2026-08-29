@@ -180,15 +180,32 @@ export function evolutionsForBase(base: ElementId): EvolutionDef[] {
 /** Offer 3 evolutions for spells the player actually holds (Patch 6.0 fix:
     upgrade options must reference the player's existing spells — merged slot
     components count as held since they still cast). Bases already evolved
-    this run are excluded. If fewer than 3 bases remain, fewer cards show. */
-export function offerEvolutions(rng: RNG, evolved: (EvolutionDef | null)[], equipped: Set<ElementId>): EvolutionDef[] {
+    this run are excluded. If fewer than 3 bases remain, fewer cards show.
+    V1.0 final — FAIR-CYCLING WEIGHTS: when an `offered` ledger is passed,
+    cards draft with weight 1/(1 + timesDrafted) so every eligible
+    transmutation surfaces across a run instead of one card dominating. */
+export function offerEvolutions(
+  rng: RNG,
+  evolved: (EvolutionDef | null)[],
+  equipped: Set<ElementId>,
+  offered?: Record<string, number>,
+): EvolutionDef[] {
   const taken = new Set(evolved.filter(Boolean).map((e) => e!.base));
   const pool = EVOLUTIONS.filter((e) => equipped.has(e.base) && !taken.has(e.base));
+  const weight = (e: EvolutionDef) => (offered ? 1 / (1 + (offered[e.id] ?? 0)) : 1);
   const out: EvolutionDef[] = [];
   const scratch = [...pool];
   while (out.length < 3 && scratch.length) {
-    const i = Math.floor(rng.next() * scratch.length);
-    out.push(scratch.splice(i, 1)[0]);
+    let total = 0;
+    for (const e of scratch) total += weight(e);
+    let roll = rng.next() * total;
+    let pick = scratch[scratch.length - 1];
+    for (const e of scratch) {
+      roll -= weight(e);
+      if (roll <= 0) { pick = e; break; }
+    }
+    out.push(pick);
+    scratch.splice(scratch.indexOf(pick), 1);
   }
   return out;
 }

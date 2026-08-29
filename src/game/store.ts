@@ -102,6 +102,15 @@ interface ArchmageStore {
 
 let bannerKey = 0;
 let bannerTimer: number | undefined;
+let bannerDelay: number | undefined;
+let bannerShownAt = 0;
+/* V1.0 final — BANNER MINIMUM-DISPLAY: announcements that fire in the same
+   frame (wave start + boss alert + drop formation) no longer overwrite each
+   other instantly. The first banner holds the plate for at least 1.1 s;
+   the most recent announcement then takes over. Clearing (or a third call
+   during the hold) always wins — nothing stacks up. */
+const BANNER_MIN_SHOW = 1100;
+const BANNER_LIFE = 2500;
 
 export const useArchmageStore = create<ArchmageStore>((set, get) => ({
   meta: typeof window === "undefined" ? DEFAULT_META : loadMeta(),
@@ -126,11 +135,26 @@ export const useArchmageStore = create<ArchmageStore>((set, get) => ({
 
   showBanner: (title, sub, color) => {
     bannerKey++;
-    set({ banner: { title, sub, color, key: bannerKey } });
-    window.clearTimeout(bannerTimer);
-    bannerTimer = window.setTimeout(() => set({ banner: null }), 2500);
+    const next: Banner = { title, sub, color, key: bannerKey };
+    const show = () => {
+      bannerShownAt = performance.now();
+      window.clearTimeout(bannerTimer);
+      set({ banner: next });
+      bannerTimer = window.setTimeout(() => set({ banner: null }), BANNER_LIFE);
+    };
+    const elapsed = performance.now() - bannerShownAt;
+    window.clearTimeout(bannerDelay);
+    if (get().banner && elapsed >= 0 && elapsed < BANNER_MIN_SHOW) {
+      bannerDelay = window.setTimeout(show, BANNER_MIN_SHOW - elapsed);
+    } else {
+      show();
+    }
   },
-  clearBanner: () => { window.clearTimeout(bannerTimer); set({ banner: null }); },
+  clearBanner: () => {
+    window.clearTimeout(bannerTimer);
+    window.clearTimeout(bannerDelay);
+    set({ banner: null });
+  },
 
   setRewardOffer: (offer) => set({ rewardOffer: offer }),
   setSpellOffer: (offer) => set({ spellOffer: offer }),

@@ -209,8 +209,8 @@ interface MenuProps {
 }
 
 /* Patch 7.0: the menu reads the Zustand store directly. The Codex is now THE
-   ARCANUM (renamed + rebuilt); patch notes advertise 7.0; buttons chirp on
-   hover via the new uiHover voice. */
+   ARCANUM (renamed + rebuilt); the release panel advertises Version 1.0;
+   buttons chirp on hover via the new uiHover voice. */
 export function MenuScreen({ chapter, chapterSubtitle, onStart }: MenuProps) {
   const meta = useArchmageStore((s) => s.meta);
   const seed = useArchmageStore((s) => s.seed);
@@ -270,7 +270,17 @@ export function MenuScreen({ chapter, chapterSubtitle, onStart }: MenuProps) {
         <h1 className="anim-fade-up-1 font-display title-glow text-[#f5e3b3] font-black leading-none mt-4 text-[clamp(52px,9vw,110px)] tracking-[0.08em]">
           ARCHMAGE
         </h1>
-        <p className="anim-fade-up-2 mt-2 max-w-xl text-[15px] leading-relaxed text-[#b9aee0] italic">
+
+        {/* V1.0 final — prominent release badge: the version branding reads
+            at a glance on every device, right under the title. */}
+        <div className="anim-fade-up-2 mt-3 flex items-center gap-2.5" aria-label="Version 1.0 official release">
+          <span className="px-3.5 py-1 border border-[rgba(245,201,107,0.65)] bg-[rgba(245,201,107,0.1)] text-[#f5c96b] text-[11px] font-black uppercase tracking-[0.26em]">
+            Version 1.0
+          </span>
+          <span className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#9a7bff]">The Sealed Rift · Official Release</span>
+        </div>
+
+        <p className="anim-fade-up-2 mt-3 max-w-xl text-[15px] leading-relaxed text-[#b9aee0] italic">
           Thirteen dark arts. Seventy-eight resonances. Five tyrants that shuffle with every seed.
           Weave the requiem fast enough and the abyss itself learns your name.
         </p>
@@ -426,12 +436,13 @@ export function MenuScreen({ chapter, chapterSubtitle, onStart }: MenuProps) {
           </div>
         </div>
 
-        {/* Version 1.0 — THE SEALED RIFT: release-feature panel (the patch
-            ledger is retired; one clean panel describes the shipped game). */}
+        {/* Version 1.0 — THE SEALED RIFT: the release panel. Release info,
+            feature highlights and the final build's patch notes — the whole
+            ledger of the shipped game in one place. */}
         <div className="anim-fade-up-3 mt-4 w-full max-w-2xl border border-[rgba(154,123,255,0.28)] bg-[rgba(18,11,36,0.75)] px-6 py-3 text-left">
           <div className="flex items-center justify-between">
             <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#6bf0c2]">Version 1.0 — The Sealed Rift</div>
-            <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6a5a99]">release</div>
+            <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#f5c96b]">official release</div>
           </div>
           <ul className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1 text-[12.5px] text-[#c9bdf0] list-none">
             <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> The attunement curve — your magic grows with the rift</li>
@@ -440,9 +451,19 @@ export function MenuScreen({ chapter, chapterSubtitle, onStart }: MenuProps) {
             <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> The Reliquary — four permanent tracks bound to your soul</li>
             <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Wave 50 seals the rift — credits, then Return or endless Fight</li>
             <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Five tyrant minds — stampede, shockwave, waltz, spiral, storm</li>
-            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Strict drop economy — exactly one drop type per wave</li>
+            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Loadout-aware loot — the rift only offers what you can wield</li>
             <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> The Fateweaver — an autopilot that never casts through walls</li>
           </ul>
+          {/* final build notes */}
+          <div className="mt-2.5 border-t border-[rgba(154,123,255,0.25)] pt-2">
+            <div className="text-[10px] font-bold uppercase tracking-[0.24em] text-[#8f7bff] mb-1">Final build notes</div>
+            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1 text-[12px] text-[#b9aee0] list-none">
+              <li className="flex gap-2"><span className="text-[#43e8d8]">◆</span> Announcements re-centered + compact on every device</li>
+              <li className="flex gap-2"><span className="text-[#43e8d8]">◆</span> Accessibility suite — UI &amp; text size, reduce flashes, high contrast</li>
+              <li className="flex gap-2"><span className="text-[#43e8d8]">◆</span> Fair-cycling drops — every eligible spell, boon and transmutation surfaces</li>
+              <li className="flex gap-2"><span className="text-[#43e8d8]">◆</span> Apex loadouts — two resonances bound stop offering resonances &amp; upgrades</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
@@ -931,7 +952,9 @@ export function RewardOverlay({ rewards, tiers, wave, onPick }: {
 /* Comprehensive settings, reachable from the menu AND from the pause overlay
    mid-run (volume/graphics changes apply live). Sections: Audio
    (master/music/sfx sliders), Graphics (quality preset + shake + damage
-   numbers), Gameplay (aim assist + Rift Mercy), Data (reset). */
+   numbers), Accessibility (V1.0: UI size, announcement text size, reduce
+   flashes, high-contrast HUD), Gameplay (aim assist + Rift Mercy), Data
+   (reset). */
 
 export function SettingsScreen({ onClose }: { onClose: () => void }) {
   const meta = useArchmageStore((s) => s.meta);
@@ -1030,27 +1053,85 @@ export function SettingsScreen({ onClose }: { onClose: () => void }) {
                 className="accent-[#f5c96b] w-5 h-5 shrink-0"
               />
             </label>
-            {/* Patch 10.1 — custom UI scaling: the HUD ships 10% smaller by
-                default; this slider re-scales it to taste (75%–125%). */}
+            {/* Patch 10.1 — custom UI scaling moved to the Accessibility
+                section below (V1.0: it belongs with text size, flash
+                reduction and high contrast). */}
+          </div>
+        </div>
+
+        {/* V1.0 final — ACCESSIBILITY SUITE: UI size, announcement text
+            size, flash reduction and high-contrast HUD. Every option is
+            live — the HUD re-scales and the next banner renders at the new
+            text size without restarting the run. */}
+        <div className="mt-5">
+          <div className="text-[11px] font-bold uppercase tracking-[0.26em] text-[#f5c96b] mb-2">Accessibility</div>
+          <div className="border border-[rgba(154,123,255,0.28)] bg-[rgba(13,9,25,0.6)] px-4 py-3">
             <div className="flex items-center gap-3 py-1.5">
               <span className="text-[#b9aee0] shrink-0"><UiIcon name="settings" size={16} /></span>
               <div className="flex-1 min-w-0">
                 <div className="flex items-baseline justify-between">
-                  <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-[#c9bdf0]">HUD scale</span>
+                  <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-[#c9bdf0]">UI size</span>
                   <span className="text-[12px] font-black tabular-nums text-[#ffe9ad]">{Math.round(s.hudScale * 100)}%</span>
                 </div>
                 <input
                   type="range"
                   min={75}
-                  max={125}
+                  max={150}
                   step={5}
                   value={Math.round(s.hudScale * 100)}
-                  aria-label="HUD scale"
+                  aria-label="UI size"
                   onChange={(e) => { sfx.click(); patchSettings({ hudScale: Number(e.target.value) / 100 }); }}
                   className="settings-slider"
                 />
-                <div className="text-[10.5px] text-[#6a5a99] italic mt-0.5">Size of the combat interface — vitals, wave plate, spell bar and touch controls</div>
+                <div className="text-[10.5px] text-[#6a5a99] italic mt-0.5">The whole combat interface — vitals, wave plate, spell bar and touch controls</div>
               </div>
+            </div>
+            <div className="flex items-center gap-3 py-1.5">
+              <span className="text-[#b9aee0] shrink-0"><UiIcon name="book" size={16} /></span>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-baseline justify-between">
+                  <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-[#c9bdf0]">Announcement text size</span>
+                  <span className="text-[12px] font-black tabular-nums text-[#ffe9ad]">{Math.round((s.textScale ?? 1) * 100)}%</span>
+                </div>
+                <input
+                  type="range"
+                  min={75}
+                  max={150}
+                  step={5}
+                  value={Math.round((s.textScale ?? 1) * 100)}
+                  aria-label="Announcement text size"
+                  onChange={(e) => { sfx.click(); patchSettings({ textScale: Number(e.target.value) / 100 }); }}
+                  className="settings-slider"
+                />
+                <div className="text-[10.5px] text-[#6a5a99] italic mt-0.5">Every in-game announcement — wave calls, spawn whispers, boss alerts — centered and compact</div>
+              </div>
+            </div>
+            <label className="flex items-center justify-between gap-3 py-1.5 cursor-pointer">
+              <div>
+                <div className="text-[12px] font-bold uppercase tracking-[0.18em] text-[#c9bdf0]">Reduce flashes</div>
+                <div className="text-[10.5px] text-[#6a5a99] italic">Dampen the red damage vignette and death flash — kinder to photosensitive eyes</div>
+              </div>
+              <input
+                type="checkbox"
+                checked={!!s.reduceFlash}
+                onChange={(e) => { sfx.click(); patchSettings({ reduceFlash: e.target.checked }); }}
+                className="accent-[#f5c96b] w-5 h-5 shrink-0"
+              />
+            </label>
+            <label className="flex items-center justify-between gap-3 py-1.5 cursor-pointer">
+              <div>
+                <div className="text-[12px] font-bold uppercase tracking-[0.18em] text-[#c9bdf0]">High-contrast HUD</div>
+                <div className="text-[10.5px] text-[#6a5a99] italic">Solid panels, brighter borders and a scrim behind announcements — maximum legibility</div>
+              </div>
+              <input
+                type="checkbox"
+                checked={!!s.highContrast}
+                onChange={(e) => { sfx.click(); patchSettings({ highContrast: e.target.checked }); }}
+                className="accent-[#f5c96b] w-5 h-5 shrink-0"
+              />
+            </label>
+            <div className="text-[10.5px] text-[#6a5a99] italic border-t border-[rgba(154,123,255,0.22)] pt-2 mt-1">
+              More comfort: screen shake and damage numbers live in Graphics; aim assist and Rift Mercy in Gameplay.
             </div>
           </div>
         </div>

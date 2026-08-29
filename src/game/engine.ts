@@ -281,8 +281,12 @@ export class ArchmageEngine {
      sees a different tyrant order through the 5 acts. */
   private equipped: EquippedSlot[] = STARTER_SPELLS.map((id) => ({ spells: [SPELL_ORDER.indexOf(id)] }));
   private spellDrops: SpellDrop[] = [];
-  private spellPool: ElementId[] = [];
-  private poolCursor = 0;
+  /* V1.0 final — FAIR-CYCLING SPELL BAG: a seeded shuffle-bag over the
+     spells the player does NOT hold. Every eligible element is drawn exactly
+     once per cycle before any repeats, so tears rotate the whole roster
+     fairly instead of a blind cursor. Refilled whenever it runs dry (or the
+     loadout changes and the remainder is stale). */
+  private spellBag: ElementId[] = [];
   private pendingOffer: SpellOffer | null = null;
   private bossShuffle: BossDef[] = [];
   private runMerges: string[] = [];              // merge names woven this run
@@ -308,6 +312,12 @@ export class ArchmageEngine {
     spread: 0, homing: 0, range: 1, bolts: 1, dr: 1,
   };
   private rewardTiers: Record<string, number> = {};
+  /* V1.0 final — FAIR-CYCLING RNG LEDGERS: rewardOffered counts how often a
+     boon card has been DRAFTED into a tribute (weight ∝ 1/(1+n), so every
+     eligible boon surfaces); evoOffered does the same for evolution cards.
+     Strict drop RATES are untouched — this only fair-cycles WHAT drafts. */
+  private rewardOffered: Record<string, number> = {};
+  private evoOffered: Record<string, number> = {};
   private bonusShards = 0;               // Aether Cache glyphs banked mid-run
   /* V1.0 — THE GLYPH LEDGER: slain foes shed aether glyphs (the gold motes).
      Every pickup registers here, feeds the live HUD counter, and is paid
@@ -469,10 +479,6 @@ export class ArchmageEngine {
     /* Patch 6.0: apply the graphics preset before the first resize so the
        render resolution + particle budget are correct from frame one. */
     this.applyGfx(o.settings);
-
-    /* Patch 4.0: shuffle the spell pool so each run's offer rotation is
-       unique to the seed. */
-    this.reshuffleSpellPool();
 
     /* Patch 5.0: shuffle the 5 unique bosses via the seed so each restart
        sees a different tyrant order through the 5 acts (e.g. Mordrax at
@@ -705,11 +711,19 @@ export class ArchmageEngine {
   /* --------------------- evolution flow (Patch 7.0) --------------------- */
 
   /* Patch 7.0: finishStory is gone — after a boss clear the engine offers
-     evolutions directly. If nothing is left to transmute, roll on. */
+     evolutions directly. If nothing is left to transmute, roll on.
+     V1.0 final — STATE B: in a max-tier loadout (≥2 resonances bound) spell
+     upgrades are REMOVED from the pool; the boss wave rolls straight on. */
   private offerEvolutionsOrNext() {
+    if (this.maxTierLoadout()) {
+      this.o.onBanner("APEX LOADOUT", "Two resonances bound — nothing left to transmute", "#43e8d8");
+      this.startNextWave();
+      return;
+    }
     /* evolution offers reference the player's EQUIPPED spells — no upgrades
        for spells the player doesn't hold (Patch 6.0 rule, kept). */
-    const choices = offerEvolutions(this.rng, this.evolutions, this.equippedSet());
+    const choices = offerEvolutions(this.rng, this.evolutions, this.equippedSet(), this.evoOffered);
+    for (const c of choices) this.evoOffered[c.id] = (this.evoOffered[c.id] ?? 0) + 1;
     if (choices.length === 0) {
       this.o.onBanner("NOTHING LEFT TO TRANSMUTE", "Every spell you hold is already evolved", "#43e8d8");
       this.startNextWave();
@@ -918,6 +932,30 @@ export class ArchmageEngine {
     return out;
   }
 
+  /* V1.0 final — STATE-BASED DROP ECONOMY. The loot pool reads the live
+     loadout:
+       STATE A (standard loadout — fewer than two resonance slots):
+         resonances + boons + new spells + spell upgrades all stay in the
+         pool (each gated by its own eligibility rule: a resonance orb needs
+         ≥2 single spells to sacrifice; an evolution needs an un-transmuted
+         held base).
+       STATE B (max-tier loadout — two or more RESONANCE spells, i.e. merged
+         slots, are bound): resonances and spell upgrades are REMOVED from
+         the pool immediately — a third resonance is impossible (only one
+         single remains) and further transmutations are beneath an apex
+         loadout. Only new base spells (spell tears), boons (tribute gates)
+         and hearts (when wounded) may spawn. */
+  private resonanceCount(): number {
+    let n = 0;
+    for (const slot of this.equipped) if (slot.spells.length >= 2) n++;
+    return n;
+  }
+
+  /** True when the loadout has reached the resonance apex (State B). */
+  private maxTierLoadout(): boolean {
+    return this.resonanceCount() >= 2;
+  }
+
   /** Patch 5.0 — seed-permuted boss order. On every restart, this reshuffles
       BOSS_DEFS so each of the 5 acts sees a different tyrant. The boss's
       native act is preserved as backstory context only; their stats carry
@@ -971,10 +1009,14 @@ export class ArchmageEngine {
            if the rift reabsorbs the tear, the wave fields NO drop.
         4. a heart when the mage bleeds (HP < 70%).
       No other pickup may spawn during the wave, and any unclaimed orb
-      dissolves at wave end — one type, strictly enforced. */
+      dissolves at wave end — one type, strictly enforced.
+      V1.0 final — STATE-BASED POOLS: in a max-tier loadout (≥2 resonance
+      spells bound) the resonance branch is hard-removed — State B fields
+      only spell tears, tribute boons and wounded hearts. Strict rates for
+      everything else are untouched. */
   private resolveWaveDrop(n: number): DropKind {
     if (n > 0 && n % TRIBUTE_INTERVAL === 0 && n % 10 !== 0) return "tribute";
-    if (n > 0 && n % MERGE_INTERVAL === 9) {
+    if (n > 0 && n % MERGE_INTERVAL === 9 && !this.maxTierLoadout()) {
       if (this.mergeableSlots().length >= 2) return "resonance";
       return this.hp < this.maxHp * 0.7 ? "heart" : "none";
     }
@@ -1193,13 +1235,14 @@ export class ArchmageEngine {
 
     if (n % 10 === 0) {
       /* Patch 5.0: use the seed-shuffled boss for this act. Patch 10.2: the
-         spawn cutscene layer is fully GONE — no title card, no message
-         banner. The tyrant simply arrives: audio roar + sting + a screen
-         shake are the only telegraphs, and every attack telegraphs itself
-         in the arena (windup rings, dash puffs, spiral arms). The adaptive
-         score jumps to boss intensity. Boss HP/damage are eased by
-         DIFFICULTY_MULT like every other foe. Patch 10.2: the adds follow
-         the seed's ecology too (pickBiased). */
+         spawn cutscene layer is fully GONE — no title card, no message box,
+         nothing blocks the arena. V1.0 final: the tyrant's arrival carries
+         one COMPACT, CENTERED alert banner (name + title) alongside the
+         audio roar + sting + shake — every attack still telegraphs itself
+         in the arena. Boss HP/damage are eased by DIFFICULTY_MULT like every
+         other foe. Patch 10.2: the adds follow the seed's ecology too
+         (pickBiased). */
+      const boss = this.currentBoss();
       this.spawnQueue.push({ type: "boss", t: 1.2 });
       /* Patch 9.0: adds thinned by Rift Mercy; skitter joins the mob pool. */
       const adds = Math.max(2, Math.round(Math.min(4 + Math.floor(n / 10) * 2, 12) * (1 - this.mercyDr * MERCY_SPAWNS)));
@@ -1210,6 +1253,11 @@ export class ArchmageEngine {
       this.o.sfx.sting();
       this.o.sfx.setIntensity(2);
       this.shakeIt(14);
+      this.o.onBanner(
+        this.endless && n > VICTORY_WAVE ? `ECHO OF ${boss.name.toUpperCase()}` : "A TYRANT RISES",
+        `${boss.name}, ${boss.title}`,
+        "#ff8ba0",
+      );
     } else {
       const types = availableTypes(n);
       /* Patch 9.0: Rift Mercy trims the wave budget — fewer foes per wave. */
@@ -1243,10 +1291,13 @@ export class ArchmageEngine {
     /* rift shrine — surprise transmutation entrance.
        Patch 11.0 — strict economy: no shrine on tribute or resonance waves
        (those waves already field their one drop type; a second reward source
-       would break the "exactly one" rule). */
+       would break the "exactly one" rule).
+       V1.0 final — STATE B: no shrines in a max-tier loadout either — the
+       shrine transmutes spells (a spell upgrade), which is removed from
+       State B's pool. */
     this.shrine = null;
     this.waveDrop = this.resolveWaveDrop(n);
-    if (n >= 3 && n % 10 !== 0 && this.waveDrop !== "tribute" && this.waveDrop !== "resonance" && this.rng.chance(SHRINE_CHANCE)) {
+    if (n >= 3 && n % 10 !== 0 && !this.maxTierLoadout() && this.waveDrop !== "tribute" && this.waveDrop !== "resonance" && this.rng.chance(SHRINE_CHANCE)) {
       let sx = 0, sy = 0, ok = false;
       for (let attempt = 0; attempt < 12 && !ok; attempt++) {
         sx = this.rng.range(0.14, 0.86) * WORLD_W;
@@ -1408,14 +1459,27 @@ export class ArchmageEngine {
 
   /* Seeded reward draft — the run seed governs every tribute offer.
      Patch 6.0: pool = uncapped rewards + the always-available cache; picks
-     already taken to their REWARD_MAX cap are filtered out. */
+     already taken to their REWARD_MAX cap are filtered out.
+     V1.0 final — FAIR-CYCLING WEIGHTS: each card drafts with weight
+     1/(1 + timesDrafted), so every eligible boon surfaces across a run
+     instead of one lucky card dominating. Still 3 distinct cards, still
+     strict tribute cadence (every 5th wave) — only the DRAFT is weighted. */
   private pickRewards(): UpgradeChoice[] {
     const pool = REWARD_POOL.filter((r) => (this.rewardTiers[r.id] ?? 0) < (REWARD_MAX[r.id] ?? Infinity));
     const out: UpgradeChoice[] = [];
     const scratch = [...pool];
     while (out.length < 3 && scratch.length) {
-      const i = Math.floor(this.rng.next() * scratch.length);
-      out.push(scratch.splice(i, 1)[0]);
+      let total = 0;
+      for (const r of scratch) total += 1 / (1 + (this.rewardOffered[r.id] ?? 0));
+      let roll = this.rng.next() * total;
+      let pick = scratch[scratch.length - 1];
+      for (const r of scratch) {
+        roll -= 1 / (1 + (this.rewardOffered[r.id] ?? 0));
+        if (roll <= 0) { pick = r; break; }
+      }
+      out.push(pick);
+      this.rewardOffered[pick.id] = (this.rewardOffered[pick.id] ?? 0) + 1;
+      scratch.splice(scratch.indexOf(pick), 1);
     }
     return out;
   }
@@ -2535,17 +2599,27 @@ export class ArchmageEngine {
 
   /* --------------------------- Patch 5.0 drops --------------------------- */
 
-  /** Reshuffle the rotating spell-offer pool (seeded). Called on init +
-      every few waves so the player sees fresh faces. */
-  private reshuffleSpellPool() {
-    const scratch = [...SPELL_ORDER];
-    const out: ElementId[] = [];
-    while (scratch.length) {
-      const i = Math.floor(this.rng.next() * scratch.length);
-      out.push(scratch.splice(i, 1)[0]);
+  /** Draw the next spell-tear element: pops from the seeded bag, refilling
+      (excluding everything currently equipped) whenever it runs dry. Falls
+      back to any non-equipped element when the bag holds only stale picks
+      (can't happen with 13 elements and ≤6 held, but the game never breaks).
+      V1.0 final — FAIR-CYCLING RNG: a Fisher-Yates shuffle-bag over the
+      eligible roster guarantees every not-held element tears exactly once
+      per cycle before any repeat. */
+  private drawSpellTear(): ElementId {
+    const equipped = this.equippedSet();
+    while (this.spellBag.length) {
+      const id = this.spellBag.pop()!;
+      if (!equipped.has(id)) return id;
     }
-    this.spellPool = out;
-    this.poolCursor = 0;
+    /* refill: seeded Fisher-Yates over every eligible element */
+    const bag = SPELL_ORDER.filter((s) => !equipped.has(s));
+    for (let i = bag.length - 1; i > 0; i--) {
+      const j = Math.floor(this.rng.next() * (i + 1));
+      [bag[i], bag[j]] = [bag[j], bag[i]];
+    }
+    this.spellBag = bag;
+    return this.spellBag.pop() ?? SPELL_ORDER.find((s) => !equipped.has(s)) ?? SPELL_ORDER[0];
   }
 
   /** Flatten the equipped list into a Set of element ids currently in any
@@ -2559,12 +2633,12 @@ export class ArchmageEngine {
 
   /** Spawn a floating spell-drop glyph at (x, y) — Patch 11.0: the orb's
       kind is set by the strict wave economy (startWave); spell orbs carry
-      the element they represent. */
+      the element they represent.
+      V1.0 final: the element comes from the fair-cycling bag (never a
+      duplicate of something already held — the tear is always a real
+      choice, in every loadout state). */
   private spawnSpellDrop(x: number, y: number, kind: "spell" | "heart" | "resonance") {
-    const id = kind === "spell"
-      ? this.spellPool[this.poolCursor % this.spellPool.length]
-      : "blood";
-    if (kind === "spell") this.poolCursor++;
+    const id = kind === "spell" ? this.drawSpellTear() : "blood";
     this.spellDrops.push({
       kind, x, y, vx: 0, vy: -40, life: 14, id, grad: null,
       wob: this.rng.range(0, TAU),
@@ -2607,7 +2681,7 @@ export class ArchmageEngine {
       others.push(scratch.splice(i, 1)[0]);
     }
     const pool: ElementId[] = [d.id, ...others];
-    while (pool.length < SPELL_OFFER_COUNT) pool.push(this.spellPool[0] ?? SPELL_ORDER[0]);
+    while (pool.length < SPELL_OFFER_COUNT) pool.push(this.drawSpellTear());
     this.pendingOffer = { pool };
     this.phase = "spelloffer";
     this.o.onPhase("spelloffer", { offer: this.pendingOffer });
@@ -2705,7 +2779,9 @@ export class ArchmageEngine {
     if (this.mercyDr > 0) final *= 1 - this.mercyDr;
     this.hp -= final;
     this.iframes = 0.75;
-    if (!this.reducedMotion) this.redFlash = 0.55;
+    /* V1.0 final — reduceFlash accessibility setting softens the red
+       damage vignette alongside the OS reduced-motion preference. */
+    if (!this.reducedMotion && !this.o.settings.reduceFlash) this.redFlash = 0.55;
     this.shakeIt(11);
     this.o.sfx.hurt();
     const ang = Math.atan2(this.py - sy, this.px - sx);
@@ -2721,7 +2797,9 @@ export class ArchmageEngine {
     this.o.sfx.death();
     this.o.sfx.setIntensity(0);
     this.shakeIt(26);
-    if (!this.reducedMotion) this.redFlash = 1;
+    /* V1.0 final — reduceFlash accessibility setting softens the red
+       vignette alongside the OS reduced-motion preference. */
+    if (!this.reducedMotion && !this.o.settings.reduceFlash) this.redFlash = 1;
     for (let i = 0; i < 50; i++) this.puff(this.px, this.py, i % 2 ? "#b06bff" : "#f5c96b", 380, 4.6);
     this.ring(this.px, this.py, 220, "#b06bff", 5);
     /* Patch 10.0 — a death inside the endless echo still counts as a triumph
@@ -2908,18 +2986,26 @@ export class ArchmageEngine {
          array but generateArena now only ever emits the mana kind.) */
 
       /* rift shrine — transmutation on touch. Patch 6.0: offers reference
-         the player's EQUIPPED spells only. */
+         the player's EQUIPPED spells only. V1.0 final: fair-cycling weights
+         rotate the transmutation draft; shrines can't spawn in State B, but
+         a live merge inside the shrine's lifetime still resolves safely. */
       if (this.shrine) {
         const s = this.shrine;
         const dx = this.px - s.x, dy = this.py - s.y;
         if (dx * dx + dy * dy < 34 * 34) {
           this.shrine = null;
-          const choices = offerEvolutions(this.rng, this.evolutions, this.equippedSet());
-          if (choices.length > 0) {
-            this.pendingAfter = "resume";
-            this.phase = "evolution";
-            this.o.onPhase("evolution");
-            this.o.onEvolution(choices);
+          if (!this.maxTierLoadout()) {
+            const choices = offerEvolutions(this.rng, this.evolutions, this.equippedSet(), this.evoOffered);
+            for (const c of choices) this.evoOffered[c.id] = (this.evoOffered[c.id] ?? 0) + 1;
+            if (choices.length > 0) {
+              this.pendingAfter = "resume";
+              this.phase = "evolution";
+              this.o.onPhase("evolution");
+              this.o.onEvolution(choices);
+            } else {
+              this.score += 150;
+              this.o.onBanner("THE SHRINE COLLAPSES", "+150 score — nothing left to transmute", "#43e8d8");
+            }
           } else {
             this.score += 150;
             this.o.onBanner("THE SHRINE COLLAPSES", "+150 score — nothing left to transmute", "#43e8d8");
