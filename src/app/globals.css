@@ -339,6 +339,49 @@ canvas {
   transition: width 0.12s linear;
 }
 
+/* ---------- Patch 10.1 — icon status chips ----------
+   The text-heavy status lines ("FIREBALL primed — cast another element",
+   "RADIANT LANCE attuned — free casts +50% power") are replaced by compact
+   visual chips: spell glyph + status glyph + decay timer bar. Full sentences
+   live on in the aria-labels; the arena stays clean. */
+.status-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  margin: 0 auto;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(154, 123, 255, 0.4);
+  background: rgba(13, 9, 25, 0.85);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+}
+.status-chip .chip-glyph {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10.5px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  color: #e9e2ff;
+  line-height: 1;
+}
+.status-chip .chip-bar {
+  flex: 1;
+  min-width: 96px;
+  max-width: 170px;
+  height: 5px;
+}
+.chip-pulse {
+  animation: chipPulse 0.9s ease-in-out infinite;
+}
+@keyframes chipPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(1.4); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .chip-pulse { animation: none; }
+}
+
 /* ---------- spell slots ---------- */
 .spell-slot {
   position: relative;

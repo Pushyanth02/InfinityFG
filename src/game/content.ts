@@ -104,8 +104,12 @@ export const SPELL_OFFER_COUNT = 3;        // spells shown per drop overlay
 /* Global difficulty: all enemy HP and damage are scaled by this factor.
    0.9 = the requested "10% easier" across the board (speed untouched so the
    game FEELS identical, just less punishing). Applies to bosses + hazards
-   as well (boss stats come from BOSS_DEFS; hazards scale with wave). */
-export const DIFFICULTY_MULT = 0.9;
+   as well (boss stats come from BOSS_DEFS; hazards scale with wave).
+   Patch 10.1 — a SECOND global −10% (0.9 × 0.9 = 0.81): the foundational
+   update lowers base difficulty another tenth across HP, damage, wave
+   budget, spawn cap and elite pressure. Rift Mercy then personalizes on
+   top of this gentler baseline. */
+export const DIFFICULTY_MULT = 0.81;
 
 /* Patch 10.0 — the victory wave: clearing wave 50's tyrant seals the rift
    and rolls the end-credit sequence ("you closed the rift"), after which
@@ -827,6 +831,10 @@ export interface GameSettings {
   sfx: number;            // 0..100 sound-effects volume
   gfx: GfxLevel;          // render quality preset
   screenShake: boolean;   // camera shake on impacts
+  /* Patch 10.1 — custom UI scaling: multiplies the entire HUD layer
+     (vitals / wave plate / spell bar / status chips). 0.75–1.25, default
+     0.9 — the HUD ships SMALLER by default for maximum arena legibility. */
+  hudScale: number;       // 0.75..1.25 UI scale multiplier
 }
 
 export const DEFAULT_SETTINGS: GameSettings = {
@@ -834,6 +842,9 @@ export const DEFAULT_SETTINGS: GameSettings = {
   /* Patch 10.0 — music louder by default: the score is meant to be HEARD
      (the music bus headroom was also raised in audio.ts: ×0.5 → ×0.85). */
   master: 80, music: 70, sfx: 90, gfx: 2, screenShake: true,
+  /* Patch 10.1 — HUD 10% smaller out of the box (less screen furniture,
+     more arena); the Settings slider lets each player re-scale it. */
+  hudScale: 0.9,
 };
 
 export interface MetaSave {

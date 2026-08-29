@@ -402,18 +402,18 @@ export function MenuScreen({ chapter, chapterSubtitle, onStart }: MenuProps) {
 
         <div className="anim-fade-up-3 mt-4 w-full max-w-2xl border border-[rgba(154,123,255,0.28)] bg-[rgba(18,11,36,0.75)] px-6 py-3 text-left">
           <div className="flex items-center justify-between">
-            <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#6bf0c2]">Patch 10.0 — The Sealed Rift</div>
+            <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#6bf0c2]">Patch 10.1 — The Clear Horizon</div>
             <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6a5a99]">live</div>
           </div>
           <ul className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1 text-[12.5px] text-[#c9bdf0] list-none">
-            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Endgame: seal the rift at wave 50 — credits, then Return or Fight</li>
-            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Endless echo mode — survive past the seal, escalating forever</li>
-            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Touch controls rebuilt — zero overlap, thumb-zone layout</li>
-            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Rite of Control now teaches the device it runs on</li>
-            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Fluid movement — lean, turn-assist, stride dust</li>
-            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> The score mixed loud — dramatic boss ostinato on entry</li>
-            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Spell drops nerfed exactly 10% — the rift reabsorbs tears</li>
-            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> HUD rescaled for every screen, edge to edge</li>
+            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Fullscreen play on mobile — the rift claims the whole screen</li>
+            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Camera widened — see more of the arena than ever before</li>
+            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> HUD 10% smaller by default, with a new HUD-scale slider</li>
+            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Status icons — primed and attuned now read at a glance</li>
+            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Base difficulty lowered another 10% across the rift</li>
+            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Rift Mercy — progressive tiers, always yours to lower</li>
+            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Landscape enforced with the rotate guard on touch</li>
+            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Single FIRE button + spell toggle — no fire joystick</li>
           </ul>
         </div>
       </div>
@@ -999,6 +999,28 @@ export function SettingsScreen({ onClose }: { onClose: () => void }) {
                 className="accent-[#f5c96b] w-5 h-5 shrink-0"
               />
             </label>
+            {/* Patch 10.1 — custom UI scaling: the HUD ships 10% smaller by
+                default; this slider re-scales it to taste (75%–125%). */}
+            <div className="flex items-center gap-3 py-1.5">
+              <span className="text-[#b9aee0] shrink-0"><UiIcon name="settings" size={16} /></span>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-baseline justify-between">
+                  <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-[#c9bdf0]">HUD scale</span>
+                  <span className="text-[12px] font-black tabular-nums text-[#ffe9ad]">{Math.round(s.hudScale * 100)}%</span>
+                </div>
+                <input
+                  type="range"
+                  min={75}
+                  max={125}
+                  step={5}
+                  value={Math.round(s.hudScale * 100)}
+                  aria-label="HUD scale"
+                  onChange={(e) => { sfx.click(); patchSettings({ hudScale: Number(e.target.value) / 100 }); }}
+                  className="settings-slider"
+                />
+                <div className="text-[10.5px] text-[#6a5a99] italic mt-0.5">Size of the combat interface — vitals, wave plate, spell bar and status chips</div>
+              </div>
+            </div>
           </div>
         </div>
 

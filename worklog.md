@@ -29,3 +29,37 @@ Stage Summary:
 - Archmage — Rift Survivor replicated byte-exact (md5-verified) into the sandbox: 13 game source files, 1 art asset, docs, deploy workflow, dual-mode configs.
 - Audit fixes applied: corrected stale package.json description (13 elements/78 resonances); noted JPEG-in-.png asset oddity.
 - Final state: lint 0/0, tsc 0, single dev server HTTP 200, golden path (menu→run→boss→death→meta-progression→mobile) fully browser-verified with zero errors.
+
+---
+Task ID: 2
+Agent: orchestrator (Z.ai Code) — Lead Game Developer
+Task: Patch 10.1 "The Clear Horizon" — foundational updates: viewport/camera (mobile fullscreen, FOV), controls/UI (HUD scaling slider, icon status notifications), Rift Mercy overhaul verification + fresh −10% global difficulty.
+
+Work Log:
+- Deep-read all touched systems first: TouchControls.tsx (fire button layout), GameShell.tsx (HUD refs/onHud 30Hz path), store.ts, content.ts (mercy constants, GameSettings, DIFFICULTY_MULT, scaleEnemy/waveBudget/spawnCap/eliteChance), engine.ts (computeFov, attunement/resonance priming), screens.tsx (SettingsScreen, MenuScreen rite + patch notes), icons.tsx, globals.css.
+- Audit of the request vs current build: rotate guard, single FIRE button + spell-toggle, Rite-of-Controls device gating, Mercy progressive tiers (T1 2%→4%, T2 6%, +4%/tier, attack/defense/spawn/HP/speed packages) and manual tier downgrade already existed from Patches 9.0/10.0 — verified live instead of rebuilt. New work: fullscreen, FOV, HUD scale, icon chips, second −10% difficulty.
+- NEW src/components/game/useFullscreen.ts: useFullscreen hook (request/exit/toggle + requestMobileFullscreen; standard + webkit prefixed; fullscreenchange listeners; silent-fail everywhere; memoized return).
+- GameShell.tsx: fs hook wired into startRun (auto-request on touch ENTER/RISE — user-gesture path); onHud rewritten — resLabel/attLabel text writes replaced by rare setState icon swaps (resNotif/attNotif + id refs, hot path untouched); all five HUD containers (vitals, wave plate, right cluster, status meters, spell bar) get style.zoom = hudScale (default 0.9); status chips render SpellIcon + pulsing + (resonance) / SpellIcon + bolt + +50% (attunement) with ref-driven decay bars and full-sentence aria-labels; TouchControls receives onToggleFullscreen/isFullscreen.
+- TouchControls.tsx: FULL/EXIT button added to the top-right utility row (between ARCHMAGE and PAUSE), aria-pressed state, expand/compress icons.
+- icons.tsx: new UiIcon cases "expand"/"compress" (four-corner arrows) + "bolt" routed to BoonIcon (was missing — found during browser QA: attunement chip rendered without the bolt glyph; fixed and re-verified).
+- content.ts: GameSettings.hudScale (0.75–1.25, default 0.9 — HUD ships 10% smaller); DIFFICULTY_MULT 0.9 → 0.81 (second global −10%: enemy HP, damage, wave budget, spawn cap, elite chance; speed untouched).
+- engine.ts: computeFov widened per device class (phone 1080×640→1180×700, tablet 1180×680→1320×780, desktop 1280×720→1440×840).
+- screens.tsx: HUD-scale slider in Settings → Graphics (75–125%, step 5, click-synced to store + persisted); menu patch-notes panel updated to Patch 10.1 (8 bullets).
+- globals.css: .status-chip / .chip-glyph / .chip-bar / .chip-pulse styles + chipPulse keyframes, prefers-reduced-motion guard.
+- CHANGELOG.md: full Patch 10.1 section.
+
+Browser verification (agent-browser, zero page errors, zero console errors):
+- Menu: Patch 10.1 notes panel renders (fullscreen/HUD-10% bullets confirmed in innerText).
+- Settings: HUD-scale slider present (value 90, min 75, max 125, step 5); set to 125 → persisted (localStorage 1.25) → in-run vitals + wave plate + spell bar style.zoom "1.25" (vitals 285px vs 248 base); reset to 0.9 → zoom "0.9" live.
+- Difficulty: fresh run, live wave-1 goblin maxHp = 21.06 = 26 × 0.81 exactly (was 23.4 at 0.9).
+- Resonance chip: cast(0) → chip opacity 1, SpellIcon rendered, pulsing + present, aria-label "Fireball primed — cast another element to weave the resonance", decay bar width 83.35% animating.
+- Attunement chip: forced via dev hook → opacity 1, spell icon + bolt + "+50%" glyphs, aria-label "…attuned — free casts at +50% power"; icon bug (missing UiIcon bolt case) caught + fixed + re-verified (2 svgs).
+- Mercy: localStorage mercyDeaths=2, mercy ON → Settings tier chips AUTO 6% (pressed) / T1 2% / T2 6% / NONE; clicked T1 → mercyTierSel=1 persisted; in-run HUD readout "T1".
+- Touch (forced coarse-pointer + ontouchstart, 915×412 landscape): full thumb-zone layout renders incl. "Enter fullscreen" FULL button; real Playwright click → document.fullscreenElement true, button flips to "Exit fullscreen"/EXIT/pressed; click again → false. (Synthetic JS clicks can't fire it — onPointerDown + user-activation requirement, by design.)
+- Rite gating: forced-touch session renders touch controls (LEFT STICK rite path); fresh desktop page renders keyboard/LMB rite — device gating proven both directions.
+- Quality gates: eslint 0/0, tsc --noEmit 0 errors, dev.log clean (HTTP 200, no runtime errors).
+
+Stage Summary:
+- Patch 10.1 shipped: mobile fullscreen mechanism (auto on run start + FULL toggle), widened camera FOV, HUD 10% smaller by default with 75–125% settings slider, icon status chips replacing text-heavy primed/attuned lines (aria-labels preserved), fresh −10% global difficulty (0.81), Mercy progressive tiers + manual downgrade confirmed live.
+- One real bug found & fixed during QA (missing UiIcon "bolt" case).
+- All prior features re-verified untouched; zero console/page errors across every flow.

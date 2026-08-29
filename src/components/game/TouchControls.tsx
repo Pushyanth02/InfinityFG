@@ -39,6 +39,9 @@ interface Props {
   equippedIds: (ElementId | { merged: ElementId[] } | null)[];
   /** Patch 9.0 — live selected slot index (drives the SPELL button icon). */
   selectedSlot: number;
+  /** Patch 10.1 — fullscreen toggle (touch action row). */
+  onToggleFullscreen: () => void;
+  isFullscreen: boolean;
 }
 
 interface StickState {
@@ -72,6 +75,8 @@ export function TouchControls({
   onSelectSlot, onDash, onSurge, onPause, onToggleAuto, autoMode,
   equippedIds = STARTER_SPELLS as ElementId[],
   selectedSlot = 0,
+  onToggleFullscreen,
+  isFullscreen = false,
 }: Props) {
   const moveStick = useRef<StickState | null>(null);
   const moveHomeRef = useRef<HTMLDivElement | null>(null);
@@ -310,9 +315,11 @@ export function TouchControls({
         </button>
       </div>
 
-      {/* utility row — top-right, BELOW the shards HUD: ARCHMAGE · PAUSE.
-          Compact horizontal buttons: the only things up here, so nothing
-          ever collides with the attack zone below. */}
+      {/* utility row — top-right, BELOW the shards HUD: ARCHMAGE · FULL ·
+          PAUSE. Patch 10.1 adds the fullscreen toggle (edge-to-edge play;
+          ENTER THE RIFT already auto-requests it — this is the manual exit
+          and re-entry). Compact horizontal buttons: nothing up here ever
+          collides with the attack zone below. */}
       <div className="touch-actions">
         <button
           type="button"
@@ -323,6 +330,17 @@ export function TouchControls({
         >
           <UiIcon name="rings" size={19} />
           <span className="touch-btn-label">{autoMode ? "AUTO" : "MAGE"}</span>
+        </button>
+
+        <button
+          type="button"
+          className="touch-btn sm fullscreen"
+          onPointerDown={(e) => { e.preventDefault(); onToggleFullscreen(); }}
+          aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+          aria-pressed={isFullscreen}
+        >
+          <UiIcon name={isFullscreen ? "compress" : "expand"} size={18} />
+          <span className="touch-btn-label">{isFullscreen ? "EXIT" : "FULL"}</span>
         </button>
 
         <button

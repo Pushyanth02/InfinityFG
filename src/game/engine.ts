@@ -525,10 +525,14 @@ export class ArchmageEngine {
   }
 
   /** Patch 9.0 — FOV: guarantee a minimum visible world slice per device,
-      clamped so the camera never reveals space beyond the world bounds. */
+      clamped so the camera never reveals space beyond the world bounds.
+      Patch 10.1 — the slice is WIDENED per device class for maximum map
+      visibility (phones see ~78% of world width, desktops ~75%): threats
+      telegraph earlier and the arena reads as the true 1920×1280 rift it
+      is, not a keyhole. */
   private computeFov() {
-    const minH = this.deviceClass === "phone" ? 640 : this.deviceClass === "tablet" ? 680 : 720;
-    const minW = this.deviceClass === "phone" ? 1080 : this.deviceClass === "tablet" ? 1180 : 1280;
+    const minH = this.deviceClass === "phone" ? 700 : this.deviceClass === "tablet" ? 780 : 840;
+    const minW = this.deviceClass === "phone" ? 1180 : this.deviceClass === "tablet" ? 1320 : 1440;
     let z = Math.min(this.w / minW, this.h / minH);
     z = Math.max(z, this.w / WORLD_W, this.h / WORLD_H);
     z = Math.min(z, 1.6);

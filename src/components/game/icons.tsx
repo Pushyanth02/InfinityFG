@@ -363,6 +363,8 @@ export function UiIcon({ name, ...p }: IconProps & { name: string }) {
     case "shield": return <BoonIcon name="shield" {...p} />;
     case "heart": return <BoonIcon name="heart" {...p} />;
     case "sword": return <BoonIcon name="sword" {...p} />;
+    /* Patch 10.1 — bolt glyph for the attunement status chip */
+    case "bolt": return <BoonIcon name="bolt" {...p} />;
     case "book":
       return (
         <svg {...base(p)}>
@@ -399,6 +401,19 @@ export function UiIcon({ name, ...p }: IconProps & { name: string }) {
       return (
         <svg {...base(p)}>
           <path d="M2.5 12c1.6-4 3.2-6 4.8-6s3.2 2 4.7 6 3.1 6 4.7 6 3.2-2 4.8-6" />
+        </svg>
+      );
+    /* Patch 10.1 — fullscreen toggle glyphs (four-corner arrows) */
+    case "expand":
+      return (
+        <svg {...base(p)}>
+          <path d="M14 4h6v6M10 4H4v6M14 20h6v-6M10 20H4v-6" />
+        </svg>
+      );
+    case "compress":
+      return (
+        <svg {...base(p)}>
+          <path d="M20 14h-6v6M4 14h6v6M20 10h-6V4M4 10h6V4" />
         </svg>
       );
     default: return null;

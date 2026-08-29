@@ -17,6 +17,7 @@ import {
 import { BossTitleCard, EndCreditsOverlay, EvolutionOverlay, MergeOverlay, SpellOfferOverlay } from "./overlays";
 import { TouchControls } from "./TouchControls";
 import { useIsPortraitTouch, useIsTouchDevice } from "./useIsTouchDevice";
+import { useFullscreen } from "./useFullscreen";
 import { BOSS_DEFS } from "@/game/content";
 
 /* boss ids for routing bestiary discovery callbacks */
@@ -55,6 +56,9 @@ export default function GameShell() {
   /* Patch 9.0 — effective Rift Mercy tier from the meta ladder (recomputed
      whenever the settings toggle, banked deaths, or manual tier change). */
   const mercyTier = effectiveMercyTier(meta);
+  /* Patch 10.1 — custom UI scaling (Settings → HUD scale; default 0.9 so the
+     HUD ships smaller). Clamped defensively against corrupt saves. */
+  const hudZoom = Math.max(0.75, Math.min(1.25, meta.settings.hudScale || 0.9));
 
   const metaRef = useRef(meta);
   useEffect(() => { metaRef.current = meta; }, [meta]);
@@ -87,10 +91,8 @@ export default function GameShell() {
   const dashFill = useRef<HTMLDivElement | null>(null);
   const resWrap = useRef<HTMLDivElement | null>(null);
   const resFill = useRef<HTMLDivElement | null>(null);
-  const resLabel = useRef<HTMLSpanElement | null>(null);
   const attWrap = useRef<HTMLDivElement | null>(null);
   const attFill = useRef<HTMLDivElement | null>(null);
-  const attLabel = useRef<HTMLSpanElement | null>(null);
   const bossWrap = useRef<HTMLDivElement | null>(null);
   const bossFill = useRef<HTMLDivElement | null>(null);
   const bossLabel = useRef<HTMLDivElement | null>(null);
@@ -102,6 +104,18 @@ export default function GameShell() {
 
   /* touch detection — drives whether the virtual twin-stick layer renders */
   const isTouch = useIsTouchDevice();
+  /* Patch 10.1 — fullscreen mechanism: touch devices auto-enter fullscreen
+     on run start (the ENTER tap is the user gesture the API demands), and a
+     FULL button in the touch action row toggles it. Desktops stay windowed. */
+  const fs = useFullscreen();
+  /* Patch 10.1 — icon status notifications: the resonance-primed / attuned
+     messages render as compact glyph chips instead of text lines. The primed
+     element changes rarely, so React state is fine here — the 30 Hz decay
+     bars still write refs directly (zero re-renders on the hot path). */
+  const [resNotif, setResNotif] = useState<ElementId | null>(null);
+  const [attNotif, setAttNotif] = useState<ElementId | null>(null);
+  const resIdRef = useRef<ElementId | null>(null);
+  const attIdRef = useRef<ElementId | null>(null);
 
   /* weave / surge mirror refs so TouchControls can read live state without
      subscribing to HUD callbacks (which would force re-renders). */
@@ -208,29 +222,42 @@ export default function GameShell() {
       }
     }
     if (dashFill.current) dashFill.current.style.height = `${h.dashFrac * 100}%`;
-    if (resWrap.current && resFill.current && resLabel.current) {
+    if (resWrap.current && resFill.current) {
       if (h.resonance) {
         const def = SPELLS[h.resonance.id];
         resWrap.current.style.opacity = "1";
         resFill.current.style.width = `${h.resonance.frac * 100}%`;
         resFill.current.style.background = def.color;
-        resLabel.current.textContent = `${def.name} primed — cast another element`;
-        resLabel.current.style.color = def.color;
+        /* Patch 10.1 — icon chip: swap the glyph only when the primed
+           element actually changes (state writes stay off the hot path). */
+        if (resIdRef.current !== h.resonance.id) {
+          resIdRef.current = h.resonance.id;
+          setResNotif(h.resonance.id);
+        }
       } else {
         resWrap.current.style.opacity = "0";
+        if (resIdRef.current !== null) {
+          resIdRef.current = null;
+          setResNotif(null);
+        }
       }
     }
-    if (attWrap.current && attFill.current && attLabel.current) {
+    if (attWrap.current && attFill.current) {
       if (h.attune) {
         const def = SPELLS[h.attune.id];
         attWrap.current.style.opacity = "1";
-        attWrap.current.style.borderColor = def.color + "88";
         attFill.current.style.width = `${h.attune.frac * 100}%`;
         attFill.current.style.background = def.color;
-        attLabel.current.textContent = `${def.name} attuned — free casts +50% power`;
-        attLabel.current.style.color = def.color;
+        if (attIdRef.current !== h.attune.id) {
+          attIdRef.current = h.attune.id;
+          setAttNotif(h.attune.id);
+        }
       } else {
         attWrap.current.style.opacity = "0";
+        if (attIdRef.current !== null) {
+          attIdRef.current = null;
+          setAttNotif(null);
+        }
       }
     }
     if (bossWrap.current && bossFill.current) {
@@ -420,9 +447,13 @@ export default function GameShell() {
 
   const startRun = useCallback(() => {
     sfx.unlock();
+    /* Patch 10.1 — forced fullscreen on touch devices: this tap IS the user
+       gesture the Fullscreen API requires. iPhone Safari (no element
+       fullscreen) declines silently and the game stays windowed. */
+    void fs.requestMobileFullscreen(isTouch);
     /* Patch 7.0: no intro cutscene — straight into the arena. */
     beginEngine();
-  }, [beginEngine]);
+  }, [beginEngine, fs, isTouch]);
 
   useEffect(() => () => stopRun(), [stopRun]);
 
@@ -561,9 +592,9 @@ export default function GameShell() {
       {/* ================================ HUD ================================ */}
       {inRun && (
         <>
-          {/* vitals */}
+          {/* vitals — Patch 10.1: scaled by the HUD-scale setting (default 0.9) */}
           <div className="hud-vitals rune-panel px-4 py-3 w-[248px] pointer-events-none"
-               style={{ top: "calc(env(safe-area-inset-top) + 12px)", left: "calc(env(safe-area-inset-left) + 12px)" }}>
+               style={{ top: "calc(env(safe-area-inset-top) + 12px)", left: "calc(env(safe-area-inset-left) + 12px)", zoom: hudZoom }}>
             <div className="flex items-baseline justify-between">
               <span className="hud-vitals-title font-display font-bold text-[15px] tracking-[0.18em] text-[#f5e3b3]">ARCHMAGE</span>
               <span ref={timeText} className="text-[12px] font-bold text-[#8f7bff] tabular-nums">0:00</span>
@@ -599,9 +630,9 @@ export default function GameShell() {
             </div>
           </div>
 
-          {/* wave plate — act name + wave */}
+          {/* wave plate — act name + wave (Patch 10.1: HUD-scale aware) */}
           <div className="absolute left-1/2 -translate-x-1/2 z-20 text-center pointer-events-none"
-               style={{ top: "calc(env(safe-area-inset-top) + 12px)" }}>
+               style={{ top: "calc(env(safe-area-inset-top) + 12px)", zoom: hudZoom }}>
             <div className="hud-wave-plate rune-panel px-6 py-2 min-w-[190px]">
               <div ref={actText} className="hud-act-label text-[9px] font-bold uppercase tracking-[0.24em] text-[#6bf0c2]">The Weeping Gate</div>
               <div className="hud-wave-label text-[10px] font-bold uppercase tracking-[0.34em] text-[#9a7bff]">Wave</div>
@@ -641,7 +672,7 @@ export default function GameShell() {
           {/* right cluster — on touch devices the pause button lives in the
               TouchControls action row. Shards + mute remain visible. */}
           <div className="absolute z-20 flex items-center gap-2"
-               style={{ top: "calc(env(safe-area-inset-top) + 12px)", right: "calc(env(safe-area-inset-right) + 12px)" }}>
+               style={{ top: "calc(env(safe-area-inset-top) + 12px)", right: "calc(env(safe-area-inset-right) + 12px)", zoom: hudZoom }}>
             <div className="rune-panel px-3 py-2 flex items-center gap-2 pointer-events-none">
               <span className="text-[#ffe9ad]"><UiIcon name="gem" size={16} /></span>
               <span className="font-display font-bold text-[#ffe9ad]">{meta.shards}</span>
@@ -656,24 +687,48 @@ export default function GameShell() {
             )}
           </div>
 
-          {/* resonance / attune meters — raised above the touch action row */}
+          {/* Patch 10.1 — ICON STATUS CHIPS: the old text lines ("FIREBALL
+              primed — cast another element" / "RADIANT LANCE attuned — free
+              casts +50% power") are now compact glyph chips: spell icon +
+              pulsing + for a primed resonance, spell icon + bolt +50% for an
+              attunement. Full sentences remain as aria-labels for screen
+              readers; the decay timer bars still animate via refs. */}
           <div className="absolute left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1.5 pointer-events-none w-[380px] max-w-[86vw]"
-               style={{ bottom: isTouch ? "calc(168px + env(safe-area-inset-bottom))" : "128px" }}>
-            <div ref={resWrap} className="w-full transition-opacity duration-200" style={{ opacity: 0 }}>
-              <span ref={resLabel} className="block text-center text-[11px] font-bold uppercase tracking-[0.2em]">Resonance</span>
-              <div className="bar h-[6px] mt-1"><div ref={resFill} className="bar-fill" style={{ width: "100%" }} /></div>
+               style={{ bottom: isTouch ? "calc(168px + env(safe-area-inset-bottom))" : "128px", zoom: hudZoom }}>
+            <div ref={resWrap} className="w-full transition-opacity duration-200" style={{ opacity: 0 }}
+                 role="status"
+                 aria-label={resNotif ? `${SPELLS[resNotif].name} primed — cast another element to weave the resonance` : undefined}>
+              <div className="status-chip">
+                {resNotif && (
+                  <>
+                    <span style={{ color: SPELLS[resNotif].color }}><SpellIcon id={resNotif} size={15} /></span>
+                    <span className="chip-glyph chip-pulse" style={{ color: SPELLS[resNotif].color }} aria-hidden>+</span>
+                  </>
+                )}
+                <div className="bar chip-bar"><div ref={resFill} className="bar-fill" style={{ width: "100%" }} /></div>
+              </div>
             </div>
-            <div ref={attWrap} className="w-full border px-3 py-1.5 transition-opacity duration-300" style={{ opacity: 0, background: "rgba(13,9,25,0.85)" }}>
-              <span ref={attLabel} className="block text-center text-[11px] font-bold uppercase tracking-[0.2em]">Attuned</span>
-              <div className="bar h-[5px] mt-1"><div ref={attFill} className="bar-fill" style={{ width: "100%" }} /></div>
+            <div ref={attWrap} className="w-full transition-opacity duration-300" style={{ opacity: 0 }}
+                 role="status"
+                 aria-label={attNotif ? `${SPELLS[attNotif].name} attuned — free casts at +50% power` : undefined}>
+              <div className="status-chip">
+                {attNotif && (
+                  <>
+                    <span style={{ color: SPELLS[attNotif].color }}><SpellIcon id={attNotif} size={15} /></span>
+                    <span className="chip-glyph" aria-hidden><UiIcon name="bolt" size={11} /></span>
+                    <span className="chip-glyph" aria-hidden>+50%</span>
+                  </>
+                )}
+                <div className="bar chip-bar"><div ref={attFill} className="bar-fill" style={{ width: "100%" }} /></div>
+              </div>
             </div>
           </div>
 
           {/* spell bar — hidden on touch devices (TouchControls renders its own strip)
-              and during the game-over eulogy. */}
+              and during the game-over eulogy. Patch 10.1: HUD-scale aware. */}
           {!isTouch && phase !== "gameover" && phase !== "spelloffer" && phase !== "mergeoffer" && (
             <div className="absolute left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1"
-                 style={{ bottom: "calc(env(safe-area-inset-bottom) + 8px)" }}>
+                 style={{ bottom: "calc(env(safe-area-inset-bottom) + 8px)", zoom: hudZoom }}>
               <div className="flex items-end gap-1">
                 {equippedIds.map((entry, i) => {
                   if (entry === null) {
@@ -790,6 +845,8 @@ export default function GameShell() {
           onToggleAuto={onToggleAuto}
           equippedIds={equippedIds}
           selectedSlot={selectedSlot}
+          onToggleFullscreen={fs.toggle}
+          isFullscreen={fs.isFullscreen}
         />
       )}
 

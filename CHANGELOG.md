@@ -3,6 +3,42 @@
 All notable changes to **Archmage — Rift Survivor** are documented here.
 The game itself reports the live patch on its menu screen.
 
+## Patch 10.1 — The Clear Horizon
+
+The foundational controls & feel patch.
+
+### Viewport & camera
+- **Fullscreen on mobile**: entering the rift on a touch device now requests
+  browser fullscreen automatically (the tap itself is the user gesture the
+  API demands); a **FULL** button joins the touch action row for manual exit
+  / re-entry. iPhone Safari (no element fullscreen) declines silently.
+- **Camera widened for maximum map visibility**: the per-device FOV floors
+  rose (phone 1080×640 → 1180×700, tablet → 1320×780, desktop → 1440×840) —
+  threats telegraph earlier and the 1920×1280 arena reads true.
+- Landscape remains enforced on touch devices with the rotate guard.
+
+### Controls & UI
+- Single **FIRE** button + spell-toggle mechanism (cycle button and tap-to-
+  select strip) — confirmed final; no fire joystick anywhere.
+- The Rite of Control teaches only the device it runs on (keyboard/mouse vs
+  touch gestures) — never both.
+- **HUD 10% smaller by default**, with a new **HUD-scale slider** in
+  Settings → Graphics (75%–125%) covering vitals, wave plate, spell bar and
+  status chips.
+- **Icon status notifications**: the text-heavy primed/attuned lines are now
+  compact glyph chips — spell icon + pulsing `+` for a primed resonance,
+  spell icon + bolt `+50%` for an attunement, each with its decay bar. Full
+  sentences remain as aria-labels for screen readers.
+
+### Balance
+- **Global base difficulty lowered another 10%** (DIFFICULTY_MULT
+  0.9 → 0.81): enemy HP, damage, wave budget, spawn cap and elite pressure
+  are all gentler; speed untouched so the arena still feels the same.
+- **Rift Mercy** confirmed progressive: tier 1 = 2%→4% within a run, tier 2
+  = 6%→8%, +4% per further death — attack up, damage taken down, fewer and
+  softer spawns. The tier can always be lowered by hand in Settings (AUTO /
+  T1…Tn / OFF) if the rift becomes too kind.
+
 ## Patch 10.0 — The Sealed Rift
 
 The endgame, audio and cross-device polish patch.
