@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { ArchmageEngine, GamePhase, HudData, MergeOffer, RunStats, SpellOffer } from "@/game/engine";
 import {
   actForWave, computeBonuses, effectiveMercyTier, ElementId, SPELLS, STARTER_SPELLS,
@@ -432,6 +432,46 @@ export default function GameShell() {
 
   const inRun = phase === "running" || phase === "paused" || phase === "intermission" || phase === "gameover" || phase === "evolution" || phase === "spelloffer" || phase === "mergeoffer" || phase === "epilogue";
 
+  /* V1.0.1 — HUD FIT GUARD: if the three top-row panels cannot fit the
+     viewport at the current HUD scale (narrow window × large scale), shrink
+     the SIDE panels via --hud-fit until the row stops overflowing. The
+     centered plate already clamps to whatever remains — so nothing ever
+     overlaps and nothing leaves the screen, at every width × scale combo. */
+  const hudRowRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const row = hudRowRef.current;
+    if (!row) return;
+    let raf = 0;
+    const compute = () => {
+      raf = 0;
+      const center = row.querySelector<HTMLElement>(".hud-center");
+      row.style.setProperty("--hud-fit", "1");
+      let f = 1;
+      /* step the side-panel zoom down until the row fits AND the centered
+         plate keeps a livable zone (≥90px — the compact plate + boss bar).
+         The center zone starves to 0 before the row ever overflows, so the
+         scrollWidth check alone is not enough. Floor 0.35 — below that the
+         HUD text is unreadable and the window degenerate. */
+      for (let i = 0; i < 12; i++) {
+        const cw = center ? center.getBoundingClientRect().width : row.clientWidth;
+        if (row.scrollWidth <= row.clientWidth && cw >= 90) break;
+        f = Math.max(0.35, f - 0.07);
+        row.style.setProperty("--hud-fit", f.toFixed(3));
+      }
+    };
+    compute();
+    /* re-fit on any viewport or row-size change (rotation, window resize,
+       scale-slider moves, touch controls mounting the pause button…) */
+    const ro = new ResizeObserver(() => { if (!raf) raf = requestAnimationFrame(compute); });
+    ro.observe(row);
+    window.addEventListener("resize", compute);
+    return () => {
+      if (raf) cancelAnimationFrame(raf);
+      ro.disconnect();
+      window.removeEventListener("resize", compute);
+    };
+  }, [inRun, hudZoom, isTouch]);
+
   /* Patch 7.0 — the adaptive score calms down whenever we're out of a run. */
   useEffect(() => {
     if (phase === "menu") sfx.setIntensity(0);
@@ -560,9 +600,28 @@ export default function GameShell() {
       {/* ================================ HUD ================================ */}
       {inRun && (
         <>
-          {/* vitals — Patch 10.1: scaled by the HUD-scale setting (default 0.9) */}
-          <div className="hud-vitals rune-panel px-4 py-3 w-[248px] pointer-events-none"
-               style={{ top: "calc(env(safe-area-inset-top) + 12px)", left: "calc(env(safe-area-inset-left) + 12px)", zoom: hudZoom }}>
+          {/* V1.0.1 OVERLAP FIX — the top HUD is now ONE flex row (vitals |
+              centered wave/boss plate | utility cluster). The three clusters
+              used to be absolutely positioned, so on narrow viewports and
+              large HUD scales the centered wave plate + "Rift Tyrant" boss
+              bar landed ON TOP of the vitals panel's Weave + Rift Mercy
+              rows. As flex children the side panels reserve their true
+              zoomed width, the plate centers in whatever remains, and the
+              plate/boss bar clamp with max-width — overlap is geometrically
+              impossible at any viewport width × any HUD scale (75–150%). */}
+          <div
+            ref={hudRowRef}
+            className="hud-row absolute inset-x-0 top-0 z-20 flex items-start justify-between gap-2 pointer-events-none"
+            style={{
+              paddingTop: "calc(env(safe-area-inset-top) + 12px)",
+              paddingLeft: "calc(env(safe-area-inset-left) + 12px)",
+              paddingRight: "calc(env(safe-area-inset-right) + 12px)",
+              "--hud-scale": hudZoom,
+            } as CSSProperties}
+          >
+          {/* vitals — scaled by the HUD-scale setting (default 0.9) */}
+          <div className="hud-side hud-side-l flex justify-start">
+            <div className="hud-vitals rune-panel px-4 py-3 w-[248px] pointer-events-none">
             <div className="flex items-baseline justify-between">
               <span className="hud-vitals-title font-display font-bold text-[15px] tracking-[0.18em] text-[#f5e3b3]">ARCHMAGE</span>
               <span ref={timeText} className="text-[12px] font-bold text-[#8f7bff] tabular-nums">0:00</span>
@@ -596,12 +655,13 @@ export default function GameShell() {
               <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-[#6bf0c2]">Rift Mercy</span>
               <span ref={mercyText} className="text-[10px] font-black tabular-nums text-[#6bf0c2]">2%</span>
             </div>
+            </div>
           </div>
 
-          {/* wave plate — act name + wave (Patch 10.1: HUD-scale aware) */}
-          <div className="absolute left-1/2 -translate-x-1/2 z-20 text-center pointer-events-none"
-               style={{ top: "calc(env(safe-area-inset-top) + 12px)", zoom: hudZoom }}>
-            <div className="hud-wave-plate rune-panel px-6 py-2 min-w-[190px]">
+          {/* wave plate — act name + wave; centers between the side clusters.
+              Patch 10.1: HUD-scale aware (zoom via --hud-scale on the row). */}
+          <div className="hud-center flex flex-col items-center text-center pointer-events-none">
+            <div className="hud-wave-plate rune-panel px-6 py-2">
               <div ref={actText} className="hud-act-label text-[9px] font-bold uppercase tracking-[0.24em] text-[#6bf0c2]">The Sunless Vestibule</div>
               <div className="hud-wave-label text-[10px] font-bold uppercase tracking-[0.34em] text-[#9a7bff]">Wave</div>
               <div ref={waveText} className="hud-wave-num font-display font-black text-4xl leading-none text-[#ffe9ad]" style={{ textShadow: "0 0 22px rgba(245,201,107,0.5)" }}>01</div>
@@ -622,15 +682,15 @@ export default function GameShell() {
                 <span ref={scoreText} className="text-[#ffe9ad] tabular-nums">0</span>
               </div>
             </div>
-            <div ref={bossWrap} className="mt-2 transition-opacity duration-300" style={{ opacity: 0, display: "none" }}>
+            <div ref={bossWrap} className="mt-2 w-full transition-opacity duration-300" style={{ opacity: 0, display: "none" }}>
               <div ref={bossLabel} className="text-[11px] font-display font-bold tracking-[0.3em] text-[#ff8ba0] uppercase">Rift Tyrant</div>
-              <div className="bar mx-auto mt-1 h-[10px] w-[320px] max-w-[70vw] border-[rgba(255,77,107,0.5)]">
+              <div className="bar mx-auto mt-1 h-[10px] w-[320px] max-w-full border-[rgba(255,77,107,0.5)]">
                 <div ref={bossFill} className="bar-fill" style={{ width: "100%", background: "linear-gradient(90deg, #7a1028, #ff4d6b)", boxShadow: "0 0 12px rgba(255,77,107,0.6)" }} />
               </div>
             </div>
             {/* Patch 8.0 — Archmage Mode badge (visible whenever the pilot drives) */}
             {autoMode && (
-              <div className="auto-chip mx-auto mt-2 w-fit">
+              <div className="auto-chip mt-2 w-fit">
                 <span className="auto-dot" aria-hidden />
                 ARCHMAGE AUTO
               </div>
@@ -638,9 +698,11 @@ export default function GameShell() {
           </div>
 
           {/* right cluster — on touch devices the pause button lives in the
-              TouchControls action row. Shards + mute remain visible. */}
-          <div className="absolute z-20 flex items-center gap-2"
-               style={{ top: "calc(env(safe-area-inset-top) + 12px)", right: "calc(env(safe-area-inset-right) + 12px)", zoom: hudZoom }}>
+              TouchControls action row. Glyphs + mute remain visible. The
+              inner .hud-right wrapper carries the zoom + pointer events so
+              the flexible outer zone never intercepts canvas input. */}
+          <div className="hud-side hud-side-r flex justify-end">
+            <div className="hud-right flex items-center gap-2 pointer-events-auto">
             <div className="rune-panel px-3 py-2 flex items-center gap-2 pointer-events-none" title="Aether glyphs — the Reliquary's currency">
               <span className="text-[#ffe9ad]"><UiIcon name="gem" size={16} /></span>
               <span className="font-display font-bold text-[#ffe9ad]">{meta.shards}</span>
@@ -654,6 +716,8 @@ export default function GameShell() {
                 <UiIcon name="pause" size={16} />
               </button>
             )}
+            </div>
+          </div>
           </div>
 
           {/* spell bar — hidden on touch devices (TouchControls renders its own strip)
