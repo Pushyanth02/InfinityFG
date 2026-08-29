@@ -16,7 +16,7 @@
 
 import { create } from "zustand";
 import {
-  BossDef, DEFAULT_META, ElementId, EnemyType, GameSettings, MetaSave, UpgradeChoice,
+  DEFAULT_META, ElementId, EnemyType, GameSettings, MetaSave, UpgradeChoice,
   computeBonuses, loadMeta, randomSeedString, saveMeta,
 } from "./content";
 import { GamePhase, MergeOffer, RunStats, SpellOffer } from "./engine";
@@ -47,12 +47,6 @@ export interface RewardOfferState {
   tiers: Record<string, number>;
 }
 
-export interface BossIntroState {
-  boss: BossDef;
-  actName: string;
-  key: number;
-}
-
 interface ArchmageStore {
   /* persistent meta + settings */
   meta: MetaSave;
@@ -66,7 +60,6 @@ interface ArchmageStore {
   spellOffer: SpellOfferState | null;
   mergeOffer: MergeOfferState | null;
   evolutions: EvolutionDef[] | null;
-  bossIntro: BossIntroState | null;
   stats: RunStats | null;
 
   /* settings screen */
@@ -92,8 +85,6 @@ interface ArchmageStore {
   setSpellOffer: (offer: SpellOfferState | null) => void;
   setMergeOffer: (offer: MergeOfferState | null) => void;
   setEvolutions: (choices: EvolutionDef[] | null) => void;
-  setBossIntro: (boss: BossDef, actName: string) => void;
-  clearBossIntro: () => void;
   setStats: (stats: RunStats | null) => void;
   openSettings: () => void;
   closeSettings: () => void;
@@ -110,7 +101,6 @@ interface ArchmageStore {
 }
 
 let bannerKey = 0;
-let bossKey = 0;
 let bannerTimer: number | undefined;
 
 export const useArchmageStore = create<ArchmageStore>((set, get) => ({
@@ -124,7 +114,6 @@ export const useArchmageStore = create<ArchmageStore>((set, get) => ({
   spellOffer: null,
   mergeOffer: null,
   evolutions: null,
-  bossIntro: null,
   stats: null,
 
   settingsOpen: false,
@@ -147,12 +136,6 @@ export const useArchmageStore = create<ArchmageStore>((set, get) => ({
   setSpellOffer: (offer) => set({ spellOffer: offer }),
   setMergeOffer: (offer) => set({ mergeOffer: offer }),
   setEvolutions: (choices) => set({ evolutions: choices }),
-
-  setBossIntro: (boss, actName) => {
-    bossKey++;
-    set({ bossIntro: { boss, actName, key: bossKey } });
-  },
-  clearBossIntro: () => set({ bossIntro: null }),
 
   setStats: (stats) => set({ stats }),
 
@@ -265,7 +248,6 @@ export const useArchmageStore = create<ArchmageStore>((set, get) => ({
     spellOffer: null,
     mergeOffer: null,
     evolutions: null,
-    bossIntro: null,
     stats: null,
     banner: null,
   }),

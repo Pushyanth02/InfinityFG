@@ -19,6 +19,16 @@
    sonic), a per-death Rift Mercy ladder with concrete attack/defense/spawn
    effects, a hold-to-fire FIRE button with auto-targeting, and Archmage
    Mode improvements (pillar avoidance, boss-volley dodging, desktop access).
+   Patch 10.2 "The Thinking Rift": every tyrant now runs a UNIQUE behavior
+   set (stampede charges, slam shockwaves + adds, blade-dance lunges, blink
+   spirals, and an apex storm mixing all three) with per-boss enrages, all
+   boss spawn cutscenes/title cards/message banners are GONE (pure audio +
+   visual telegraphs), the Fateweaver (Archmage Mode's brain) casts with
+   line-of-sight discipline — resonance-aware, mana-economical, never firing
+   at foes behind walls — and picks boons from live run context, the flow
+   field can't be corner-cut or stuck (no-corner-cut descent, faster stuck
+   recovery, rift-hop failsafe), the world grows to 2560×1600 with eight
+   archetypes, and the Rift Seed drives a per-seed enemy ecology (poolBias).
    Optimized replica: dead-flag entities + in-place compaction (zero per-frame
    array allocation), squared-distance hot paths, cached gradients, seeded
    reward drafts, head-indexed spawn queue, throttled preallocated HUD payload. */
@@ -28,12 +38,13 @@ import {
   EQUIP_SLOTS, GameSettings, MERGE_INTERVAL, MetaBonuses, RNG, SLOT_KEYS, SPELL_ORDER, SPELLS,
   SPELL_DROP_HEAL_FRAC, SPELL_DROP_WAVE_MAX, SPELL_DROP_WAVE_MIN, SPELL_DROP_NERF, SPELL_OFFER_COUNT, STARTER_SPELLS,
   UpgradeChoice, availableTypes, comboKey, eliteChance, endlessBossMult, endlessHpMult, generateArena, hashSeed, mercyForRound, mulberry32,
-  scaleEnemy, spawnCap, spawnWindow, waveBudget, VICTORY_WAVE,
+  scaleEnemy, spawnCap, spawnWindow, waveBudget, VICTORY_WAVE, poolBias,
   ActDef, actForWave, WORLD_W, WORLD_H,
   MERCY_ATTACK, MERCY_SPAWNS, MERCY_CAPLIVE, MERCY_HP, MERCY_SPD,
 } from "./content";
 import { Sfx } from "./audio";
 import { EVOLUTIONS, EvolutionDef, offerEvolutions } from "./evolutions";
+import type { FateContext } from "./autopick";
 
 /* --------------------------------- types --------------------------------- */
 
@@ -93,9 +104,6 @@ export interface EngineOpts {
   onEvolution: (choices: EvolutionDef[]) => void;
   onSpellOffer: (offer: SpellOffer) => void;
   onMerge: (offer: MergeOffer) => void;
-  /* Patch 6.0: boss intro plays as an in-game title card while combat stays
-     live — the React layer renders the card from the BossDef directly. */
-  onBossIntro: (boss: BossDef, act: ActDef) => void;
   /* Patch 9.0 — effective Rift Mercy tier (0 = off). Computed by the shell
      from the meta save's mercyDeaths ladder + manual tier selection. */
   mercyTier: number;
@@ -109,13 +117,23 @@ interface Enemy {
   hp: number; maxHp: number; speed: number; damage: number; r: number; score: number;
   ranged: boolean; shootsEvery: number; flying: boolean;
   hitFlash: number; burnT: number; burnDps: number; chillT: number; poisonT: number;
-  shootT: number; strafeDir: number; actT: number; actState: 0 | 1 | 2;
+  shootT: number; strafeDir: number; actT: number;
+  /* Patch 10.2 — actState widened to a free number so each tyrant can run a
+     bespoke state machine (state 2 is reserved for "dashing/charging" in
+     every pattern so the shared contact-damage multiplier keeps working). */
+  actState: number;
   cx: number; cy: number; contactCd: number; wob: number;
+  /* Patch 10.2 — boss-pattern scratch: subT = sub-timer / flag, armAng =
+     rotating spiral arm angle, count = repeat/phase counter. Unused by
+     normal foes (their behaviors keep using actT/actState/cx/cy). */
+  subT: number; armAng: number; count: number;
   affix: EliteAffix | null; resist: number; auraT: number; enraged: boolean;
   dead: boolean;                // flagged on death, compacted at frame start
   grad: CanvasGradient | null;  // cached body gradient (origin-relative)
-  /* Patch 9.0 — stuck detection bookkeeping (flow-field safety net) */
-  lastX: number; lastY: number; stuckT: number;
+  /* Patch 9.0 — stuck detection bookkeeping (flow-field safety net).
+     Patch 10.2: stuckN counts CONSECUTIVE stuck windows (escalating kicks,
+     then a rift-hop relocation) so terrain can never weld a foe in place. */
+  lastX: number; lastY: number; stuckT: number; stuckN: number;
 }
 
 interface Proj {
@@ -195,9 +213,9 @@ const SURGE_DUR = 6;
 const N_SPELLS = SPELL_ORDER.length;
 const SHRINE_CHANCE = 0.18;
 const SHRINE_LIFE = 14;
-/* Patch 9.0 — flow-field pathfinding grid: 64px cells over the 1920×1280
-   world → 30×20 = 600 cells. Tiny BFS, rebuilt only when the player crosses
-   a cell boundary (or twice a second as a safety net). */
+/* Patch 9.0 — flow-field pathfinding grid: 64px cells over the 2560×1600
+   (Patch 10.2) world → 40×25 = 1000 cells. Tiny BFS, rebuilt only when the
+   player crosses a cell boundary (or twice a second as a safety net). */
 const FLOW_CELL = 64;
 const FLOW_GW = WORLD_W / FLOW_CELL;
 const FLOW_GH = WORLD_H / FLOW_CELL;
@@ -215,10 +233,10 @@ export class ArchmageEngine {
   phase: GamePhase = "running";
 
   private w = 800; private h = 600; private dpr = 1;
-  /* Patch 9.0 — the world is a fixed 1920×1280 arena; this.w/h remain the
-     CANVAS (viewport) size. camX/camY is the world point at screen center;
-     zoomCur is the live FOV scale (smoothed toward `zoom`, the device-
-     tailored target; combat pressure pulls it out slightly). */
+  /* Patch 9.0 — the world is a fixed arena (2560×1600 since Patch 10.2);
+     this.w/h remain the CANVAS (viewport) size. camX/camY is the world point
+     at screen center; zoomCur is the live FOV scale (smoothed toward `zoom`,
+     the device-tailored target; combat pressure pulls it out slightly). */
   private camX = WORLD_W / 2; private camY = WORLD_H / 2;
   private zoom = 1; private zoomCur = 1;
   private deviceClass: "phone" | "tablet" | "desktop" = "desktop";
@@ -289,15 +307,29 @@ export class ArchmageEngine {
      concrete effects (defense/attack/spawn/HP/speed) hang off this fraction. */
   private mercyDr = 0;
   private mercyTier = 0;
-  /* Patch 9.0 — flow-field pathfinding grid (cell 64px → 30×20 cells).
-     flowDist holds BFS distance-to-player per cell; rebuilt whenever the
-     player crosses a cell boundary or half a second elapses. Ground enemies
-     without line of sight steer along it so pillars can never trap them. */
+  /* Patch 9.0 — flow-field pathfinding grid (cell 64px → 40×25 cells on the
+     Patch 10.2 world). flowDist holds BFS distance-to-player per cell;
+     rebuilt whenever the player crosses a cell boundary or half a second
+     elapses. Ground enemies without line of sight steer along it so pillars
+     can never trap them. */
   private flowDist: Uint16Array = new Uint16Array(FLOW_GW * FLOW_GH);
   private flowClock = 0;
   private flowCell = -1;
   /* Patch 7.0: run-scoped bestiary dedupe — onBestiary fires once per kind. */
   private seenKinds = new Set<string>();
+  /* Patch 10.2 — seed-driven enemy ecology: per-type spawn weight multipliers
+     derived from the Rift Seed (see poolBias in content.ts). Applied to the
+     wave-composition rolls and the boss-wave adds so each seed fields a
+     genuinely different monster mix. */
+  private typeBias: Record<EnemyType, number>;
+  /* Patch 10.2 — boss steering scratch: updateBoss writes the desired
+     velocity here (avoids per-frame allocation); the shared enemy update
+     applies it after the per-type dispatch. */
+  private bossTv = { x: 0, y: 0 };
+  /* Patch 10.2 — Fateweaver surge discipline: timestamp of when the weave
+     meter filled (0 = not full). The disciplined pilot holds a full surge
+     until it matters — boss up, a pack closing, or ~5s held. */
+  private weaveFullT = 0;
 
   /* Patch 6.0 — graphics quality budget */
   private particleCap = 420;
@@ -386,6 +418,9 @@ export class ArchmageEngine {
   constructor(o: EngineOpts) {
     this.o = o;
     this.rng = mulberry32(hashSeed(o.seed));
+    /* Patch 10.2 — the seed's ecology stream is read BEFORE anything else so
+       the main rng sequence is identical to pre-10.2 for the same seed. */
+    this.typeBias = poolBias(o.seed);
     const ctx = o.canvas.getContext("2d");
     if (!ctx) throw new Error("no 2d context");
     this.ctx = ctx;
@@ -528,7 +563,7 @@ export class ArchmageEngine {
       clamped so the camera never reveals space beyond the world bounds.
       Patch 10.1 — the slice is WIDENED per device class for maximum map
       visibility (phones see ~78% of world width, desktops ~75%): threats
-      telegraph earlier and the arena reads as the true 1920×1280 rift it
+      telegraph earlier and the arena reads as the true 2560×1600 rift it
       is, not a keyhole. */
   private computeFov() {
     const minH = this.deviceClass === "phone" ? 700 : this.deviceClass === "tablet" ? 780 : 840;
@@ -1091,38 +1126,42 @@ export class ArchmageEngine {
     this.o.sfx.setIntensity(1);
 
     if (n % 10 === 0) {
-      /* Patch 5.0: use the seed-shuffled boss for this act. Patch 7.0: the
-         intro is an IN-GAME title card (onBossIntro) rendered over LIVE
-         combat — no cutscene, no taunt dialogue. The adaptive score jumps
-         to boss intensity (heartbeat pulse + brighter drone). Boss HP/damage
-         are eased by DIFFICULTY_MULT like every other foe. */
-      const boss = this.currentBoss();
+      /* Patch 5.0: use the seed-shuffled boss for this act. Patch 10.2: the
+         spawn cutscene layer is fully GONE — no title card, no message
+         banner. The tyrant simply arrives: audio roar + sting + a screen
+         shake are the only telegraphs, and every attack telegraphs itself
+         in the arena (windup rings, dash puffs, spiral arms). The adaptive
+         score jumps to boss intensity. Boss HP/damage are eased by
+         DIFFICULTY_MULT like every other foe. Patch 10.2: the adds follow
+         the seed's ecology too (pickBiased). */
       this.spawnQueue.push({ type: "boss", t: 1.2 });
       /* Patch 9.0: adds thinned by Rift Mercy; skitter joins the mob pool. */
       const adds = Math.max(2, Math.round(Math.min(4 + Math.floor(n / 10) * 2, 12) * (1 - this.mercyDr * MERCY_SPAWNS)));
       for (let i = 0; i < adds; i++) {
-        this.spawnQueue.push({ type: this.rng.pick(["goblin", "imp", "swarm", "archer", "skitter"] as EnemyType[]), t: 3 + i * 2.2 });
+        this.spawnQueue.push({ type: this.pickBiased(["goblin", "imp", "swarm", "archer", "skitter"] as EnemyType[]), t: 3 + i * 2.2 });
       }
       this.o.sfx.bossRoar();
       this.o.sfx.sting();
       this.o.sfx.setIntensity(2);
-      this.o.onBossIntro(boss, this.act);
-      this.o.onBanner(`${boss.name.toUpperCase()}, ${boss.title.toUpperCase()}`, `Act ${this.act.id} closes — ${boss.mechanics}`, boss.color);
       this.shakeIt(14);
     } else {
       const types = availableTypes(n);
       /* Patch 9.0: Rift Mercy trims the wave budget — fewer foes per wave. */
       const budget = waveBudget(n) * (1 - this.mercyDr * MERCY_SPAWNS);
-      /* hoisted weight table — later unlocks are weighted higher */
+      /* hoisted weight table — later unlocks are weighted higher. Patch
+         10.2: the seed's ecology multipliers bend the mix (featured types
+         surge, faded types thin) so each Rift Seed fields a different
+         roster for the same wave curve. */
+      const weights = types.map((t, i) => (1 + i * 0.85) * (this.typeBias[t] ?? 1));
       let total = 0;
-      for (let i = 0; i < types.length; i++) total += 1 + i * 0.85;
+      for (const w of weights) total += w;
       let spent = 0;
       const list: EnemyType[] = [];
       let guard = 0;
       while (spent < budget && guard++ < 90) {
         let r = this.rng.next() * total;
         let pick = types[0];
-        for (let i = 0; i < types.length; i++) { r -= 1 + i * 0.85; if (r <= 0) { pick = types[i]; break; } }
+        for (let i = 0; i < types.length; i++) { r -= weights[i]; if (r <= 0) { pick = types[i]; break; } }
         const c = ENEMY_DEFS[pick].cost;
         if (spent + c > budget + 0.6) break;
         spent += c; list.push(pick);
@@ -1188,7 +1227,17 @@ export class ArchmageEngine {
     return flavors[(n - 1) % flavors.length];
   }
 
-  private spawnEnemy(type: EnemyType) {
+  /** Patch 10.2 — seed-ecology weighted pick: rolls a type from the pool,
+      each entry weighted by this run's per-seed typeBias multipliers. */
+  private pickBiased(pool: EnemyType[]): EnemyType {
+    let total = 0;
+    for (const t of pool) total += this.typeBias[t] ?? 1;
+    let r = this.rng.next() * total;
+    for (const t of pool) { r -= this.typeBias[t] ?? 1; if (r <= 0) return t; }
+    return pool[0];
+  }
+
+  private spawnEnemy(type: EnemyType, ox?: number, oy?: number) {
     const def = ENEMY_DEFS[type];
     const s = scaleEnemy(def, this.wave);
     /* Patch 10.0 — endless escalation: past wave 50 every foe's HP compounds
@@ -1197,11 +1246,23 @@ export class ArchmageEngine {
        it doesn't one-shot you. */
     const hpEndless = this.wave > VICTORY_WAVE ? endlessHpMult(this.wave) : 1;
     const dmgEndless = this.wave > VICTORY_WAVE ? 1 + (endlessHpMult(this.wave) - 1) * 0.5 : 1;
-    /* Patch 9.0 — ring spawns: foes materialize on a circle around the
-       PLAYER just past the camera's reach (clamped inside the world), so
-       they never pop inside view and never have to squeeze through walls. */
+    /* Spawn position — Patch 10.2 adds an optional anchored origin (used by
+       Korrath's imp-shedding); the default is the Patch 9.0 player ring. */
     let x = 0, y = 0;
-    {
+    if (ox !== undefined && oy !== undefined) {
+      /* Patch 10.2 — anchored spawn: scatter in a small ring around the
+       * anchor, clear of pillars. */
+      for (let attempt = 0; attempt < 14; attempt++) {
+        const a = this.rng.next() * TAU;
+        const rr = this.rng.range(60, 170);
+        x = Math.max(70, Math.min(WORLD_W - 70, ox + Math.cos(a) * rr));
+        y = Math.max(70, Math.min(WORLD_H - 70, oy + Math.sin(a) * rr));
+        if (!this.circleRectHit(x, y, def.radius + 6)) break;
+      }
+    } else {
+      /* Patch 9.0 — ring spawns: foes materialize on a circle around the
+         PLAYER just past the camera's reach (clamped inside the world), so
+         they never pop inside view and never have to squeeze through walls. */
       const viewR = Math.max(this.w, this.h) / this.zoomCur;
       const spawnDist = type === "boss" ? Math.min(560, Math.max(360, viewR * 0.5)) : Math.max(430, viewR * 0.66 + 60);
       for (let attempt = 0; attempt < 14; attempt++) {
@@ -1265,9 +1326,11 @@ export class ArchmageEngine {
       flying: !!def.flying, hitFlash: 0, burnT: 0, burnDps: 0, chillT: 0, poisonT: 0,
       shootT: this.rng.range(0.6, 1.8), strafeDir: this.rng.chance(0.5) ? 1 : -1,
       actT: this.rng.range(1.5, 3.5), actState: 0, cx: 0, cy: 0, contactCd: 0,
-      wob: this.rng.range(0, TAU), affix, resist, auraT: 0, enraged: false,
+      wob: type === "boss" ? 0 : this.rng.range(0, TAU),
+      subT: 0, armAng: this.rng.next() * TAU, count: 0,
+      affix, resist, auraT: 0, enraged: false,
       dead: false, grad: null,
-      lastX: x, lastY: y, stuckT: 0,
+      lastX: x, lastY: y, stuckT: 0, stuckN: 0,
     });
   }
 
@@ -1853,9 +1916,13 @@ export class ArchmageEngine {
       /* threat weight: bosses and elites dominate the centroid */
       const w = (e.type === "boss" ? 3 : e.affix ? 1.6 : 1) / Math.max(100 * 100, d2);
       threatX += dx * w; threatY += dy * w;
-      /* targeting: bosses and ranged shooters first, distance-scaled */
+      /* targeting: bosses and ranged shooters first, distance-scaled.
+         Patch 10.2 — LINE OF SIGHT is REQUIRED: the Fateweaver never fires
+         at foes behind walls. The raycast only runs for candidates that
+         beat the current best (cheap early-out); if nothing is visible the
+         pilot simply repositions instead of casting. */
       const s = d2 / (e.type === "boss" ? 8 : e.ranged ? 2.2 : 1);
-      if (s < tScore) { tScore = s; target = e; }
+      if (s < tScore && this.lineClear(px, py, e.x, e.y)) { tScore = s; target = e; }
     }
     const nd = nearest ? Math.sqrt(nd2) : Infinity;
     const manaFrac = this.mana / this.maxMana;
@@ -1863,10 +1930,13 @@ export class ArchmageEngine {
     /* ---------- steering (boids-style: sum of weighted urges) ---------- */
     let sx = 0, sy = 0;
 
-    /* kite the nearest threat around a preferred engagement range */
+    /* kite the nearest threat around a preferred engagement range.
+       Patch 10.2 — wounded caution: the lower the HP, the wider the kite. */
     if (nearest) {
       const ux = (nearest.x - px) / nd, uy = (nearest.y - py) / nd;
-      const pref = nearest.type === "boss" ? 330 : nearest.ranged ? 270 : 240;
+      const hpFrac = this.hp / this.maxHp;
+      const caution = hpFrac < 0.7 ? 1 + (0.7 - hpFrac) * 1.2 : 1;
+      const pref = (nearest.type === "boss" ? 330 : nearest.ranged ? 270 : 240) * caution;
       if (nd < pref * 0.8) {
         const push = (pref * 0.8 - nd) / (pref * 0.8);
         sx -= ux * push * 1.8; sy -= uy * push * 1.8;      // too close → back off
@@ -1899,6 +1969,7 @@ export class ArchmageEngine {
 
     /* dodge incoming bolts — strong repulsion from any bolt closing on us */
     let boltDanger = false;
+    let bandDanger = false;   // Patch 10.2 — boss shockwave band closing in
     for (const b of this.eBolts) {
       const dx = px - b.x, dy = py - b.y;
       const d2 = dx * dx + dy * dy;
@@ -1910,16 +1981,35 @@ export class ArchmageEngine {
       sx += (dx / d) * w; sy += (dy / d) * w;
       if (d < 105 && closing > 120) boltDanger = true;
     }
-    /* Patch 9.0 — boss-volley anticipation: when the tyrant is about to
-       unleash a radial ring, strafe hard perpendicular to it so the pilot
-       threads the gaps instead of eating the bloom. */
+    /* Patch 9.0 — boss-volley anticipation (Patch 10.2: the tyrants' volley
+       cadences still ride shootT — Vorrac's fan, Solenne's tempo, Maelthar's
+       spiral — so the pilot keeps threading the gaps whenever one is due). */
     for (const e of this.enemies) {
-      if (e.dead || e.type !== "boss" || e.shootT > 0.5) continue;
+      if (e.dead || e.type !== "boss") continue;
       const bx = e.x - px, by = e.y - py;
       const bl = Math.hypot(bx, by) || 1;
-      /* keep kiting distance while sliding sideways */
-      sx += (bx / bl) * 0.8 - (by / bl) * this.autoStrafeDir * 1.6;
-      sy += (by / bl) * 0.8 + (bx / bl) * this.autoStrafeDir * 1.6;
+      /* volley due → keep kiting distance while sliding sideways */
+      if (e.shootT <= 0.5) {
+        sx += (bx / bl) * 0.8 - (by / bl) * this.autoStrafeDir * 1.6;
+        sy += (by / bl) * 0.8 + (bx / bl) * this.autoStrafeDir * 1.6;
+      }
+      /* Patch 10.2 — WINDUP AWARENESS: every tyrant's bespoke pattern roots
+         or rears in state 1 before it strikes (Vorrac's charge, Korrath's
+         slam, Solenne's lunge, Maelthar's stampede). The Fateweaver reads
+         that tell and opens distance while sliding — pre-dodging instead of
+         reacting to the hit. */
+      if (e.actState === 1) {
+        const push = 1.9;
+        sx += (bx / bl) * push - (by / bl) * this.autoStrafeDir * 1.2;
+        sy += (by / bl) * push + (bx / bl) * this.autoStrafeDir * 1.2;
+      }
+      /* Patch 10.2 — SHOCKWAVE BAND: Korrath's traveling slam ring (radius
+         rides e.wob) cannot be outrun — the calculated answer is to blink
+         THROUGH it with dash invulnerability the instant it arrives. */
+      if (e.wob > 0) {
+        const bandDelta = bl - e.wob;
+        if (Math.abs(bandDelta) < 90 && e.wob < 470) bandDanger = true;
+      }
       break;
     }
 
@@ -2001,11 +2091,22 @@ export class ArchmageEngine {
     /* ---------- emergency blink-step ----------
        A bolt is about to land or a mob is inside point-blank range and the
        dash is ready → dash along the current escape vector (away from the
-       threat centroid). */
-    const swarmDanger = nearest !== null && nd < 90;
-    if (this.dashCd <= 0 && (boltDanger || swarmDanger)) {
+       threat centroid). Patch 10.2: the trigger fires earlier when hurt. */
+    const swarmDanger = nearest !== null && nd < 90 + (1 - this.hp / this.maxHp) * 60;
+    if (this.dashCd <= 0 && (boltDanger || swarmDanger || bandDanger)) {
       let ex = px - (nearest ? nearest.x : px), ey = py - (nearest ? nearest.y : py);
       if (boltDanger && threatX !== 0 && threatY !== 0) { ex = -threatX; ey = -threatY; }
+      if (!boltDanger && bandDanger) {
+        /* Patch 10.2 — crossing INWARD under dash invulnerability beats
+           fleeing a 560px/s ring: the safe pocket is behind the band, right
+           beside the tyrant. */
+        for (const e of this.enemies) {
+          if (!e.dead && e.type === "boss" && e.wob > 0) {
+            ex = e.x - px; ey = e.y - py;
+            break;
+          }
+        }
+      }
       const el = Math.hypot(ex, ey);
       if (el > 1) {
         this.moveAxisX = ex / el;
@@ -2023,7 +2124,10 @@ export class ArchmageEngine {
 
       this.autoTick -= dt;
       if (this.autoTick <= 0) {
-        this.autoTick = 0.14;
+        /* Patch 10.2 — intensity scaleback: the Fateweaver casts at a
+           deliberate pace (0.30s decisions, was 0.14s) and only when the
+           situation scores above a strict threshold — no ability spam. */
+        this.autoTick = 0.3;
         const slot = this.autoPickSlot(target, closeCount);
         if (slot >= 0) this.castSpell(slot);
       }
@@ -2043,22 +2147,90 @@ export class ArchmageEngine {
       }
     }
 
-    this.autoWeaveAndSurge();
+    this.autoWeaveAndSurge(true);
   }
 
   /** Free arcane bolts (Weave builder) + instant Weave Surge when full.
-      Shared by the piloted and manual-grace paths — surge is never wasted. */
-  private autoWeaveAndSurge() {
-    if (this.weave >= 1) this.trySurge();
-    if (this.surgeT > 0 || this.mana > this.maxMana * 0.5) this.weaveBolt();
+      Shared by the piloted and manual-grace paths.
+      Patch 10.2 — FATEWEAVER discipline: in full-auto the surge is HELD
+      until it matters (a boss is up, a pack is closing, or the meter has
+      been full for ~5s), and weave bolts are only spent on targets in line
+      of sight. The manual-grace path stays trigger-happy — surge is never
+      wasted while a human is steering. */
+  private autoWeaveAndSurge(disciplined = false) {
+    if (this.weave >= 1) {
+      if (this.weaveFullT === 0) this.weaveFullT = this.t;
+      let go = true;
+      if (disciplined) {
+        let closeCount = 0;
+        let bossUp = false;
+        for (const e of this.enemies) {
+          if (e.dead) continue;
+          if (e.type === "boss") { bossUp = true; break; }
+          const dx = e.x - this.px, dy = e.y - this.py;
+          if (dx * dx + dy * dy < 260 * 260) closeCount++;
+        }
+        go = bossUp || closeCount >= 4 || this.t - this.weaveFullT > 5;
+      }
+      if (go) { this.trySurge(); this.weaveFullT = 0; }
+    } else {
+      this.weaveFullT = 0;
+    }
+    if (this.surgeT > 0 || this.mana > this.maxMana * 0.5) {
+      if (!disciplined || this.hasLosTarget()) this.weaveBolt();
+    }
   }
 
-  /** Situation-aware spell choice: returns the equipped slot index to fire,
-      or −1 when nothing is worth casting right now. */
+  /** Patch 10.2 — is any enemy visible (LoS) within weave-bolt range? The
+      disciplined pilot never lobs bolts into a wall. */
+  private hasLosTarget(): boolean {
+    for (const e of this.enemies) {
+      if (e.dead) continue;
+      const dx = e.x - this.px, dy = e.y - this.py;
+      if (dx * dx + dy * dy > 1200 * 1200) continue;
+      if (this.lineClear(this.px, this.py, e.x, e.y)) return true;
+    }
+    return false;
+  }
+
+  /** Patch 10.2 — FATEWEAVER context snapshot: the live run state the
+      auto-pickers (autopick.ts) reason over while Archmage Mode resolves an
+      overlay choice. Pure read — safe to call from React at any moment. */
+  getFateContext(): FateContext {
+    const equipped = this.equipped.map((slot): ElementId | { merged: ElementId[] } | null => {
+      if (slot.spells.length === 0) return null;
+      if (slot.spells.length === 1) return SPELL_ORDER[slot.spells[0]];
+      return { merged: slot.spells.map((idx) => SPELL_ORDER[idx]) };
+    });
+    let alive = 0;
+    for (const e of this.enemies) if (!e.dead) alive++;
+    return {
+      hpFrac: this.hp / this.maxHp,
+      manaFrac: this.mana / this.maxMana,
+      wave: this.wave,
+      bossSoon: (this.wave + 1) % 10 === 0,
+      enemiesAlive: alive,
+      power: this.mods.power,
+      armor: 1 - this.mods.dr,
+      crit: this.mods.crit,
+      cdr: 1 - this.mods.cdr,
+      equipped,
+    };
+  }
+
+  /** Situation-aware spell choice — Patch 10.2: the FATEWEAVER brain.
+      Returns the equipped slot index to fire, or −1 when nothing is worth
+      casting right now. No spam: a strict value threshold, a mana reserve
+      for panic tools, resonance-aware pairing (a primed element is worth
+      detonating), and the per-element range bands. */
   private autoPickSlot(target: Enemy, closeCount: number): number {
     const px = this.px, py = this.py;
     const manaFrac = this.mana / this.maxMana;
     const td = Math.hypot(target.x - px, target.y - py);
+
+    /* mana reserve — never cast below 12% unless something is crawling up
+       the robe (panic tools may empty the well) */
+    if (manaFrac < 0.12 && closeCount < 3) return -1;
 
     /* cluster size around the target (AoE value) */
     let cluster = 0;
@@ -2068,8 +2240,14 @@ export class ArchmageEngine {
       if (dx * dx + dy * dy < 130 * 130) cluster++;
     }
 
-    let bestSlot = -1, bestScore = 35;   // threshold: don't waste mana
-    if (manaFrac > 0.92) bestScore = 8;  // …unless aether is overflowing
+    /* Patch 10.2 — resonance awareness: when an element is primed and the
+       window is still open, casting a DIFFERENT element detonates the
+       resonance (large AoE + weave charge). The Fateweaver hunts those
+       pairs instead of mashing whatever is off cooldown. */
+    const prime = this.lastCast && this.t - this.lastCast.t < this.mods.comboWindow ? this.lastCast.id : null;
+
+    let bestSlot = -1, bestScore = 46;  // Patch 10.2: stricter floor — no waste
+    if (manaFrac > 0.95) bestScore = 18; // …unless the well is truly overflowing
 
     for (let i = 0; i < this.equipped.length; i++) {
       const slotSpells = this.equipped[i].spells;
@@ -2099,6 +2277,8 @@ export class ArchmageEngine {
           case "sonic":     s = 46 + closeCount * 9; break;
           default:          s = 30; break;
         }
+        /* Patch 10.2 — the resonance hunt: a primed pair is worth reaching for */
+        if (prime && id !== prime) s += 26;
         s -= sp.manaCost * 0.22;   // efficiency pressure
         if (s > slotBest) slotBest = s;
       }
@@ -2186,24 +2366,25 @@ export class ArchmageEngine {
     else this.o.sfx.hit();
     /* Patch 4.0: vamp boon removed — spells no longer heal on damage. */
 
-    /* boss enrage — Patch 7.0: phase 2 gains a NEW attack (double spiral
-       burst) instead of just speed, per Dead Cells' design rule: never
-       accelerate old attacks at low HP, add new ones. */
+    /* boss enrage — Patch 7.0: phase 2 gains a NEW attack instead of just
+       speed (Dead Cells rule). Patch 10.2: the shared text banner and the
+       generic spiral burst are GONE — no boss message boxes. The moment
+       reads purely through audio + visuals (roar, shake, flare rings), and
+       every tyrant's OWN pattern densifies from here: Vorrac chains a third
+       re-aimed charge and tightens his fan, Korrath slams harder and sheds
+       more imps, Solenne doubles her tempo and adds a third lunge, Ysed
+       blinks faster behind a triple arm, Maelthar's storm gains a fourth
+       arm and a wider nova. */
     if (e.type === "boss" && !e.enraged && e.hp > 0 && e.hp < e.maxHp * 0.5) {
       e.enraged = true;
       e.speed *= 1.35;
       e.shootT = Math.min(e.shootT, 0.8);
       this.o.sfx.bossRoar();
-      this.o.onBanner("THE TYRANT RAGES", "Phase two — spiral storm, denser volleys", "#ff4d6b");
       this.shakeIt(16);
-      this.ring(e.x, e.y, 150, "#ff4d6b", 5);
-      for (let ring = 0; ring < 2; ring++) {
-        for (let i = 0; i < 18; i++) {
-          const a = (i / 18) * TAU + ring * (TAU / 36);
-          const spd = ring === 0 ? 200 : 285;
-          this.eBolts.push({ x: e.x, y: e.y, vx: Math.cos(a) * spd, vy: Math.sin(a) * spd, r: 7, dmg: e.damage * 0.6, life: 4, color: "#ff8ba0" });
-        }
-      }
+      this.hitStop = Math.max(this.hitStop, 0.12);
+      this.ring(e.x, e.y, 150, e.color, 5);
+      this.ring(e.x, e.y, 230, e.glow, 3);
+      for (let i = 0; i < 26; i++) this.puff(e.x, e.y, i % 2 ? e.color : e.glow, 300, 4.4);
     }
     if (e.hp <= 0) this.killEnemy(e);
   }
@@ -2243,13 +2424,15 @@ export class ArchmageEngine {
     }
 
     /* Patch 7.0: boss felled — score + shake + hit-stop; the Arcanum
-       bestiary entry unlocks via the onBestiary callback above. */
+       bestiary entry unlocks via the onBestiary callback above. Patch
+       10.2: no message banner — the kill reads through the massive visual
+       burst + a floating +250 score at the kill site. */
     if (e.type === "boss") {
       this.score += 250;
       this.shakeIt(22);
       this.hitStop = Math.max(this.hitStop, 0.22);
-      const boss = this.currentBoss();
-      this.o.onBanner(`${boss.name.toUpperCase()} FELLED`, `+250 score — ${boss.name} is laid to rest`, "#ffe9ad");
+      this.floater(e.x, e.y - e.r - 14, "+250", "#ffe9ad", 22);
+      this.floater(this.px, this.py - 46, "TYRANT FELLED", "#ffe9ad", 18);
     }
   }
 
@@ -2867,7 +3050,9 @@ export class ArchmageEngine {
   private updateEnemy(e: Enemy, dt: number, running: boolean) {
     e.hitFlash = Math.max(0, e.hitFlash - dt);
     e.contactCd = Math.max(0, e.contactCd - dt);
-    e.wob += dt * 6;
+    /* Patch 10.2 — the generic wobble is for rendering bobbing/flap; bosses
+       are exempt because Korrath OWNS wob as his shockwave radius now. */
+    if (e.type !== "boss") e.wob += dt * 6;
     if (e.poisonT > 0) e.poisonT -= dt;
     if (e.burnT > 0) {
       e.burnT -= dt;
@@ -2930,22 +3115,30 @@ export class ArchmageEngine {
           tvy = (fd.y * 0.85 + ny * 0.15) * e.speed;
         }
       }
-      /* stuck safety net — if we barely moved for a full second while trying
-         to move, kick us along the flow field so no enemy ever welds to a
-         corner. (Bosses are exempt; their charge state handles walls.) */
+      /* stuck safety net — Patch 10.2 hardening: a 0.6s window with a 14px
+         moved floor, escalating velocity kicks along the flow field, and a
+         last-resort RIFT HOP (a tiny relocation to the open spawn ring) so
+         terrain can never weld a foe in place. (Bosses are exempt; their
+         bespoke states handle walls.) */
       e.stuckT += dt;
-      if (e.stuckT >= 1) {
+      if (e.stuckT >= 0.6) {
         const moved = Math.hypot(e.x - e.lastX, e.y - e.lastY);
-        if (moved < 10 && e.type !== "boss") {
+        if (moved < 14 && e.type !== "boss") {
+          e.stuckN++;
           const fd = ArchmageEngine.DIR;
           if (this.flowDir(e.x, e.y, fd)) {
-            e.vx += fd.x * e.speed * 1.6;
-            e.vy += fd.y * e.speed * 1.6;
+            const kick = e.stuckN >= 2 ? 2.8 : 1.6;
+            e.vx += fd.x * e.speed * kick;
+            e.vy += fd.y * e.speed * kick;
           } else {
-            /* unreached (fully enclosed) — perpendicular shuffle */
-            e.vx += -ny * e.speed * 1.2;
-            e.vy += nx * e.speed * 1.2;
+            /* unreached (walled pocket) — alternate perpendicular shuffles */
+            e.strafeDir = -e.strafeDir;
+            e.vx += -ny * e.speed * 1.4 * e.strafeDir;
+            e.vy += nx * e.speed * 1.4 * e.strafeDir;
           }
+          if (e.stuckN >= 4) this.riftHop(e);
+        } else {
+          e.stuckN = 0;
         }
         e.lastX = e.x; e.lastY = e.y; e.stuckT = 0;
       }
@@ -3098,34 +3291,13 @@ export class ArchmageEngine {
         this.o.sfx.hit();
       }
     } else if (e.type === "boss") {
-      e.actT -= dt;
-      if (e.actState === 0 && e.actT <= 0) {
-        e.actState = 1; e.actT = 0.7; e.cx = nx; e.cy = ny;
-        this.o.sfx.bossRoar();
-      } else if (e.actState === 1) {
-        tvx *= 0.15; tvy *= 0.15;
-        if (e.actT <= 0) {
-          e.actState = 2; e.actT = 0.55;
-          const a2 = Math.atan2(this.py - e.y, this.px - e.x);
-          e.cx = Math.cos(a2); e.cy = Math.sin(a2);
-        }
-      } else if (e.actState === 2) {
-        tvx = e.cx * 430; tvy = e.cy * 430;
-        if (Math.random() < dt * 30) this.puff(e.x, e.y, "#ff4d6b", 120, 4);
-        if (e.actT <= 0) { e.actState = 0; e.actT = 4.5 + Math.random() * 2; this.shakeIt(8); }
-      }
-      /* radial volley — faster when enraged */
-      e.shootT -= dt;
-      if (e.shootT <= 0) {
-        e.shootT = e.enraged ? 2.1 : 3.0;
-        const nB = e.enraged ? 14 : 10;
-        for (let i = 0; i < nB; i++) {
-          const a = (i / nB) * TAU + this.t;
-          this.eBolts.push({ x: e.x, y: e.y, vx: Math.cos(a) * 196, vy: Math.sin(a) * 196, r: 7, dmg: e.damage * 0.6, life: 4, color: "#ff8ba0" });
-        }
-        this.o.sfx.castVoid();
-        this.ring(e.x, e.y, 60, "#ff4d6b", 3);
-      }
+      /* Patch 10.2 — every tyrant runs its own bespoke behavior set (see the
+         boss brains below). The pattern writes its desired velocity into the
+         bossTv scratch; telegraphs are purely visual + audio — no message
+         boxes anywhere in a boss fight. */
+      this.updateBoss(e, dt, nx, ny, dist);
+      tvx = this.bossTv.x;
+      tvy = this.bossTv.y;
     }
 
     const lerp = Math.min(1, (e.type === "boss" ? 2.2 : 5) * dt);
@@ -3154,6 +3326,321 @@ export class ArchmageEngine {
     if (dist < cr && e.contactCd <= 0) {
       e.contactCd = 0.9;
       this.damagePlayer(e.damage * (e.actState === 2 && e.type === "boss" ? 1.45 : 1), e.x, e.y);
+    }
+  }
+
+  /* ==========================================================================
+     Patch 10.2 — BOSS BRAINS. The single shared charge/volley loop is gone:
+     every tyrant is now a fully distinct encounter.
+       vorrac   — Stampede Charger: stalks, then chains 2–3 re-aimed charges
+                  with a short windup between each; aimed fan volleys.
+       korrath  — Immovable Juggernaut: never charges, never strafes — walks
+                  you down, slams expanding shockwave rings, sheds cinder imps.
+       solenne  — Blade Dancer: orbits at fencing range on a metronome tempo
+                  (3-bolt fans that accelerate as she bleeds), then chains
+                  lunges THROUGH the mage.
+       ysed     — Blink Fortress: anchors and channels rotating twin-arm
+                  spiral barrages, then blinks to a fresh anchor around the
+                  mage with a landing pulse. Massive soak, positioning puzzle.
+       maelthar — The Apex Storm: cycles all three signatures — stampede
+                  charges, a multi-arm spiral, and a gravity rift that drags
+                  the mage in before the nova release.
+     Shared conventions:
+       • actState 2 is ALWAYS a dashing/charging state, so the shared
+         contact-damage ×1.45 rule keeps working unchanged.
+       • subT doubles as a sub-timer/flag, count as a repeat/phase counter,
+         armAng as the spiral arm angle, wob as Korrath's shockwave radius.
+       • Enrage (below half HP) never just speeds old attacks up — each
+         pattern densifies or adds (Dead Cells rule).
+     ========================================================================== */
+
+  private updateBoss(e: Enemy, dt: number, nx: number, ny: number, dist: number) {
+    const tv = this.bossTv;
+    tv.x = nx * e.speed; tv.y = ny * e.speed;
+    switch (this.currentBoss().id) {
+      case "korrath": this.bossKorrath(e, dt, nx, ny, dist); return;
+      case "solenne": this.bossSolenne(e, dt, nx, ny, dist); return;
+      case "ysed": this.bossYsed(e, dt, nx, ny, dist); return;
+      case "maelthar": this.bossMaelthar(e, dt, nx, ny, dist); return;
+      default: this.bossVorrac(e, dt, nx, ny, dist); return;
+    }
+  }
+
+  /* VORRAC, the Gate-Sorrow — the Stampede Charger. */
+  private bossVorrac(e: Enemy, dt: number, nx: number, ny: number, dist: number) {
+    const tv = this.bossTv;
+    e.actT -= dt;
+    if (e.actState === 0) {
+      /* stalk — a slow drift toward the mage, waiting for the next run */
+      tv.x = nx * e.speed * 0.5; tv.y = ny * e.speed * 0.5;
+      if (e.actT <= 0 && dist < 640) {
+        e.actState = 1; e.actT = 0.55; e.count = e.enraged ? 3 : 2;
+        this.o.sfx.bossRoar();
+      }
+    } else if (e.actState === 1) {
+      /* windup — roots and paws the ground; locks on late */
+      tv.x = nx * e.speed * 0.08; tv.y = ny * e.speed * 0.08;
+      if (Math.random() < dt * 26) this.puff(e.x + (Math.random() * 44 - 22), e.y + e.r * 0.6, "#ffa3b5", 90, 3);
+      if (e.actT <= 0) {
+        const a = Math.atan2(this.py - e.y, this.px - e.x);
+        e.cx = Math.cos(a); e.cy = Math.sin(a);
+        e.actState = 2; e.actT = 0.5;
+        this.ring(e.x, e.y, 72, e.color, 3);
+      }
+    } else if (e.actState === 2) {
+      /* the charge — a committed lane dash through the mage's position */
+      tv.x = e.cx * 470; tv.y = e.cy * 470;
+      if (Math.random() < dt * 30) this.puff(e.x, e.y, "#ff4d6b", 120, 4);
+      if (e.actT <= 0) {
+        e.count--;
+        if (e.count > 0) { e.actState = 1; e.actT = 0.26; }   // re-aimed follow-up
+        else { e.actState = 0; e.actT = (e.enraged ? 2.6 : 3.6) + Math.random() * 1.4; this.shakeIt(8); }
+      }
+    }
+    /* aimed fan volley — a wide sweep across the mage's lane */
+    e.shootT -= dt;
+    if (e.shootT <= 0 && e.actState !== 1) {
+      e.shootT = e.enraged ? 2.6 : 3.6;
+      const base = Math.atan2(this.py - e.y, this.px - e.x);
+      const nB = e.enraged ? 7 : 5;
+      for (let i = 0; i < nB; i++) {
+        const a = base + (i - (nB - 1) / 2) * 0.16;
+        this.eBolts.push({ x: e.x, y: e.y, vx: Math.cos(a) * 232, vy: Math.sin(a) * 232, r: 6, dmg: e.damage * 0.55, life: 3.6, color: e.glow });
+      }
+      this.o.sfx.hit();
+      this.ring(e.x, e.y, 56, e.color, 2.5);
+    }
+  }
+
+  /* KORRATH, the Ash-Eaten — the Immovable Juggernaut. */
+  private bossKorrath(e: Enemy, dt: number, nx: number, _ny: number, dist: number) {
+    const tv = this.bossTv;
+    e.actT -= dt;
+    /* relentless walk — no strafe, no charge, no mercy */
+    tv.x = nx * e.speed; tv.y = _ny * e.speed;
+    /* slam cadence: a swelling telegraph, then the shockwave */
+    if (e.actState === 0 && e.actT <= 0) {
+      e.actState = 1; e.actT = 0.6; e.subT = 0; e.armAng = 0;
+      this.ring(e.x, e.y, 96, e.color, 3);
+    } else if (e.actState === 1) {
+      /* windup — slows and hunches while the ring swells */
+      tv.x *= 0.25; tv.y *= 0.25;
+      if (Math.random() < dt * 20) this.puff(e.x + (Math.random() * 64 - 32), e.y + e.r, "#ffb08a", 80, 3);
+      if (e.actT <= 0) {
+        e.actState = 0; e.actT = e.enraged ? 3.2 : 4.6;
+        e.wob = 40; e.subT = 0;                      // shockwave goes live
+        this.o.sfx.castEarth();
+        this.shakeIt(12);
+        this.ring(e.x, e.y, 120, "#ff7847", 5);
+      }
+    }
+    /* the expanding shockwave — a traveling damage band */
+    if (e.wob > 0) {
+      e.wob += (e.enraged ? 700 : 560) * dt;
+      e.armAng -= dt;
+      if (e.armAng <= 0) { e.armAng = 0.07; this.ring(e.x, e.y, e.wob, "#ff7847", 3); }
+      if (e.subT === 0 && Math.abs(dist - e.wob) < 30) {
+        e.subT = 1;
+        this.damagePlayer(e.damage, e.x, e.y);
+      }
+      if (e.wob > 520) e.wob = 0;
+    }
+    /* sheds cinder imps — the fire follows him */
+    e.shootT -= dt;
+    if (e.shootT <= 0) {
+      e.shootT = e.enraged ? 8 : 12;
+      let imps = 0;
+      for (const o of this.enemies) if (!o.dead && o.type === "imp") imps++;
+      if (imps < (e.enraged ? 6 : 4)) {
+        this.spawnEnemy("imp", e.x, e.y);
+        this.spawnEnemy("imp", e.x, e.y);
+        for (let i = 0; i < 10; i++) this.puff(e.x, e.y, "#ff8a5c", 140, 3);
+      }
+    }
+  }
+
+  /* SOLENNE, the Last Note — the Blade Dancer. */
+  private bossSolenne(e: Enemy, dt: number, nx: number, ny: number, dist: number) {
+    const tv = this.bossTv;
+    e.actT -= dt;
+    if (e.actState === 0) {
+      /* the dance — tight orbit at fencing range */
+      const tX = -ny * e.strafeDir, tY = nx * e.strafeDir;
+      const radial = dist > 290 ? 1 : dist < 210 ? -1 : 0;
+      tv.x = (tX + nx * radial * 0.9) * e.speed;
+      tv.y = (tY + ny * radial * 0.9) * e.speed;
+      /* tempo bursts — the metronome accelerates as she bleeds */
+      e.shootT -= dt;
+      if (e.shootT <= 0) {
+        const tempo = 1 - 0.45 * (1 - e.hp / e.maxHp);
+        e.shootT = (e.enraged ? 1.5 : 2.2) * tempo * 0.75;
+        const base = Math.atan2(this.py - e.y, this.px - e.x);
+        for (let i = -1; i <= 1; i++) {
+          const a = base + i * 0.13;
+          this.eBolts.push({ x: e.x, y: e.y, vx: Math.cos(a) * 300, vy: Math.sin(a) * 300, r: 5, dmg: e.damage * 0.5, life: 3.2, color: e.glow });
+        }
+        this.o.sfx.hit();
+        this.ring(e.x, e.y, 40, e.color, 2);
+      }
+      if (e.actT <= 0) { e.actState = 1; e.actT = 0.4; e.count = e.enraged ? 3 : 2; this.o.sfx.bossRoar(); }
+    } else if (e.actState === 1) {
+      /* lunge telegraph — she lifts the blade along the dash line */
+      const tX = -ny * e.strafeDir, tY = nx * e.strafeDir;
+      tv.x = tX * e.speed * 0.25; tv.y = tY * e.speed * 0.25;
+      if (Math.random() < dt * 30) {
+        const a = Math.atan2(this.py - e.y, this.px - e.x);
+        const rr = 30 + Math.random() * 220;
+        this.puff(e.x + Math.cos(a) * rr, e.y + Math.sin(a) * rr, "#aeeaf5", 60, 2.4);
+      }
+      if (e.actT <= 0) {
+        const a = Math.atan2(this.py - e.y, this.px - e.x);
+        e.cx = Math.cos(a); e.cy = Math.sin(a);
+        e.actState = 2; e.actT = 0.42;
+        this.o.sfx.castShadow();
+      }
+    } else if (e.actState === 2) {
+      /* the lunge — a fencing dash THROUGH the mage's position */
+      tv.x = e.cx * 560; tv.y = e.cy * 560;
+      if (Math.random() < dt * 34) this.puff(e.x, e.y, "#43e8d8", 130, 3.4);
+      if (e.actT <= 0) {
+        e.count--;
+        if (e.count > 0) { e.actState = 1; e.actT = 0.3; e.strafeDir = Math.random() < 0.5 ? 1 : -1; }
+        else { e.actState = 0; e.actT = e.enraged ? 4.5 : 6.5; this.shakeIt(8); }
+      }
+    }
+  }
+
+  /* YSED, the Hour-Cradled — the Blink Fortress. */
+  private bossYsed(e: Enemy, dt: number, nx: number, ny: number, _dist: number) {
+    const tv = this.bossTv;
+    e.actT -= dt;
+    if (e.actState === 0) {
+      /* anchored — barely drifts while the spiral turns */
+      tv.x = nx * e.speed * 0.12; tv.y = ny * e.speed * 0.12;
+      const arms = e.enraged ? 3 : 2;
+      e.armAng += (e.enraged ? 2.9 : 2.2) * dt;
+      e.subT -= dt;
+      if (e.subT <= 0) {
+        e.subT = 0.12;
+        for (let arm = 0; arm < arms; arm++) {
+          const a = e.armAng + (arm / arms) * TAU;
+          this.eBolts.push({ x: e.x, y: e.y, vx: Math.cos(a) * 205, vy: Math.sin(a) * 205, r: 6, dmg: e.damage * 0.5, life: 4.2, color: e.glow });
+        }
+        this.o.sfx.hit();
+      }
+      if (e.actT <= 0) { e.actState = 1; e.actT = 0.45; this.o.sfx.castVoid(); }
+    } else if (e.actState === 1) {
+      /* folding — implodes before the blink */
+      tv.x = 0; tv.y = 0;
+      if (Math.random() < dt * 36) {
+        const a = Math.random() * TAU;
+        this.puff(e.x + Math.cos(a) * 40, e.y + Math.sin(a) * 40, "#e0fff5", 70, 2.6);
+      }
+      if (e.actT <= 0) {
+        /* blink to a fresh anchor 300–380px off the mage, clear of pillars */
+        let bx = e.x, by = e.y, ok = false;
+        for (let attempt = 0; attempt < 14 && !ok; attempt++) {
+          const a = this.rng.next() * TAU;
+          const rr = this.rng.range(300, 380);
+          bx = Math.max(90, Math.min(WORLD_W - 90, this.px + Math.cos(a) * rr));
+          by = Math.max(90, Math.min(WORLD_H - 90, this.py + Math.sin(a) * rr));
+          ok = !this.circleRectHit(bx, by, e.r + 10);
+        }
+        for (let i = 0; i < 14; i++) this.puff(e.x, e.y, "#c0ffeb", 160, 3);
+        e.x = bx; e.y = by; e.vx = 0; e.vy = 0;
+        e.actState = 2; e.actT = 0.5;
+        this.ring(e.x, e.y, 110, e.color, 4);
+        this.ring(e.x, e.y, 60, e.glow, 2.5);
+        /* landing pulse — a short radial ring punctuates the arrival */
+        for (let i = 0; i < 6; i++) {
+          const a = (i / 6) * TAU + this.rng.next() * 0.3;
+          this.eBolts.push({ x: e.x, y: e.y, vx: Math.cos(a) * 240, vy: Math.sin(a) * 240, r: 6, dmg: e.damage * 0.5, life: 3.4, color: e.glow });
+        }
+        this.o.sfx.bossRoar();
+      }
+    } else if (e.actState === 2) {
+      /* recover — one breath, then the spiral resumes */
+      tv.x = 0; tv.y = 0;
+      if (e.actT <= 0) { e.actState = 0; e.actT = (e.enraged ? 2.6 : 3.6) + this.rng.range(0, 1); }
+    }
+  }
+
+  /* MAELTHAR, the First Sundering — the Apex Storm. */
+  private bossMaelthar(e: Enemy, dt: number, nx: number, ny: number, dist: number) {
+    const tv = this.bossTv;
+    e.actT -= dt;
+    if (e.actState === 0) {
+      /* hover-strafe — fast orbit, reading the mage */
+      const tX = -ny * e.strafeDir, tY = nx * e.strafeDir;
+      const radial = dist > 330 ? 1 : dist < 240 ? -1 : 0;
+      tv.x = (tX * 1.15 + nx * radial * 0.8) * e.speed;
+      tv.y = (tY * 1.15 + ny * radial * 0.8) * e.speed;
+      if (e.actT <= 0) {
+        e.count = (e.count + 1) % 3;
+        if (e.count === 0) { e.actState = 1; e.actT = 0.45; e.subT = e.enraged ? 3 : 2; this.o.sfx.bossRoar(); }
+        else if (e.count === 1) { e.actState = 3; e.actT = 2.3; e.subT = 0; e.armAng = this.rng.next() * TAU; this.o.sfx.castVoid(); }
+        else { e.actState = 5; e.actT = 1.7; this.o.sfx.castVoid(); }
+      }
+    } else if (e.actState === 1) {
+      /* stampede windup */
+      tv.x = nx * e.speed * 0.1; tv.y = ny * e.speed * 0.1;
+      if (e.actT <= 0) {
+        const a = Math.atan2(this.py - e.y, this.px - e.x);
+        e.cx = Math.cos(a); e.cy = Math.sin(a);
+        e.actState = 2; e.actT = 0.42;
+        this.ring(e.x, e.y, 80, e.color, 3);
+      }
+    } else if (e.actState === 2) {
+      /* stampede dash — subT counts the remaining charges */
+      tv.x = e.cx * 500; tv.y = e.cy * 500;
+      if (Math.random() < dt * 32) this.puff(e.x, e.y, "#ff4d6b", 130, 4);
+      if (e.actT <= 0) {
+        e.subT--;
+        if (e.subT > 0) { e.actState = 1; e.actT = 0.22; }
+        else { e.actState = 0; e.actT = 2.2 + Math.random(); this.shakeIt(9); }
+      }
+    } else if (e.actState === 3) {
+      /* multi-arm spiral storm while hovering slowly */
+      tv.x = nx * e.speed * 0.15; tv.y = ny * e.speed * 0.15;
+      const arms = e.enraged ? 4 : 3;
+      e.armAng += 2.6 * dt;
+      e.subT -= dt;
+      if (e.subT <= 0) {
+        e.subT = 0.13;
+        for (let arm = 0; arm < arms; arm++) {
+          const a = e.armAng + (arm / arms) * TAU;
+          this.eBolts.push({ x: e.x, y: e.y, vx: Math.cos(a) * 240, vy: Math.sin(a) * 240, r: 6, dmg: e.damage * 0.5, life: 4, color: "#ffe9ad" });
+        }
+        this.o.sfx.hit();
+      }
+      if (e.actT <= 0) { e.actState = 0; e.actT = 2 + Math.random(); this.shakeIt(7); }
+    } else if (e.actState === 5) {
+      /* gravity rift — drags the mage in while the vortex builds */
+      tv.x = 0; tv.y = 0;
+      const dx = e.x - this.px, dy = e.y - this.py;
+      const d = Math.hypot(dx, dy) || 1;
+      if (d < 700) {
+        const pull = 230;
+        this.px = Math.max(20, Math.min(WORLD_W - 20, this.px + (dx / d) * pull * dt));
+        this.py = Math.max(20, Math.min(WORLD_H - 20, this.py + (dy / d) * pull * dt));
+      }
+      if (Math.random() < dt * 40) {
+        const a = Math.random() * TAU, rr = this.rng.range(60, 260);
+        this.puff(e.x + Math.cos(a) * rr, e.y + Math.sin(a) * rr, "#ffe9ad", 60, 2.6);
+      }
+      if (e.actT <= 0) {
+        /* the nova release */
+        const nB = e.enraged ? 22 : 16;
+        for (let i = 0; i < nB; i++) {
+          const a = (i / nB) * TAU + this.rng.next() * 0.2;
+          this.eBolts.push({ x: e.x, y: e.y, vx: Math.cos(a) * 260, vy: Math.sin(a) * 260, r: 7, dmg: e.damage * 0.6, life: 4, color: "#ff8ba0" });
+        }
+        this.ring(e.x, e.y, 200, "#ffe9ad", 5);
+        this.ring(e.x, e.y, 120, "#ff4d6b", 3);
+        this.o.sfx.castVoid();
+        this.shakeIt(14);
+        e.actState = 0; e.actT = 2.4 + Math.random();
+      }
     }
   }
 
@@ -3341,19 +3828,21 @@ export class ArchmageEngine {
 
   /* ------------------- Patch 9.0 — pathfinding & LOS ---------------------- */
 
-  /** Is a flow cell blocked by a pillar (inflated so bodies never clip)? */
+  /** Is a flow cell blocked by a pillar (inflated so bodies never clip)?
+      Patch 10.2: inflation 10 → 14px so mid-size bodies hug walls less and
+      the no-corner-cut descent below never pinches them into a corner. */
   private flowBlocked(gx: number, gy: number): boolean {
     const x0 = gx * FLOW_CELL, y0 = gy * FLOW_CELL;
     const x1 = x0 + FLOW_CELL, y1 = y0 + FLOW_CELL;
     for (const p of this.arena.pillars) {
-      if (p.x < x1 + 10 && p.x + p.w > x0 - 10 && p.y < y1 + 10 && p.y + p.h > y0 - 10) return true;
+      if (p.x < x1 + 14 && p.x + p.w > x0 - 14 && p.y < y1 + 14 && p.y + p.h > y0 - 14) return true;
     }
     return false;
   }
 
-  /** Rebuild the BFS distance field toward the player. 600 cells, flat arrays
-      — a few microseconds. Re-run when the player crosses a cell or twice a
-      second at most. */
+  /** Rebuild the BFS distance field toward the player. 1000 cells (40×25 on
+      the Patch 10.2 world), flat arrays — a few microseconds. Re-run when the
+      player crosses a cell or twice a second at most. */
   private rebuildFlowField() {
     const dist = this.flowDist;
     dist.fill(FLOW_UNREACHED);
@@ -3394,12 +3883,19 @@ export class ArchmageEngine {
     const d0 = this.flowDist[gy * FLOW_GW + gx];
     if (d0 === FLOW_UNREACHED) return false;
     let bx = 0, by = 0, best = d0;
-    /* 8-neighbourhood descent — pick the neighbour closest to the player */
+    /* 8-neighbourhood descent — pick the neighbour closest to the player.
+       Patch 10.2 — NO CORNER-CUTTING: a diagonal step is only taken when
+       BOTH orthogonal neighbours are open, so the descent never steers a
+       body straight across a pillar corner (the classic wedge-jam). */
     for (let dy = -1; dy <= 1; dy++) {
       for (let dx = -1; dx <= 1; dx++) {
         if (dx === 0 && dy === 0) continue;
         const nx = gx + dx, ny = gy + dy;
         if (nx < 0 || ny < 0 || nx >= FLOW_GW || ny >= FLOW_GH) continue;
+        if (dx !== 0 && dy !== 0) {
+          if (this.flowDist[gy * FLOW_GW + nx] === FLOW_UNREACHED) continue;
+          if (this.flowDist[ny * FLOW_GW + gx] === FLOW_UNREACHED) continue;
+        }
         const d = this.flowDist[ny * FLOW_GW + nx];
         if (d < best) { best = d; bx = dx; by = dy; }
       }
@@ -3412,6 +3908,28 @@ export class ArchmageEngine {
     const len = Math.hypot(dx, dy) || 1;
     out.x = dx / len; out.y = dy / len;
     return true;
+  }
+
+  /** Patch 10.2 — last-resort unstick: relocate a hopelessly wedged foe to
+      a fresh open ring point around the player (with rift-blink puffs at
+      both ends). Guarantees no enemy is ever permanently stuck on terrain —
+      if four consecutive stuck windows (≈2.4s of true weld) fire, the foe
+      blinks out of the jam and re-approaches through open space. */
+  private riftHop(e: Enemy) {
+    for (let attempt = 0; attempt < 16; attempt++) {
+      const a = this.rng.next() * TAU;
+      const rr = this.rng.range(380, 520);
+      const x = Math.max(70, Math.min(WORLD_W - 70, this.px + Math.cos(a) * rr));
+      const y = Math.max(70, Math.min(WORLD_H - 70, this.py + Math.sin(a) * rr));
+      if (this.circleRectHit(x, y, e.r + 8)) continue;
+      for (let i = 0; i < 6; i++) this.puff(e.x, e.y, e.glow, 90, 2.6);
+      e.x = x; e.y = y;
+      e.vx = 0; e.vy = 0;
+      e.lastX = x; e.lastY = y;
+      e.stuckN = 0;
+      for (let i = 0; i < 6; i++) this.puff(x, y, e.glow, 90, 2.6);
+      return;
+    }
   }
 
   /** Cheap line-of-sight raycast against the (inflated) pillars — 30px steps. */

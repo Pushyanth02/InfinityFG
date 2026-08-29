@@ -402,18 +402,18 @@ export function MenuScreen({ chapter, chapterSubtitle, onStart }: MenuProps) {
 
         <div className="anim-fade-up-3 mt-4 w-full max-w-2xl border border-[rgba(154,123,255,0.28)] bg-[rgba(18,11,36,0.75)] px-6 py-3 text-left">
           <div className="flex items-center justify-between">
-            <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#6bf0c2]">Patch 10.1 — The Clear Horizon</div>
+            <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#6bf0c2]">Patch 10.2 — The Thinking Rift</div>
             <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6a5a99]">live</div>
           </div>
           <ul className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1 text-[12.5px] text-[#c9bdf0] list-none">
-            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Fullscreen play on mobile — the rift claims the whole screen</li>
-            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Camera widened — see more of the arena than ever before</li>
-            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> HUD 10% smaller by default, with a new HUD-scale slider</li>
-            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Status icons — primed and attuned now read at a glance</li>
-            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Base difficulty lowered another 10% across the rift</li>
-            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Rift Mercy — progressive tiers, always yours to lower</li>
-            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Landscape enforced with the rotate guard on touch</li>
-            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Single FIRE button + spell toggle — no fire joystick</li>
+            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Every tyrant rebuilt — five fully distinct boss kits</li>
+            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Zero boss cutscenes — no cards, no banners, pure telegraphs</li>
+            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Archmage Mode now respects walls — true line-of-sight casting</li>
+            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> The Fateweaver: calculated casts, resonance hunts, no spam</li>
+            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Boons picked from live context — wounds, mana, incoming tyrants</li>
+            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Pathfinding hardened — no corner jams, no foes stuck on terrain</li>
+            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> The rift grows to 2560×1600 with eight layout archetypes</li>
+            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Rift Seeds reshape the monster pool — every seed, a new ecology</li>
           </ul>
         </div>
       </div>

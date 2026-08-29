@@ -1,19 +1,20 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { EvolutionDef } from "@/game/evolutions";
 import { BossDef, COMBOS, ElementId, SPELLS, comboKey } from "@/game/content";
 import { sfx } from "@/game/store";
 import { SpellIcon, UiIcon } from "./icons";
 
 /* ============================================================================
-   overlays.tsx — Patch 7.0 "The Pure Arcanum".
+   overlays.tsx — Patch 10.2 "The Thinking Rift".
    ----------------------------------------------------------------------------
    The story layer is GONE: no Cutscene player, no DialogueBar, no portraits.
-   What remains are the pure gameplay overlays — Evolution, SpellOffer
-   (with Back to Game), Merge — plus the in-game BossTitleCard, which now
-   renders a PROCEDURAL ANIMATED SIGIL (seeded SVG geometry in the boss's
-   colors) instead of portrait art. Zero image assets in this file. */
+   Patch 10.2 also removed the in-game BossTitleCard — tyrants arrive with no
+   cutscene, card, or message box at all. What remains are the pure gameplay
+   overlays — Evolution, SpellOffer (with Back to Game), Merge — plus
+   BossSigil (the procedural rune emblem used by the Arcanum's Tyrants tab;
+   seeded SVG geometry in the boss's colors). Zero image assets in this file. */
 
 /* ============================================================================
    BossSigil — procedural rune emblem, generated from the boss's id.
@@ -84,79 +85,6 @@ export function BossSigil({ boss, size = 120, animate = true }: { boss: BossDef;
       {/* center eye */}
       <circle cx="50" cy="50" r="3.4" fill={glow} className="sigil-pulse" />
     </svg>
-  );
-}
-
-/* ============================================================================
-   BossTitleCard — in-game boss intro over LIVE combat (no cutscene).
-   ----------------------------------------------------------------------------
-   Procedural sigil + name + title + mechanics line + threat readout
-   (HP / damage / speed gauges relative to the deadliest tyrant). Auto-fades
-   after ~6s or on click; the fight never pauses. */
-
-export interface BossIntroProps {
-  boss: BossDef;
-  actName: string;
-  onDone: () => void;
-}
-
-/* Max stats across all bosses → normalize the threat gauges. */
-const MAX_HP = 2600, MAX_DMG = 44, MAX_SPD = 65;
-
-export function BossTitleCard({ boss, actName, onDone }: BossIntroProps) {
-  const [visible, setVisible] = useState(false);
-  const doneRef = useRef(false);
-  const finish = useCallback(() => {
-    if (doneRef.current) return;
-    doneRef.current = true;
-    setVisible(false);
-    window.setTimeout(onDone, 260);
-  }, [onDone]);
-
-  useEffect(() => {
-    const t1 = window.setTimeout(() => setVisible(true), 60);
-    const t2 = window.setTimeout(finish, 6000);
-    return () => { window.clearTimeout(t1); window.clearTimeout(t2); };
-  }, [finish]);
-
-  const gauge = (label: string, v: number, max: number) => (
-    <div className="boss-gauge" key={label}>
-      <span className="boss-gauge-label">{label}</span>
-      <span className="boss-gauge-track">
-        <span className="boss-gauge-fill" style={{ width: `${Math.max(6, Math.round((v / max) * 100))}%` }} />
-      </span>
-    </div>
-  );
-
-  return (
-    <div
-      className={`boss-card ${visible ? "is-visible" : ""}`}
-      role="status"
-      aria-live="polite"
-      onClick={finish}
-      title="Click to dismiss"
-    >
-      <div className="boss-card-inner">
-        <div className="boss-card-sigil-wrap" style={{ borderColor: boss.color + "88", boxShadow: `0 0 26px ${boss.color}55` }}>
-          <BossSigil boss={boss} size={118} />
-        </div>
-        <div className="boss-card-body">
-          <div className="boss-card-kicker" style={{ color: boss.color }}>
-            {actName} · a tyrant approaches
-          </div>
-          <h2 className="boss-card-name font-display" style={{ color: boss.color, textShadow: `0 0 30px ${boss.color}66` }}>
-            {boss.name.toUpperCase()}
-          </h2>
-          <div className="boss-card-title font-display">{boss.title}</div>
-          <p className="boss-card-lore">{boss.mechanics}</p>
-          <div className="boss-card-gauges">
-            {gauge("HP", boss.hp, MAX_HP)}
-            {gauge("DMG", boss.damage, MAX_DMG)}
-            {gauge("SPD", boss.speed, MAX_SPD)}
-          </div>
-        </div>
-      </div>
-    </div>
   );
 }
 

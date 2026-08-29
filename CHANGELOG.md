@@ -3,6 +3,74 @@
 All notable changes to **Archmage — Rift Survivor** are documented here.
 The game itself reports the live patch on its menu screen.
 
+## Patch 10.2 — The Thinking Rift
+
+The AI & procedural overhaul patch.
+
+### Boss encounters — five distinct tyrants
+- **Every boss completely redesigned** with its own bespoke behavior set (the
+  shared charge/volley loop is gone):
+  - **Vorrac, the Gate-Sorrow** — the *Stampede Charger*: stalks, then chains
+    2–3 re-aimed lane dashes (3 when enraged) with aimed fan volleys between.
+  - **Korrath, the Ash-Eaten** — the *Immovable Juggernaut*: never charges and
+    never strafes; walks you down, slams **expanding shockwave rings** you must
+    space against, and **sheds cinder imps** throughout the fight.
+  - **Solenne, the Last Note** — the *Blade Dancer*: orbits at fencing range on
+    a **metronome tempo** of triple-bolt fans that accelerates as she bleeds,
+    then chains lunges straight through your position.
+  - **Ysed, the Hour-Cradled** — the *Blink Fortress*: anchors and channels
+    **rotating twin-arm spiral barrages**, then blinks to a fresh anchor
+    around you with a radial landing pulse (triple arm when enraged).
+  - **Maelthar, the First Sundering** — the *Apex Storm*: cycles all three
+    signatures — stampede charges, a multi-arm spiral storm, and a **gravity
+    rift** that drags you in before the nova release.
+- **All boss spawn cutscenes and message boxes removed**: no title card, no
+  spawn banner, no enrage banner, no felled banner — tyrants arrive with only
+  an audio roar, a sting, a screen shake, and honest in-arena telegraphs
+  (windup rings, dash puffs, spiral arms, shockwave bands). Kills read
+  through the death burst + a floating score; the HUD boss plate keeps the
+  name and HP bar.
+- Enrage (below half HP) follows the Dead Cells rule everywhere: each pattern
+  **adds** (a third charge, denser slams, doubled tempo, an extra arm, a wider
+  nova) instead of merely speeding up.
+
+### Fateweaver & Archmage Mode
+- **Line of Sight is now enforced**: the autopilot raycasts against pillars
+  before targeting — it never casts at enemies behind walls, never lobs weave
+  bolts into geometry, and repositions instead of wasting mana. (LoS-checked
+  early-out keeps the raycast cost negligible.)
+- **Intensity scaled back**: cast decisions run at a deliberate 0.30s cadence
+  (was 0.14s), the value threshold is stricter, a 12% mana reserve is kept
+  for panic tools, and wounded pilots kite wider and blink earlier.
+- **The Fateweaver** (the decision brain) is context-aware:
+  - *Casting*: hunts primed **resonances** (+score for the detonating
+    element), respects per-spell range bands, cluster sizes and close-count
+    panic value — no more ability spam.
+  - *Surge discipline*: a full Weave meter is held until it matters (boss up,
+    pack closing, or ~5s held) instead of being dumped instantly.
+  - *Boons*: tribute rewards, evolutions, spell offers and merges are now
+    ranked against a live **FateContext** snapshot — wounded mages take
+    armor/HP, mana-starved builds take focus economy, pre-boss gates spike
+    offense, saturated stats are skipped, and lopsided loadouts chase the
+    missing role (an AoE-less build hunts AoE offers; the last AoE tool is
+    protected from merging).
+
+### World generation
+- **Pathfinding hardened** so terrain can never trap a foe: the flow-field
+  descent **cannot corner-cut** (diagonal steps require both orthogonal
+  neighbours open), cell inflation rose 10→14px, stuck recovery runs on a
+  0.6s/14px window with **escalating kicks**, and four consecutive stuck
+  windows trigger a **rift-hop** — a tiny relocation to the open spawn ring.
+- **The world grew to 2560×1600** (+67% area) with all five original
+  archetypes rescaled to fill it, and **three new layout archetypes** —
+  *Spiral* (an archimedean whorl), *Crosswall* (a broken X of stepped rays),
+  and *Scatter* (a drifting field of free shards) — for eight floor plans.
+- **Rift Seeds now drive the monster ecology**: `poolBias` derives a stable
+  per-seed weight multiplier for every foe type (two "featured" stars surge
+  2.4×, some fade) applied to every wave composition and boss-wave add roll —
+  changing the seed reshapes **both** the map layout and the enemy pool, while
+  unlock waves keep progression pacing intact.
+
 ## Patch 10.1 — The Clear Horizon
 
 The foundational controls & feel patch.

@@ -11,7 +11,12 @@
    78 resonances), +5 normal enemy types (19 total), Rift Mercy reworked to
    a per-death assist ladder with a selectable tier, the global −10%
    difficulty now ALSO covers spawn pressure, and the arena became a fixed
-   1920×1280 world with five seed-driven layout archetypes. */
+   1920×1280 world with five seed-driven layout archetypes.
+   Patch 10.2 "The Thinking Rift": the world grows to 2560×1600 with EIGHT
+   layout archetypes (three new floor plans), and the Rift Seed now also
+   drives an enemy ECOLOGY — poolBias() bends every foe type's spawn weight
+   per seed (two "featured" stars surge, some fade), so altering the seed
+   reshapes both the map AND the monster pool. */
 
 /* ------------------------------ Seeded RNG ------------------------------ */
 export interface RNG {
@@ -171,11 +176,11 @@ export const REWARD_COUNT = 3;
 /* Five unique bosses — one per 10-round set. On every run the engine
    shuffles BOSS_ORDER via the seed so the player faces them in a different
    order each restart. Patch 7.0: bosses are PURE mechanical encounters —
-   no art, no backstory, no dialogue. Each carries a short `mechanics` line
-   (shown on the in-game title card and in the Arcanum) that honestly
-   describes their combat behavior. All bosses: closing charges, radial
-   bolt volleys, enrage below half health (denser volleys + a one-time
-   spiral burst). */
+   no art, no backstory, no dialogue. Patch 10.2: every tyrant now runs a
+   fully DISTINCT behavior set (see the boss brains in engine.ts) — the
+   `mechanics` line below honestly describes each one's actual kit. All of
+   them enrage below half health by ADDING to their pattern, never by
+   merely speeding up. */
 export interface BossDef {
   id: string;
   name: string;
@@ -197,7 +202,7 @@ export const BOSS_DEFS: BossDef[] = [
     title: "the Gate-Sorrow",
     hp: 950, damage: 26, speed: 55, radius: 44,
     color: "#ff4d6b", glow: "#ffa3b5",
-    mechanics: "First of the tyrants — brisk charges and wide bolt volleys. Enrages below half health.",
+    mechanics: "Stampede charger — stalks, then chains two-to-three re-aimed lane dashes with aimed fan volleys between.",
   },
   {
     id: "korrath",
@@ -205,7 +210,7 @@ export const BOSS_DEFS: BossDef[] = [
     title: "the Ash-Eaten",
     hp: 1300, damage: 30, speed: 50, radius: 46,
     color: "#ff7847", glow: "#ffb08a",
-    mechanics: "Heavy brute — slow pursuit, crushing contact damage. Volleys widen when enraged.",
+    mechanics: "Immovable juggernaut — never charges; walks you down, slams expanding shockwave rings, and sheds cinder imps.",
   },
   {
     id: "solenne",
@@ -213,7 +218,7 @@ export const BOSS_DEFS: BossDef[] = [
     title: "the Last Note",
     hp: 1650, damage: 34, speed: 60, radius: 42,
     color: "#43e8d8", glow: "#aeeaf5",
-    mechanics: "Balanced duelist — rapid charges between volleys. Watch the wind-up ring.",
+    mechanics: "Blade dancer — orbits at fencing range on an accelerating tempo of triple fans, then chains lunges through you.",
   },
   {
     id: "ysed",
@@ -221,7 +226,7 @@ export const BOSS_DEFS: BossDef[] = [
     title: "the Hour-Cradled",
     hp: 2000, damage: 38, speed: 45, radius: 44,
     color: "#c0ffeb", glow: "#e0fff5",
-    mechanics: "Fortified leviathan — soaks punishment, answers with dense radial storms.",
+    mechanics: "Blink fortress — anchors and channels rotating twin-arm spiral barrages, then blinks around you with a landing pulse.",
   },
   {
     id: "maelthar",
@@ -229,7 +234,7 @@ export const BOSS_DEFS: BossDef[] = [
     title: "the First Sundering",
     hp: 2600, damage: 44, speed: 65, radius: 48,
     color: "#ff4d6b", glow: "#ffe9ad",
-    mechanics: "The rift's heartbeat — fastest charges, densest volleys, no mercy phases. End it.",
+    mechanics: "The apex storm — cycles stampede charges, a multi-arm spiral, and a gravity rift that drags you into the nova.",
   },
 ];
 
@@ -670,17 +675,41 @@ export function availableTypes(wave: number): EnemyType[] {
   return ENEMY_ORDER.filter((t) => ENEMY_DEFS[t].unlockWave <= wave);
 }
 
+/* Patch 10.2 — seed-driven enemy ECOLOGY. The Rift Seed no longer decides
+   only the floor plan: poolBias derives a stable per-seed weight multiplier
+   for every foe type (some flourish, some fade) plus two "featured" stars
+   that surge 2.4×. Unlock waves still gate availability, so progression
+   pacing is untouched — the seed reshapes the MIX, not the difficulty.
+   Uses its own RNG stream (seed + ":ecology") so it never perturbs the
+   engine's main spawn/arena sequence. */
+export function poolBias(seed: string): Record<EnemyType, number> {
+  const rng = mulberry32(hashSeed(seed + ":ecology"));
+  const out = {} as Record<EnemyType, number>;
+  for (const t of ENEMY_ORDER) out[t] = 0.3 + rng.next() * 1.7;
+  /* two featured stars of this rift */
+  const roster = [...ENEMY_ORDER];
+  for (let i = 0; i < 2 && roster.length; i++) {
+    const star = roster.splice(Math.floor(rng.next() * roster.length), 1)[0];
+    out[star] *= 2.4;
+  }
+  /* the riffraff never starves — early waves always have chaff */
+  out.goblin = Math.max(out.goblin, 0.85);
+  out.skitter = Math.max(out.skitter, 0.5);
+  return out;
+}
+
 /* ------------------------------ Arena gen ------------------------------- */
 /* Patch 9.0 — the arena is no longer the viewport. It is a FIXED WORLD
-   (WORLD_W × WORLD_H px) explored through a scrolling camera. Layouts are
-   generated in world pixels from five archetypes, picked by the seed + wave
-   so every Rift Shift can change not just pillar positions but the whole
-   floor plan. All archetypes guarantee:
+   (WORLD_W × WORLD_H px) explored through a scrolling camera. Patch 10.2
+   grows the world to 2560×1600 (+67% area) so the wider Patch-10.1 camera
+   has room to roam. Layouts are generated in world pixels from EIGHT
+   archetypes, picked by the seed + wave so every Rift Shift can change not
+   just pillar positions but the whole floor plan. All archetypes guarantee:
      • a clear spawn ring around the world center (player starts there),
      • ≥ 90px walkable gaps between pillars (enemies can always path),
      • hazards kept off pillars and out of the central ring. */
-export const WORLD_W = 1920;
-export const WORLD_H = 1280;
+export const WORLD_W = 2560;
+export const WORLD_H = 1600;
 
 export interface ArenaRect { x: number; y: number; w: number; h: number }   // world px
 export interface ArenaCircle { x: number; y: number; r: number; grad?: CanvasGradient | null }  // world px
@@ -694,8 +723,8 @@ export interface Arena {
   style: string;
 }
 
-export type ArenaStyle = "temple" | "colonnade" | "ring" | "chambers" | "lanes";
-const ARENA_STYLES: ArenaStyle[] = ["temple", "colonnade", "ring", "chambers", "lanes"];
+export type ArenaStyle = "temple" | "colonnade" | "ring" | "chambers" | "lanes" | "spiral" | "crosswall" | "scatter";
+const ARENA_STYLES: ArenaStyle[] = ["temple", "colonnade", "ring", "chambers", "lanes", "spiral", "crosswall", "scatter"];
 
 /* overlap helper — rects must keep `gap` of clear space between them */
 function rectsClear(a: ArenaRect, b: ArenaRect, gap: number): boolean {
@@ -724,41 +753,44 @@ export function generateArena(rng: RNG, waveIndex = 0): Arena {
   const cx = WORLD_W / 2, cy = WORLD_H / 2;
 
   if (style === "temple") {
-    /* ruined temple — 8 pillars in two concentric rings around the center */
+    /* ruined temple — 10 pillars in two concentric rings around the center
+       (Patch 10.2: rings widened for the bigger world, inner ring doubled) */
     for (let i = 0; i < 4; i++) {
       const a = (i / 4) * Math.PI * 2 + rng.range(-0.15, 0.15);
-      pushPillar(pillars, cx + Math.cos(a) * 400 - rng.range(34, 48), cy + Math.sin(a) * 400 - rng.range(52, 72), rng.range(68, 96), rng.range(104, 144), cx, cy, 240);
+      pushPillar(pillars, cx + Math.cos(a) * 500 - rng.range(38, 54), cy + Math.sin(a) * 500 - rng.range(56, 78), rng.range(74, 104), rng.range(112, 154), cx, cy, 240);
     }
-    for (let i = 0; i < 4; i++) {
-      const a = (i / 4) * Math.PI * 2 + Math.PI / 4 + rng.range(-0.2, 0.2);
-      pushPillar(pillars, cx + Math.cos(a) * 620 - 40, cy + Math.sin(a) * 620 - 56, rng.range(76, 108), rng.range(100, 150), cx, cy, 240);
+    for (let i = 0; i < 6; i++) {
+      const a = (i / 6) * Math.PI * 2 + Math.PI / 6 + rng.range(-0.2, 0.2);
+      pushPillar(pillars, cx + Math.cos(a) * 810 - 44, cy + Math.sin(a) * 810 - 60, rng.range(84, 118), rng.range(108, 160), cx, cy, 240);
     }
   } else if (style === "colonnade") {
-    /* colonnade — two long rows of pillars framing an open central lane */
-    const yTop = cy - rng.range(330, 380);
-    const yBot = cy + rng.range(330, 380);
-    for (let i = 0; i < 4; i++) {
-      const x = 260 + i * ((WORLD_W - 520) / 3) + rng.range(-60, 60);
-      pushPillar(pillars, x - 30, yTop - 80, rng.range(56, 76), rng.range(150, 190), cx, cy, 240);
-      pushPillar(pillars, x - 30, yBot - 80, rng.range(56, 76), rng.range(150, 190), cx, cy, 240);
+    /* colonnade — two long rows of pillars framing an open central lane
+       (Patch 10.2: five per row, spread across the wider world) */
+    const yTop = cy - rng.range(420, 500);
+    const yBot = cy + rng.range(420, 500);
+    for (let i = 0; i < 5; i++) {
+      const x = 320 + i * ((WORLD_W - 640) / 4) + rng.range(-70, 70);
+      pushPillar(pillars, x - 33, yTop - 88, rng.range(62, 84), rng.range(160, 210), cx, cy, 240);
+      pushPillar(pillars, x - 33, yBot - 88, rng.range(62, 84), rng.range(160, 210), cx, cy, 240);
     }
   } else if (style === "ring") {
-    /* shard ring — six small shards in a circle + heavy corner anchors */
-    const n = 6;
-    const rr = rng.range(430, 480);
+    /* shard ring — eight small shards in a circle + heavy corner anchors */
+    const n = 8;
+    const rr = rng.range(560, 640);
     for (let i = 0; i < n; i++) {
       const a = (i / n) * Math.PI * 2 + rng.range(-0.12, 0.12);
-      pushPillar(pillars, cx + Math.cos(a) * rr - rng.range(28, 40), cy + Math.sin(a) * rr - rng.range(38, 52), rng.range(56, 80), rng.range(76, 104), cx, cy, 240);
+      pushPillar(pillars, cx + Math.cos(a) * rr - rng.range(30, 44), cy + Math.sin(a) * rr - rng.range(40, 56), rng.range(60, 86), rng.range(80, 112), cx, cy, 240);
     }
-    const corners: [number, number][] = [[260, 220], [WORLD_W - 260, 220], [260, WORLD_H - 220], [WORLD_W - 260, WORLD_H - 220]];
+    const corners: [number, number][] = [[340, 280], [WORLD_W - 340, 280], [340, WORLD_H - 280], [WORLD_W - 340, WORLD_H - 280]];
     for (const [kx, ky] of corners) {
-      if (rng.chance(0.7)) pushPillar(pillars, kx - rng.range(50, 70), ky - rng.range(40, 55), rng.range(100, 140), rng.range(80, 110), cx, cy, 240);
+      if (rng.chance(0.7)) pushPillar(pillars, kx - rng.range(56, 80), ky - rng.range(44, 62), rng.range(110, 155), rng.range(88, 122), cx, cy, 240);
     }
   } else if (style === "chambers") {
-    /* quad chambers — four L-shaped corner walls with wide gates */
-    const L = rng.range(200, 260);
-    const T = 54;
-    const inset = 250;
+    /* quad chambers — four L-shaped corner walls with wide gates
+       (Patch 10.2: pushed outward + longer arms for the bigger world) */
+    const L = rng.range(270, 340);
+    const T = 58;
+    const inset = 330;
     const corners: [number, number, number, number][] = [
       [inset, inset, 1, 1], [WORLD_W - inset, inset, -1, 1],
       [inset, WORLD_H - inset, 1, -1], [WORLD_W - inset, WORLD_H - inset, -1, -1],
@@ -767,22 +799,62 @@ export function generateArena(rng: RNG, waveIndex = 0): Arena {
       pushPillar(pillars, dx > 0 ? kx : kx - L, ky - (dy > 0 ? 0 : T), L, T, cx, cy, 240);
       pushPillar(pillars, kx - (dx > 0 ? 0 : T), dy > 0 ? ky : ky - (L - T), T, L - T, cx, cy, 240);
     }
-  } else {
-    /* lanes — two long stepped walls carving three horizontal lanes */
-    for (const fx of [0.34, 0.66]) {
+  } else if (style === "lanes") {
+    /* lanes — two long stepped walls carving three horizontal lanes
+       (Patch 10.2: four segments per wall for the taller world) */
+    for (const fx of [0.33, 0.67]) {
       const x = WORLD_W * fx;
-      const segs = 3;
+      const segs = 4;
       for (let s = 0; s < segs; s++) {
         if (rng.chance(0.22)) continue;                        // knocked-through gaps
-        const y = 210 + s * ((WORLD_H - 420) / (segs - 1)) - 120;
-        pushPillar(pillars, x - 27, y, 54, rng.range(150, 200), cx, cy, 240);
+        const y = 240 + s * ((WORLD_H - 480) / (segs - 1)) - 130;
+        pushPillar(pillars, x - 29, y, 58, rng.range(170, 230), cx, cy, 240);
+      }
+    }
+  } else if (style === "spiral") {
+    /* Patch 10.2 — spiral: an archimedean whorl of shards coiling out from
+       the (clear) center. The gaps between coil arms are wide by geometry —
+       step angle and radial growth are chosen so arms never touch. */
+    let ang = rng.range(0, Math.PI * 2);
+    let rad = 330;
+    for (let i = 0; i < 12 && rad < 1080; i++) {
+      const px = cx + Math.cos(ang) * rad;
+      const py = cy + Math.sin(ang) * rad;
+      pushPillar(pillars, px - rng.range(34, 48), py - rng.range(44, 60), rng.range(64, 92), rng.range(84, 116), cx, cy, 240);
+      ang += 0.72 + rng.range(-0.06, 0.06);
+      rad += 66 + rng.range(-8, 12);
+    }
+  } else if (style === "crosswall") {
+    /* Patch 10.2 — crosswall: four stepped diagonal rays forming a broken
+       X through the middle. The center stays clear (first blocks sit at
+       400px), and the stepped blocks leave diagonal running lanes. */
+    const rays: [number, number][] = [[1, 1], [1, -1], [-1, 1], [-1, -1]];
+    for (const [dx, dy] of rays) {
+      for (const step of [400, 560, 720]) {
+        if (rng.chance(0.18)) continue;                        // weathered gaps
+        const px = cx + dx * step - 48;
+        const py = cy + dy * step - 48;
+        pushPillar(pillars, px, py, rng.range(82, 104), rng.range(82, 104), cx, cy, 240);
+      }
+    }
+  } else {
+    /* Patch 10.2 — scatter: a drifting field of 12–16 free-floating shards,
+       poisson-ish via the ≥92px spacing rule. Maximum freedom of movement,
+       minimal structure — the pure kiting floor. */
+    const n = rng.int(12, 16);
+    for (let i = 0; i < n; i++) {
+      for (let attempt = 0; attempt < 10; attempt++) {
+        const x = rng.range(120, WORLD_W - 260);
+        const y = rng.range(120, WORLD_H - 260);
+        if (pushPillar(pillars, x, y, rng.range(70, 150), rng.range(70, 150), cx, cy, 240)) break;
       }
     }
   }
 
-  /* hazards — 2-4 pools, kept off pillars and out of the central ring */
+  /* hazards — 3-5 pools (Patch 10.2: one more on average for the bigger
+     floor), kept off pillars and out of the central ring */
   const hazards: ArenaCircle[] = [];
-  const hcount = rng.int(2, 4);
+  const hcount = rng.int(3, 5);
   for (let i = 0; i < hcount; i++) {
     for (let attempt = 0; attempt < 24; attempt++) {
       const x = rng.range(140, WORLD_W - 140);

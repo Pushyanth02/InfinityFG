@@ -14,7 +14,7 @@ import { RotateIcon, SpellIcon, UiIcon } from "./icons";
 import {
   Corners, GameOverScreen, MenuScreen, PauseOverlay, RewardOverlay, SanctumScreen, SettingsScreen, ArcanumScreen,
 } from "./screens";
-import { BossTitleCard, EndCreditsOverlay, EvolutionOverlay, MergeOverlay, SpellOfferOverlay } from "./overlays";
+import { EndCreditsOverlay, EvolutionOverlay, MergeOverlay, SpellOfferOverlay } from "./overlays";
 import { TouchControls } from "./TouchControls";
 import { useIsPortraitTouch, useIsTouchDevice } from "./useIsTouchDevice";
 import { useFullscreen } from "./useFullscreen";
@@ -40,7 +40,6 @@ export default function GameShell() {
   const spellOffer = useArchmageStore((s) => s.spellOffer);
   const mergeOffer = useArchmageStore((s) => s.mergeOffer);
   const evolutions = useArchmageStore((s) => s.evolutions);
-  const bossIntro = useArchmageStore((s) => s.bossIntro);
   const stats = useArchmageStore((s) => s.stats);
   const settingsOpen = useArchmageStore((s) => s.settingsOpen);
   const seed = useArchmageStore((s) => s.seed);
@@ -384,15 +383,6 @@ export default function GameShell() {
     engineRef.current?.chooseMerge(slotA, slotB);
   }, []);
 
-  /* Patch 6.0 — boss title card over live combat (no phase change). */
-  const onBossIntro = useCallback((boss: import("@/game/content").BossDef, act: import("@/game/content").ActDef) => {
-    useArchmageStore.getState().setBossIntro(boss, act.name);
-  }, []);
-
-  const clearBossIntro = useCallback(() => {
-    useArchmageStore.getState().clearBossIntro();
-  }, []);
-
   /* live settings propagation — engine reads aim assist / gfx per frame;
      the audio graph follows the volume sliders immediately. Patch 9.0: the
      Rift Mercy ladder (toggle / banked deaths / manual tier) pushes a fresh
@@ -437,13 +427,12 @@ export default function GameShell() {
       onEvolution,
       onSpellOffer,
       onMerge,
-      onBossIntro,
     });
     /* dev-only QA hook — lets browser automation drive the engine directly */
     if (process.env.NODE_ENV === "development") {
       (window as unknown as { __archmage?: ArchmageEngine | null }).__archmage = engineRef.current;
     }
-  }, [seed, stopRun, onPhase, onHud, onComboFound, onBestiary, onEvolution, onSpellOffer, onMerge, onBossIntro]);
+  }, [seed, stopRun, onPhase, onHud, onComboFound, onBestiary, onEvolution, onSpellOffer, onMerge]);
 
   const startRun = useCallback(() => {
     sfx.unlock();
@@ -493,14 +482,16 @@ export default function GameShell() {
   const onPauseTouch = useCallback(() => engineRef.current?.togglePause(), []);
 
   /* Patch 8.0 — Archmage Mode toggle: engine autopilot + a readable banner so
-     the state change is obvious on a phone. */
+     the state change is obvious on a phone. Patch 10.2: the autopilot brain
+     is formally the FATEWEAVER — LoS-disciplined, resonance-aware casting
+     plus context-aware boon picks. */
   const onToggleAuto = useCallback(() => {
     const st = useArchmageStore.getState();
     const next = !st.autoMode;
     st.setAutoMode(next);
     st.showBanner(
-      next ? "ARCHMAGE MODE ENGAGED" : "MANUAL CONTROL",
-      next ? "The Archmage fights for you — touch a stick to override" : "The helm is yours again",
+      next ? "THE FATEWEAVER TAKES THE FIELD" : "MANUAL CONTROL",
+      next ? "Archmage Mode — calculated casting, never through walls" : "The helm is yours again",
       next ? "#43e8d8" : "#f5c96b",
     );
   }, []);
@@ -534,6 +525,9 @@ export default function GameShell() {
      auto-resolved after a short beat (the player sees WHAT was picked and
      WHY before it commits). Human picks still work — a manual tap cancels
      the pending auto-pick via the cleanup below.
+     Patch 10.2 — the FATEWEAVER decides from live context: a FateContext
+     snapshot (HP/mana, wave, incoming boss, build stats, loadout roles) is
+     pulled from the engine at decision time, so boons bend to the run.
      Patch 10.0 — the epilogue too: a hands-free player gets the full credit
      roll (10s), then RETURN (bank the triumph — endless is a commitment the
      pilot doesn't make for you). */
@@ -541,13 +535,14 @@ export default function GameShell() {
     if (!autoMode) return;
     let id: number | undefined;
     const DELAY = 1500;
+    const fate = () => engineRef.current?.getFateContext() ?? null;
     if (phase === "intermission" && rewardOffer) {
-      id = window.setTimeout(() => chooseReward(bestRewardId(rewardOffer.rewards)), DELAY);
+      id = window.setTimeout(() => chooseReward(bestRewardId(rewardOffer.rewards, fate())), DELAY);
     } else if (phase === "evolution" && evolutions) {
-      id = window.setTimeout(() => chooseEvolution(bestEvolutionId(evolutions)), DELAY);
+      id = window.setTimeout(() => chooseEvolution(bestEvolutionId(evolutions, fate())), DELAY);
     } else if (phase === "spelloffer" && spellOffer) {
       id = window.setTimeout(() => {
-        const pick = bestSpellPlacement(spellOffer.pool, spellOffer.equipped);
+        const pick = bestSpellPlacement(spellOffer.pool, spellOffer.equipped, fate());
         /* only swap when the offer beats what it replaces (or fills an empty
            slot) — otherwise bank the heal and keep the current loadout */
         if (pick && placementIsUpgrade(pick)) chooseSpellOffer(pick.slot, pick.id);
@@ -850,10 +845,9 @@ export default function GameShell() {
         />
       )}
 
-      {/* Patch 6.0 — boss title card over live combat (auto-fades, click to dismiss) */}
-      {bossIntro && phase === "running" && (
-        <BossTitleCard key={bossIntro.key} boss={bossIntro.boss} actName={bossIntro.actName} onDone={clearBossIntro} />
-      )}
+      {/* Patch 10.2 — boss title card REMOVED: tyrants arrive with no
+          cutscene, no card, no message box — only audio + in-arena
+          telegraphs. The HUD boss plate (top of screen) carries the name. */}
 
       {/* Patch 10.0 — END-CREDIT EPILOGUE: "you have closed the rift" + the
           RETURN / FIGHT choice (endless survival). Rendered above the frozen
