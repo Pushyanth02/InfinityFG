@@ -41,6 +41,20 @@ jobs:
           BUILD_MODE: pages
           BASE_PATH: /${{ github.event.repository.name }}
           NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
+          # Absolute URL for Open Graph / Twitter card images (crawlers need it).
+          # For a user-root repo (<user>.github.io) set NEXT_PUBLIC_SITE_URL to
+          # https://<user>.github.io and BASE_PATH/NEXT_PUBLIC_BASE_PATH to "".
+          NEXT_PUBLIC_SITE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
+
+      # public/.nojekyll rides along with the export (public/* → out/*) so
+      # GitHub Pages serves the _next/ directory untouched.
+      - name: Verify .nojekyll and brand assets
+        run: |
+          test -f out/.nojekyll || { echo "::error::out/.nojekyll missing"; exit 1; }
+          for f in favicon.ico favicon.svg apple-touch-icon.png site.webmanifest art/og-image.png art/twitter-card.png; do
+            test -f "out/$f" || { echo "::error::out/$f missing"; exit 1; }
+          done
+          echo "✓ .nojekyll present, brand suite exported"
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

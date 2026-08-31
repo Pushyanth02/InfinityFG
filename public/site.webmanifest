@@ -1,0 +1,29 @@
+{
+  "name": "Archmage — Rift Survivor",
+  "short_name": "Archmage",
+  "description": "A pure arcade roguelike. Thirteen dark arts, seventy-eight resonances, five shuffled tyrants — weave the requiem and seal the rift.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#0b0716",
+  "theme_color": "#0b0716",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "maskable-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

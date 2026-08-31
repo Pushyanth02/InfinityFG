@@ -10,6 +10,10 @@ const GameShell = dynamic(() => import("@/components/game/GameShell"), {
   loading: () => <LoadingSkeleton />,
 });
 
+/* GitHub Pages base path (set by the deploy workflow) — same expression the
+   game modules use, kept local so the skeleton stays dependency-free. */
+const ASSET_BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 function LoadingSkeleton() {
   return (
     <div
@@ -19,6 +23,21 @@ function LoadingSkeleton() {
       aria-live="polite"
     >
       <div className="text-center">
+        {/* V1.1 — the rift-gate sigil (public/logo.svg, the brand mark
+            every favicon/banner derives from) with a soft ember glow. */}
+        <img
+          src={`${ASSET_BASE}/logo.svg`}
+          alt=""
+          aria-hidden
+          width={72}
+          height={72}
+          draggable={false}
+          style={{
+            margin: "0 auto",
+            filter: "drop-shadow(0 0 22px rgba(245,201,107,0.45))",
+            animation: "sigil-breathe 2.4s ease-in-out infinite",
+          }}
+        />
         <div
           className="font-display font-black text-[clamp(36px,9vw,72px)] tracking-[0.14em]"
           style={{ color: "#f5e3b3", textShadow: "0 0 34px rgba(245,201,107,0.5)" }}
@@ -38,7 +57,7 @@ function LoadingSkeleton() {
             }}
           />
         </div>
-        <style>{`@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(350%)}}`}</style>
+        <style>{`@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(350%)}}@keyframes sigil-breathe{0%,100%{opacity:.72;transform:scale(.97)}50%{opacity:1;transform:scale(1.03)}}`}</style>
         <noscript>
           <p className="mt-5 text-[12px] text-[#ff8ba0]">
             JavaScript is required to enter the rift.

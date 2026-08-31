@@ -1,17 +1,19 @@
 <div align="center">
 
+<img src="public/art/banner.png" alt="Archmage — Rift Survivor key art banner: an archmage facing a gold-and-violet rift portal" width="880" />
+
 # ⚔️ ARCHMAGE
 
-### *Rift Survivor — Version 1.0 “The Sealed Rift”*
+### *Rift Survivor — Version 1.1 “True Direction”*
 
 A **pure arcade roguelike** that runs entirely in the browser.
-No accounts · no servers · no loading screens — **one** image ships with the
-game, and everything else is generated at runtime.
+No accounts · no servers · no loading screens — every spell, resonance,
+monster and note of the score is generated at runtime.
 
-[![Version](https://img.shields.io/badge/version-1.0_%E2%80%9CThe_Sealed_Rift%E2%80%9D-f5c96b?style=for-the-badge)](./CHANGELOG.md)
-[![Engine](https://img.shields.io/badge/engine-Canvas%202D%20%C2%B7%2060%20fps-9a7bff?style=for-the-badge)](#-tech-stack)
+[![Version](https://img.shields.io/badge/version-1.1_%E2%80%9CTrue_Direction%E2%80%9D-f5c96b?style=for-the-badge)](./CHANGELOG.md)
+[![Engine](https://img.shields.io/badge/engine-Canvas%202D%20%C2%B7%2060%20fps-9a7bff?style=for-the-badge)](#%EF%B8%8F-tech-stack)
 [![Audio](https://img.shields.io/badge/audio-Web%20Audio%20%C2%B7%20fully%20synthesized-43e8d8?style=for-the-badge)](#-the-score)
-[![Assets](https://img.shields.io/badge/assets-1%20image%20%C2%B7%20zero%20audio%20files-7ed957?style=for-the-badge)](#%EF%B8%8F-design-notes)
+[![Assets](https://img.shields.io/badge/brand-icons%20%C2%B7%20banners%20%C2%B7%20one%20command-7ed957?style=for-the-badge)](#%EF%B8%8F-design-notes)
 [![License](https://img.shields.io/badge/license-MIT-ff4d6b?style=for-the-badge)](./LICENSE)
 
 **🜂 13 elements · 🜛 78 resonances · 👑 5 shuffled tyrants · 🌊 50 waves + endless**
@@ -67,11 +69,15 @@ no cutscenes, no story, no filler.
 | `P` / `Esc` | Pause |
 | `M` | Mute |
 
-📱 Touch devices get a thumb-zone layer: a docked MOVE stick (drag anywhere),
-a hold-to-FIRE button with auto-targeting, a SPELL cycle button, DASH, SURGE,
-and a tap-to-cast spell strip — **every toggler carries live cooldown veils
-and aether-cost badges**. Portrait phones get a rotate guard; the landing
-page carries a fullscreen enforcer that works on any device.
+📱 Touch devices get a **twin-thumb layer with a floating analog stick**
+(drag anywhere — the stick anchors at your fingertip and maps it 1:1, every
+angle, docked mode selectable), a hold-to-FIRE button with auto-targeting,
+a hold-to-VOLLEY button (homing bolts), SPELL cycle, DASH and SURGE —
+**every button carries live cooldown veils and aether-cost badges**, and the
+whole layer is customizable in Settings: control size (75–140 %), opacity,
+stick model and left/right handedness. Portrait phones get a rotate guard;
+the landing page carries a **fullscreen icon in the top-right corner** that
+works on any device.
 
 ## ✨ Game Feel & Animation
 
@@ -125,9 +131,15 @@ src/
     TouchControls.tsx, icons.tsx, GameErrorBoundary.tsx
   app/
     page.tsx       # the single route (client-only game shell)
+    layout.tsx     # icons, favicons, OG/Twitter cards, web manifest
     globals.css    # the design system
-public/art/
-    cover.png      # the ONE image the game ships
+scripts/
+    build-brand.mjs  # regenerates the whole icon/banner suite (bun run brand)
+public/
+    favicon.ico / favicon.svg / favicon-{16,32}.png / apple-touch-icon.png
+    icon-{192,512}.png / maskable-icon.png / site.webmanifest / logo.svg
+    art/  # cover.png (menu backdrop) + og-image / twitter-card /
+          #   banner / preview + src/ (the two committed source paintings)
 ```
 
 ## 🚀 Getting started (VS Code friendly)
@@ -141,8 +153,11 @@ bun run dev       # dev server on http://localhost:3000
 ```
 
 Recommended VS Code extensions are suggested automatically (ESLint, Tailwind
-IntelliSense, Prettier) — see `.vscode/extensions.json`. Format-on-save and
-ESLint auto-fix are preconfigured in `.vscode/settings.json`.
+IntelliSense, Prettier) — see `.vscode/extensions.json`. Format-on-save,
+ESLint auto-fix, LF endings and final-newline are preconfigured in
+`.vscode/settings.json`; `.vscode/tasks.json` adds the `dev` (background
+server), `lint`, `typecheck`, `brand` and `gates` tasks, and
+`.vscode/launch.json` debugs the game in Chrome against `localhost:3000`.
 
 ### Quality gates
 
@@ -155,11 +170,16 @@ bun run typecheck   # tsc --noEmit
 
 The repo ships a ready workflow (`.github/workflows/deploy.yml`):
 
-1. Push this repo to GitHub (branch `main`).
+1. Push this repo to GitHub (branch `main` — the workflow filter).
 2. Repo **Settings → Pages → Source: GitHub Actions**.
 3. Push (or run the workflow manually). It installs, lints, type-checks,
-   builds the static export and deploys — your game lands at
+   builds the static export, **verifies `.nojekyll` and the brand suite**
+   landed in `out/`, and deploys — your game lands at
    `https://<user>.github.io/<repo>/`.
+
+`public/.nojekyll` is committed on purpose: GitHub Pages would otherwise
+run Jekyll and starve the exported `_next/` directory. The workflow fails
+loudly if it ever goes missing.
 
 The static build runs in export mode with a base path matching your repo name
 (`BUILD_MODE=pages`, `BASE_PATH=/<repo>`); local dev and the standalone server
@@ -168,7 +188,8 @@ build are unaffected.
 ### Manual static build
 
 ```bash
-BUILD_MODE=pages BASE_PATH=/my-repo NEXT_PUBLIC_BASE_PATH=/my-repo bun run build:pages
+BUILD_MODE=pages BASE_PATH=/my-repo NEXT_PUBLIC_BASE_PATH=/my-repo \
+  NEXT_PUBLIC_SITE_URL=https://user.github.io/my-repo bun run build:pages
 # → static site in ./out (serve it anywhere)
 ```
 
@@ -191,9 +212,15 @@ mix reads loud and dramatic at any volume setting.
 
 ## 🛠️ Design notes
 
-- **One image on purpose.** Beyond the cover, every visual that wants art —
-  boss sigils, Arcanum covers — is seeded, deterministic SVG generated at
-  runtime. Same seed, same art; reroll for a new one.
+- **Two source paintings, then procedural.** The menu cover and the key-art
+  banners are the only committed raster art; everything else that wants
+  art — boss sigils, Arcanum covers — is seeded, deterministic SVG generated
+  at runtime. Same seed, same art; reroll for a new one.
+- **The brand suite is one command.** `bun run brand` (scripts/build-brand.mjs)
+  regenerates the favicon.ico (16/32/48), SVG favicon, apple-touch icon, PWA
+  icons (192/512/maskable), web manifest, Open Graph / Twitter / GitHub
+  banners and the menu cover from `public/art/src/` — sharp renders the
+  rift-gate sigil from parameterized SVG so every size stays pixel-crisp.
 - **Matched curves, not walls.** Player power and enemy HP ride curves of the
   same family; elites trade raw HP for a damage-taken bonus; bosses anchor to
   your own growth. The result: magic always feels powerful, and death always

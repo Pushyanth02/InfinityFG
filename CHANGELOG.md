@@ -1,5 +1,61 @@
 # Changelog
 
+## Version 1.1 — True Direction
+
+The first post-release patch: touch play rebuilt from the stick up, the
+audit pass that followed, and a full brand identity for every device and
+every crawler.
+
+### Touch controls — True Direction
+- **The floating analog stick.** The root cause of the "locked to one
+  direction" bug is fixed at the root: on touch, the stick now anchors at
+  the exact contact point (biased inward at screen edges) and maps your
+  finger 1:1 — any angle, any distance, zero drift on press, zero bleed
+  from the previous gesture. The docked housing remains as the resting
+  affordance and springs home on release; a classic **docked** mode (legacy
+  follow-drag with a direction-preserving radial clamp) stays selectable in
+  Settings. Verified: all 4 compass directions, all 4 diagonals, and
+  multi-thumb play (move while firing) track exactly.
+- **The attack cluster, re-laid.** DASH sits middle-right directly above
+  the Weave/Surge button; VOLLEY (hold-to-fire arcane bolts, right-mouse
+  parity) joins the cluster beside Weave, above Spell/Fire. One thumb owns
+  movement, the other owns the whole arsenal.
+- **A customizable touch UI.** Control size (75–140%), control opacity
+  (40–100%), stick model (floating / docked) and handedness (right / left
+  mirror) — all live from Settings, all persisted, all verified at 140%
+  scale in the mirrored left-hand layout.
+
+### The audit pass
+- **Performance** (60 fps held at wave-50 boss with 400+ particles):
+  ember motes blit as baked 2×-DPR sprites instead of per-frame
+  `shadowBlur`; floater fonts and pillar gradients are cached and cleared
+  on arena change; the per-slot inventory dispatch storm (~180
+  setState/s) is gone; boss-bar timers are one-shot.
+- **Combat fairness:** the boss charge-lane telegraph tracks the LIVE aim
+  (it pointed at where you dashed *from*); mender plinks are range-gated
+  under 560px (no more off-screen sniping); swift elites cap at 1.05× the
+  LIVE player speed (swiftness relics always win); Ysolth/Mordrax spiral
+  volleys gained a 0.4s grace + 0.45s charge-glow windup.
+- **Accessibility:** 9px floor on the smallest HUD labels; the touch
+  utility cluster carries full labels; AA/AAA target sizes documented at
+  every control scale.
+
+### Platform & brand
+- **Fullscreen, one icon.** The fullscreen switch now lives as an icon in
+  the top-right corner beside Settings and Sound — one tap from the
+  landing page on any device, live state (expand ⇄ compress), and
+  unsupported browsers hide it quietly.
+- **A full icon & banner suite, optimized for every device:** true-PNG
+  favicon.ico (16/32/48) + SVG favicon, apple-touch-icon (180), PWA
+  manifest with 192/512 and maskable icons, Open Graph (1200×630), Twitter
+  summary-large card (1200×600), a GitHub social-preview banner (1280×640),
+  a 1600×900 preview banner and a new true-PNG menu cover — all brand-gold
+  on night violet, all regenerable with one command (`bun run brand`).
+- **Repo hardening:** GitHub Pages workflow repaired (branch filter) and
+  extended (site URL, base path, nojekyll verified), `.gitattributes` and
+  `.editorconfig` normalized, VS Code workspace tuned (format-on-save,
+  ESLint + Tailwind IntelliSense).
+
 ## Version 1.0 — The Sealed Rift (official release)
 
 The official release. Everything before this page is history;

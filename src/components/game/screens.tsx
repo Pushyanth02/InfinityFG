@@ -223,10 +223,11 @@ export function MenuScreen({ chapter, chapterSubtitle, onStart }: MenuProps) {
      device actually uses: keyboard/mouse rite on desktop, touch rite on
      phones/tablets. Never both. */
   const isTouch = useIsTouchDevice();
-  /* Patch 11.0 — THE FULLSCREEN ENFORCER: a landing-page button that takes
-     the whole experience edge-to-edge on ANY device (this tap is the user
-     gesture the Fullscreen API demands). The old in-game FULL toggle is
-     gone — this is the one true switch, and it flips live. */
+  /* V1.1 — the fullscreen switch lives as an ICON in the top-right utility
+     cluster (beside Settings and Sound). One tap still carries the user
+     gesture the Fullscreen API demands on ANY device, the state flips live
+     (expand ⇄ compress glyph), and unsupported browsers (iPhone Safari)
+     hide the button entirely. */
   const fs = useFullscreen();
   const muted = meta.settings.master <= 0;
   const toggleMute = () => patchSettings({ master: muted ? 80 : 0 });
@@ -241,12 +242,30 @@ export function MenuScreen({ chapter, chapterSubtitle, onStart }: MenuProps) {
       <MenuBackdrop />
       <div className="rune-frame absolute inset-0 pointer-events-none"><Corners /></div>
 
+      {/* V1.1 — the top-right utility cluster: FULLSCREEN (icon, live
+          state), Settings, Sound — one compact row, identical sizing and
+          spacing, 44px touch targets on every device. */}
       <div className="absolute top-6 right-6 z-20 flex items-center gap-2">
+        {fs.supported && (
+          <button
+            onClick={() => { sfx.click(); void fs.toggle(); }}
+            onMouseEnter={hover}
+            aria-pressed={fs.isFullscreen}
+            aria-label={fs.isFullscreen ? "Leave fullscreen" : "Enter fullscreen — play edge-to-edge on any device"}
+            className={`btn-ghost px-3 py-2 flex items-center transition-colors ${
+              fs.isFullscreen ? "text-[#6bf0c2] hover:text-[#a5ffd9]" : "text-[#e9e2ff] hover:text-[#ffe9ad]"
+            }`}
+            title={fs.isFullscreen ? "Leave fullscreen" : "Enter fullscreen — play edge-to-edge on any device"}
+          >
+            <UiIcon name={fs.isFullscreen ? "compress" : "expand"} size={18} />
+          </button>
+        )}
         <button
           onClick={openSettings}
           onMouseEnter={hover}
           className="btn-ghost px-3 py-2 text-[#e9e2ff] hover:text-[#ffe9ad]"
           title="Settings — audio, graphics, gameplay, data"
+          aria-label="Open settings"
         >
           <UiIcon name="settings" size={18} />
         </button>
@@ -255,6 +274,7 @@ export function MenuScreen({ chapter, chapterSubtitle, onStart }: MenuProps) {
           onMouseEnter={hover}
           className="btn-ghost px-3 py-2 text-[#e9e2ff] hover:text-[#ffe9ad]"
           title="Toggle sound (M)"
+          aria-label={muted ? "Unmute sound" : "Mute sound"}
         >
           <UiIcon name={muted ? "mute" : "sound"} size={18} />
         </button>
@@ -271,13 +291,13 @@ export function MenuScreen({ chapter, chapterSubtitle, onStart }: MenuProps) {
           ARCHMAGE
         </h1>
 
-        {/* V1.0 final — prominent release badge: the version branding reads
+        {/* V1.1 — prominent release badge: the version branding reads
             at a glance on every device, right under the title. */}
-        <div className="anim-fade-up-2 mt-3 flex items-center gap-2.5" aria-label="Version 1.0 official release">
+        <div className="anim-fade-up-2 mt-3 flex items-center gap-2.5" aria-label="Version 1.1 patch — True Direction">
           <span className="px-3.5 py-1 border border-[rgba(245,201,107,0.65)] bg-[rgba(245,201,107,0.1)] text-[#f5c96b] text-[11px] font-black uppercase tracking-[0.26em]">
-            Version 1.0
+            Version 1.1
           </span>
-          <span className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#9a7bff]">The Sealed Rift · Official Release</span>
+          <span className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#9a7bff]">True Direction · Live Patch</span>
         </div>
 
         <p className="anim-fade-up-2 mt-3 max-w-xl text-[15px] leading-relaxed text-[#b9aee0] italic">
@@ -320,26 +340,6 @@ export function MenuScreen({ chapter, chapterSubtitle, onStart }: MenuProps) {
             <UiIcon name="dice" size={16} />
           </button>
         </div>
-
-        {/* Patch 11.0 — FULLSCREEN ENFORCER: any device, one tap, immediate.
-            When active it offers the exit; when the browser refuses (iPhone
-            Safari), the button quietly reports the windowed truth. */}
-        {fs.supported && (
-          <button
-            onClick={() => { sfx.click(); void fs.toggle(); }}
-            onMouseEnter={hover}
-            aria-pressed={fs.isFullscreen}
-            className={`anim-fade-up-2 mt-4 px-6 py-2.5 text-[12px] font-black uppercase tracking-[0.22em] flex items-center gap-2.5 border transition-all duration-300 ease-[cubic-bezier(0.22,0.68,0.32,1)] ${
-              fs.isFullscreen
-                ? "border-[rgba(107,240,194,0.55)] text-[#6bf0c2] bg-[rgba(107,240,194,0.07)] hover:bg-[rgba(107,240,194,0.14)]"
-                : "border-[rgba(154,123,255,0.45)] text-[#c9baff] bg-[rgba(20,12,40,0.6)] hover:border-[rgba(245,201,107,0.65)] hover:text-[#ffe9ad]"
-            }`}
-            title={fs.isFullscreen ? "Leave fullscreen" : "Play edge-to-edge — fullscreen on any device"}
-          >
-            <UiIcon name={fs.isFullscreen ? "compress" : "expand"} size={15} />
-            {fs.isFullscreen ? "Fullscreen Engaged — Exit" : "Enter Fullscreen"}
-          </button>
-        )}
 
         <button onClick={onStart} onMouseEnter={hover} className="anim-fade-up-3 btn-gold mt-3 px-12 py-4 text-lg flex items-center gap-3">
           <UiIcon name="gate" size={22} />
@@ -403,6 +403,7 @@ export function MenuScreen({ chapter, chapterSubtitle, onStart }: MenuProps) {
               <>
                 <TouchRow badge="LEFT STICK" label="Drag anywhere — move the Archmage" />
                 <TouchRow badge="HOLD FIRE" label="Auto-target cast — hold to keep attacking" />
+                <TouchRow badge="HOLD VOLLEY" label="Arcane bolts seek the nearest foe while held" />
                 <TouchRow badge="SPELL" label="Tap to cycle your bound spells" />
                 <TouchRow badge="DASH" label="Blink step — brief immunity" />
                 <TouchRow badge="SURGE" label="Unleash the Weave Surge when full" />
@@ -436,32 +437,36 @@ export function MenuScreen({ chapter, chapterSubtitle, onStart }: MenuProps) {
           </div>
         </div>
 
-        {/* Version 1.0 — THE SEALED RIFT: the release panel. Release info,
-            feature highlights and the final build's patch notes — the whole
-            ledger of the shipped game in one place. */}
+        {/* V1.1 — THE PATCH LEDGER: the live patch's release notes on top
+            (mirrors CHANGELOG.md "Version 1.1 — True Direction"), with the
+            V1.0 release highlights preserved beneath as the foundation. */}
         <div className="anim-fade-up-3 mt-4 w-full max-w-2xl border border-[rgba(154,123,255,0.28)] bg-[rgba(18,11,36,0.75)] px-6 py-3 text-left">
           <div className="flex items-center justify-between">
-            <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#6bf0c2]">Version 1.0 — The Sealed Rift</div>
-            <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#f5c96b]">official release</div>
+            <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#6bf0c2]">Version 1.1 — True Direction</div>
+            <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#f5c96b]">latest patch</div>
           </div>
           <ul className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1 text-[12.5px] text-[#c9bdf0] list-none">
-            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> The attunement curve — your magic grows with the rift</li>
-            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> The weave hunts the marked — elites take +35% spell damage</li>
-            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Aether glyphs — every pickup registers live and pays post-run</li>
-            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> The Reliquary — four permanent tracks bound to your soul</li>
-            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Wave 50 seals the rift — credits, then Return or endless Fight</li>
-            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Five tyrant minds — stampede, shockwave, waltz, spiral, storm</li>
-            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Loadout-aware loot — the rift only offers what you can wield</li>
-            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> The Fateweaver — an autopilot that never casts through walls</li>
+            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Floating analog stick — touch movement maps your finger 1:1, every angle</li>
+            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> DASH above Weave, VOLLEY beside it — one thumb owns the whole arsenal</li>
+            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Customizable touch UI — size, opacity, stick model, handedness</li>
+            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Fairer fights — live-aim telegraphs, range gates, elite speed cap</li>
+            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> 60 fps held — baked mote sprites, cached fonts &amp; gradients, no dispatch storms</li>
+            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Fullscreen one-tap icon in the top-right corner, beside settings &amp; sound</li>
+            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> A 9px label floor and fully labeled touch controls for accessibility</li>
+            <li className="flex gap-2"><span className="text-[#f5c96b]">◆</span> Full brand pass — icons, favicons &amp; banners for every device and crawler</li>
           </ul>
-          {/* final build notes */}
+          {/* V1.0 foundation */}
           <div className="mt-2.5 border-t border-[rgba(154,123,255,0.25)] pt-2">
-            <div className="text-[10px] font-bold uppercase tracking-[0.24em] text-[#8f7bff] mb-1">Final build notes</div>
+            <div className="text-[10px] font-bold uppercase tracking-[0.24em] text-[#8f7bff] mb-1">V1.0 — The Sealed Rift</div>
             <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1 text-[12px] text-[#b9aee0] list-none">
-              <li className="flex gap-2"><span className="text-[#43e8d8]">◆</span> Announcements re-centered + compact on every device</li>
-              <li className="flex gap-2"><span className="text-[#43e8d8]">◆</span> Accessibility suite — UI &amp; text size, reduce flashes, high contrast</li>
-              <li className="flex gap-2"><span className="text-[#43e8d8]">◆</span> Fair-cycling drops — every eligible spell, boon and transmutation surfaces</li>
-              <li className="flex gap-2"><span className="text-[#43e8d8]">◆</span> Apex loadouts — two resonances bound stop offering resonances &amp; upgrades</li>
+              <li className="flex gap-2"><span className="text-[#43e8d8]">◆</span> The attunement curve — your magic grows with the rift</li>
+              <li className="flex gap-2"><span className="text-[#43e8d8]">◆</span> The weave hunts the marked — elites take +35% spell damage</li>
+              <li className="flex gap-2"><span className="text-[#43e8d8]">◆</span> Aether glyphs — every pickup registers live and pays post-run</li>
+              <li className="flex gap-2"><span className="text-[#43e8d8]">◆</span> The Reliquary — four permanent tracks bound to your soul</li>
+              <li className="flex gap-2"><span className="text-[#43e8d8]">◆</span> Wave 50 seals the rift — credits, then Return or endless Fight</li>
+              <li className="flex gap-2"><span className="text-[#43e8d8]">◆</span> Five tyrant minds — stampede, shockwave, waltz, spiral, storm</li>
+              <li className="flex gap-2"><span className="text-[#43e8d8]">◆</span> Loadout-aware loot — the rift only offers what you can wield</li>
+              <li className="flex gap-2"><span className="text-[#43e8d8]">◆</span> The Fateweaver — an autopilot that never casts through walls</li>
             </ul>
           </div>
         </div>

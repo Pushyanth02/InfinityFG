@@ -1,29 +1,22 @@
-<?xml version="1.0" encoding="utf-8"?>
-<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 viewBox="0 0 30 30" style="enable-background:new 0 0 30 30;" xml:space="preserve">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
 <defs>
-  <style type="text/css">
-    .st194{fill:#2D2D2D;stroke:#FFFFFF;stroke-width:0.6317;stroke-miterlimit:10;}
-    .st23{fill:#FFFFFF;}
-
-    .z-breathe {
-      animation: breathe 2.5s ease-in-out infinite;
-    }
-
-    @keyframes breathe {
-      0%, 100% { opacity: 0.7; }
-      50% { opacity: 1; }
-    }
-  </style>
+<linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#ffe9ad"/><stop offset="0.55" stop-color="#f5c96b"/><stop offset="1" stop-color="#c98a2e"/>
+</linearGradient>
+<linearGradient id="r" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#9a7bff"/><stop offset="1" stop-color="#5a3fae"/>
+</linearGradient>
+<radialGradient id="halo" cx="0.5" cy="0.5" r="0.5">
+<stop offset="0" stop-color="#9a7bff" stop-opacity="0.5"/><stop offset="0.75" stop-color="#9a7bff" stop-opacity="0.12"/><stop offset="1" stop-color="#9a7bff" stop-opacity="0"/>
+</radialGradient>
 </defs>
 
-<g>
-  <path class="st194" d="M24.51,28.51H5.49c-2.21,0-4-1.79-4-4V5.49c0-2.21,1.79-4,4-4h19.03c2.21,0,4,1.79,4,4v19.03
-    C28.51,26.72,26.72,28.51,24.51,28.51z"/>
-  <g class="z-breathe">
-    <path class="st23" d="M15.47,7.1l-1.3,1.85c-0.2,0.29-0.54,0.47-0.9,0.47h-7.1V7.09C6.16,7.1,15.47,7.1,15.47,7.1z"/>
-    <polygon class="st23" points="24.3,7.1 13.14,22.91 5.7,22.91 16.86,7.1"/>
-    <path class="st23" d="M14.53,22.91l1.31-1.86c0.2-0.29,0.54-0.47,0.9-0.47h7.09v2.33H14.53z"/>
-  </g>
-</g>
+<circle cx="256" cy="256" r="218.8" fill="url(#halo)"/>
+<path d="M256.0 92.2 L397.7 256.0 L256.0 419.8 L114.3 256.0 Z" fill="none" stroke="url(#g)" stroke-width="27.6" stroke-linejoin="miter" stroke-miterlimit="16"/>
+<path d="M256.0 138.2 L348.0 256.0 L256.0 373.8 L164.0 256.0 Z" fill="url(#r)" opacity="0.55"/>
+<path d="M264.3 131.8 L139.2 273.5 H222.9 L226.6 373.8 L375.6 235.8 H264.3 L280.8 131.8 Z" fill="url(#g)"/>
+
+<circle cx="132.7" cy="129.0" r="6.4" fill="#ffe9ad" opacity="0.9"/>
+<circle cx="384.8" cy="160.3" r="4.6" fill="#f5c96b" opacity="0.85"/>
+<circle cx="373.8" cy="384.8" r="5.5" fill="#9a7bff" opacity="0.95"/>
 </svg>

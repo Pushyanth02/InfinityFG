@@ -1,13 +1,14 @@
 {
   "name": "archmage",
-  "version": "1.0.0",
-  "description": "Archmage — a pure arcade roguelike. Thirteen elements, seventy-eight resonances, five shuffled tyrants, adaptive procedural music. Version 1.0 — The Sealed Rift.",
+  "version": "1.1.0",
+  "description": "Archmage — a pure arcade roguelike. Thirteen elements, seventy-eight resonances, five shuffled tyrants, adaptive procedural music. Version 1.1 — True Direction.",
   "private": true,
   "scripts": {
     "dev": "next dev -p 3000 2>&1 | tee dev.log",
     "build": "next build && cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/",
     "start": "NODE_ENV=production bun .next/standalone/server.js 2>&1 | tee server.log",
     "build:pages": "BUILD_MODE=pages next build",
+    "brand": "node scripts/build-brand.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "db:push": "prisma db push --accept-data-loss",

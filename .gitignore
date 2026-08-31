@@ -62,3 +62,10 @@ db/
 /examples/
 /mini-services/
 Caddyfile
+
+# local dev/server logs (bun run dev | tee)
+dev.log
+server.log
+
+# agent-browser debug profile from .vscode/launch.json
+.vscode/.chrome-profile/
