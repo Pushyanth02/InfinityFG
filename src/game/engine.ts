@@ -229,6 +229,9 @@ const SURGE_DUR = 6;
 const N_SPELLS = SPELL_ORDER.length;
 const SHRINE_CHANCE = 0.18;
 const SHRINE_LIFE = 14;
+/* V1.1 — world-pixel size of the pre-baked mote sprite (9px diamond + glow
+   halo padding); rendered once at 2× device resolution and blitted. */
+const MOTE_SPRITE = 32;
 /* Patch 9.0 — flow-field pathfinding grid: 64px cells over the 2560×1600
    (Patch 10.2) world → 40×25 = 1000 cells. Tiny BFS, rebuilt only when the
    player crosses a cell boundary (or twice a second as a safety net). */
@@ -440,6 +443,10 @@ export class ArchmageEngine {
   private playerBody: CanvasGradient | null = null;
   private projGrads = new Map<string, CanvasGradient>();
   private boltGrads = new Map<string, CanvasGradient>();
+  /* V1.1 AUDIT (perf) — render caches: the pre-baked mote sprite (blit
+     replaces per-mote shadowBlur) and the per-size floater font strings. */
+  private moteSprite: HTMLCanvasElement | null = null;
+  private floaterFonts = new Map<number, string>();
 
   /* reusable HUD payload (mutated in place, pushed at ~30 Hz) */
   private hudTick = 0;
@@ -567,6 +574,7 @@ export class ArchmageEngine {
 
   private resize() {
     const c = this.o.canvas;
+    const prevDpr = this.dpr;
     this.dpr = Math.min(window.devicePixelRatio || 1, this.gfxDprCap);
     this.w = Math.max(320, c.clientWidth || window.innerWidth);
     this.h = Math.max(320, c.clientHeight || window.innerHeight);
@@ -579,6 +587,9 @@ export class ArchmageEngine {
     this.computeFov();
     this.clampCamera();
     this.buildStaticGradients();
+    /* V1.1 — the mote sprite is baked at device resolution: rebuild it if
+       the DPR cap changed (monitor move / gfx preset switch). */
+    if (prevDpr !== this.dpr) this.moteSprite = null;
   }
 
   /* Patch 9.0 — device class drives the FOV target. Coarse pointers on small
@@ -1209,6 +1220,9 @@ export class ArchmageEngine {
     if (nextAct.id !== this.act.id) {
       this.act = nextAct;
       this.buildStaticGradients();
+      /* V1.1 — the act palette changed: drop the cached pillar body
+         gradients (drawPillars rebuilds them lazily with the new palette). */
+      for (const p of this.arena.pillars) p.grad = null;
       this.o.sfx.setMusicAct(nextAct.id);
     }
 
@@ -1407,6 +1421,13 @@ export class ArchmageEngine {
       affix = this.rng.pick(ELITE_ORDER);
       const ed = ELITE_DEFS[affix];
       hp *= ed.hpMult; speed *= ed.spdMult; resist = ed.resist;
+      /* V1.1 AUDIT FIX — swift's ×1.65 on top of the wave speed curve let
+         late elites reach ~1.7× the mage's sprint (443 vs 252 px/s): contact
+         chips became unavoidable. Chase speed now caps at a hair above the
+         mage's LIVE movement speed, so swiftness investment always wins
+         while swift elites still outpace every other foe. */
+      const chaseCap = 252 * this.o.bonuses.moveSpeed * this.mods.speed * 1.05;
+      if (speed > chaseCap) speed = chaseCap;
       r *= 1.12; score *= 3;
       this.o.sfx.elite();
     }
@@ -3486,11 +3507,17 @@ export class ArchmageEngine {
           for (let i = 0; i < 5; i++) this.puff(patient.x, patient.y, "#ffd6f6", 60, 2.2);
           this.o.sfx.pickup();
         } else {
-          /* nothing to mend — hostile plink */
-          e.shootT = e.shootsEvery * 1.4;
-          const sp = 220;
-          this.eBolts.push({ x: e.x + nx * e.r, y: e.y + ny * e.r, vx: nx * sp, vy: ny * sp, r: 5, dmg: e.damage * 0.8, life: 3, color: e.glow });
-          this.o.sfx.hit();
+          /* nothing to mend — hostile plink (V1.1 AUDIT FIX: range-gated like
+             every other shooter — the old unlimited range sniped the mage
+             from entirely off-screen) */
+          if (dist < 560) {
+            e.shootT = e.shootsEvery * 1.4;
+            const sp = 220;
+            this.eBolts.push({ x: e.x + nx * e.r, y: e.y + ny * e.r, vx: nx * sp, vy: ny * sp, r: 5, dmg: e.damage * 0.8, life: 3, color: e.glow });
+            this.o.sfx.hit();
+          } else {
+            e.shootT = 0.5;   // out of range: re-close before plinking
+          }
         }
       }
     } else if (e.ranged) {
@@ -3774,9 +3801,12 @@ export class ArchmageEngine {
         this.o.sfx.bossRoar();
       }
     } else if (e.actState === 2) {
-      /* recover — one breath, then the spiral resumes */
+      /* recover — one breath, then the spiral resumes (V1.1 AUDIT FIX: the
+         spiral's first burst now has a real windup — subT grace + the
+         standard charge-glow shootT cue — instead of firing ~0.12s after
+         the recover frame with zero warning) */
       tv.x = 0; tv.y = 0;
-      if (e.actT <= 0) { e.actState = 0; e.actT = (e.enraged ? 2.6 : 3.6) + this.rng.range(0, 1); }
+      if (e.actT <= 0) { e.actState = 0; e.actT = (e.enraged ? 2.6 : 3.6) + this.rng.range(0, 1); e.subT = 0.4; e.shootT = 0.45; }
     }
   }
 
@@ -3793,7 +3823,7 @@ export class ArchmageEngine {
       if (e.actT <= 0) {
         e.count = (e.count + 1) % 3;
         if (e.count === 0) { e.actState = 1; e.actT = 0.45; e.subT = e.enraged ? 3 : 2; this.o.sfx.bossRoar(); }
-        else if (e.count === 1) { e.actState = 3; e.actT = 2.3; e.subT = 0; e.armAng = this.rng.next() * TAU; this.o.sfx.castVoid(); }
+        else if (e.count === 1) { e.actState = 3; e.actT = 2.3; e.subT = 0.4; e.armAng = this.rng.next() * TAU; e.shootT = 0.45; this.o.sfx.castVoid(); }
         else { e.actState = 5; e.actT = 1.7; this.o.sfx.castVoid(); }
       }
     } else if (e.actState === 1) {
@@ -4595,10 +4625,18 @@ export class ArchmageEngine {
       c.beginPath();
       c.ellipse(x + pw / 2 + 5, y + ph + 4, pw * 0.55, 9, 0, 0, TAU);
       c.fill();
-      const g = c.createLinearGradient(x, y, x + pw, y + ph);
-      g.addColorStop(0, pcol0);
-      g.addColorStop(1, pcol1);
-      c.fillStyle = g;
+      /* V1.1 AUDIT FIX (perf) — the pillar body gradient is cached on the
+         pillar (static geometry); the old path rebuilt a linear gradient per
+         pillar per frame (8–14/frame). Rift Shifts regenerate the arena (fresh
+         pillar objects) and act changes clear the cache below so the palette
+         is always current. */
+      if (!p.grad) {
+        const g = c.createLinearGradient(x, y, x + pw, y + ph);
+        g.addColorStop(0, pcol0);
+        g.addColorStop(1, pcol1);
+        p.grad = g;
+      }
+      c.fillStyle = p.grad;
       c.fillRect(x, y, pw, ph);
       c.strokeStyle = `rgba(${rune},0.3)`;
       c.lineWidth = 1.4;
@@ -4719,17 +4757,40 @@ export class ArchmageEngine {
 
   private drawMote(c: CanvasRenderingContext2D, m: Mote) {
     const a = Math.min(1, m.life / 1.2);
+    /* V1.1 AUDIT FIX (perf) — the glowing diamond is pre-rendered ONCE to an
+       offscreen sprite (glow baked in at device resolution) and blitted with
+       drawImage. The old path set shadowBlur=8 per mote — the classic
+       Canvas2D software-blur killer — for up to 130 motes/frame, dominating
+       the p95 frame-time tail during mote vacuums at DPR 2. */
+    const spr = this.ensureMoteSprite();
     c.save();
     c.translate(m.x, m.y);
     c.rotate(this.t * 3 + m.x);
     c.globalAlpha = a;
-    c.fillStyle = "#ffe9ad";
-    c.shadowColor = "#f5c96b";
-    c.shadowBlur = 8;
-    c.beginPath();
-    c.moveTo(0, -4.5); c.lineTo(3.4, 0); c.lineTo(0, 4.5); c.lineTo(-3.4, 0);
-    c.closePath(); c.fill();
+    c.drawImage(spr, -MOTE_SPRITE / 2, -MOTE_SPRITE / 2, MOTE_SPRITE, MOTE_SPRITE);
     c.restore();
+  }
+
+  /** V1.1 — builds (once) the offscreen mote sprite: the 9px gold diamond
+      with its #f5c96b halo baked at 2× device resolution so the blit stays
+      crisp at every gfx preset's DPR cap. */
+  private ensureMoteSprite(): HTMLCanvasElement {
+    if (this.moteSprite) return this.moteSprite;
+    const dpr = Math.max(1, Math.min(2, this.dpr * 2));
+    const cv = document.createElement("canvas");
+    cv.width = Math.ceil(MOTE_SPRITE * dpr);
+    cv.height = Math.ceil(MOTE_SPRITE * dpr);
+    const g = cv.getContext("2d")!;
+    g.scale(dpr, dpr);
+    g.translate(MOTE_SPRITE / 2, MOTE_SPRITE / 2);
+    g.fillStyle = "#ffe9ad";
+    g.shadowColor = "#f5c96b";
+    g.shadowBlur = 8;
+    g.beginPath();
+    g.moveTo(0, -4.5); g.lineTo(3.4, 0); g.lineTo(0, 4.5); g.lineTo(-3.4, 0);
+    g.closePath(); g.fill();
+    this.moteSprite = cv;
+    return cv;
   }
 
   /* Patch 11.0 — DROP ORBS, one distinct silhouette per drop type:
@@ -5316,9 +5377,14 @@ export class ArchmageEngine {
           c.restore();
         }
         if (e.actState === 1) {
+          /* V1.1 AUDIT FIX — the charge lane now tracks the LIVE aim (toward
+             the mage) exactly like the lancer's telegraph. The old draw used
+             the stale e.cx/cy locked at the PREVIOUS dash's end, so the lane
+             pointed down the last charge's direction (or nowhere on the
+             first) — players dodged the wrong lane. */
           c.strokeStyle = `rgba(255,77,107,${0.3 + Math.sin(t * 20) * 0.25})`;
           c.lineWidth = 3;
-          c.beginPath(); c.moveTo(0, 0); c.lineTo(e.cx * 600, e.cy * 600); c.stroke();
+          c.beginPath(); c.moveTo(0, 0); c.lineTo(ca * 600, sa * 600); c.stroke();
         }
         break;
       }
@@ -5724,7 +5790,10 @@ export class ArchmageEngine {
   private drawFloater(c: CanvasRenderingContext2D, f: Floater) {
     const k = f.life / f.maxLife;
     c.globalAlpha = Math.min(1, k * 1.6);
-    c.font = `800 ${f.size}px 'Alegreya Sans', sans-serif`;
+    /* V1.1 AUDIT FIX (perf) — font strings cached per size (floaters use a
+       handful of fixed sizes); the old path rebuilt a template string per
+       floater per frame (up to 70/frame with damage numbers on). */
+    c.font = this.floaterFont(f.size);
     c.textAlign = "center";
     c.lineWidth = 3;
     c.strokeStyle = "rgba(10,6,20,0.85)";
@@ -5732,5 +5801,15 @@ export class ArchmageEngine {
     c.fillStyle = f.color;
     c.fillText(f.text, f.x, f.y);
     c.globalAlpha = 1;
+  }
+
+  /** V1.1 — cached floater font strings keyed by size. */
+  private floaterFont(size: number): string {
+    let f = this.floaterFonts.get(size);
+    if (!f) {
+      f = `800 ${size}px 'Alegreya Sans', sans-serif`;
+      this.floaterFonts.set(size, f);
+    }
+    return f;
   }
 }

@@ -953,8 +953,9 @@ export function RewardOverlay({ rewards, tiers, wave, onPick }: {
    mid-run (volume/graphics changes apply live). Sections: Audio
    (master/music/sfx sliders), Graphics (quality preset + shake + damage
    numbers), Accessibility (V1.0: UI size, announcement text size, reduce
-   flashes, high-contrast HUD), Gameplay (aim assist + Rift Mercy), Data
-   (reset). */
+   flashes, high-contrast HUD), Touch controls (V1.1: control size, opacity,
+   floating/docked stick, handedness mirror), Gameplay (aim assist + Rift
+   Mercy), Data (reset). */
 
 export function SettingsScreen({ onClose }: { onClose: () => void }) {
   const meta = useArchmageStore((s) => s.meta);
@@ -1132,6 +1133,94 @@ export function SettingsScreen({ onClose }: { onClose: () => void }) {
             </label>
             <div className="text-[10.5px] text-[#6a5a99] italic border-t border-[rgba(154,123,255,0.22)] pt-2 mt-1">
               More comfort: screen shake and damage numbers live in Graphics; aim assist and Rift Mercy in Gameplay.
+            </div>
+          </div>
+        </div>
+
+        {/* V1.1 — TOUCH CONTROLS: the customizable in-run control layer. Every
+            option applies live (size, opacity, stick model, hand mirror) and
+            persists — tuned once, correct on every device. */}
+        <div className="mt-5">
+          <div className="text-[11px] font-bold uppercase tracking-[0.26em] text-[#f5c96b] mb-2">Touch controls</div>
+          <div className="border border-[rgba(154,123,255,0.28)] bg-[rgba(13,9,25,0.6)] px-4 py-3">
+            <div className="flex items-center gap-3 py-1.5">
+              <span className="text-[#b9aee0] shrink-0"><UiIcon name="target" size={16} /></span>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-baseline justify-between">
+                  <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-[#c9bdf0]">Control size</span>
+                  <span className="text-[12px] font-black tabular-nums text-[#ffe9ad]">{Math.round((s.touchScale ?? 1) * 100)}%</span>
+                </div>
+                <input
+                  type="range"
+                  min={75}
+                  max={140}
+                  step={5}
+                  value={Math.round((s.touchScale ?? 1) * 100)}
+                  aria-label="Touch control size"
+                  onChange={(e) => { sfx.click(); patchSettings({ touchScale: Number(e.target.value) / 100 }); }}
+                  className="settings-slider"
+                />
+                <div className="text-[10.5px] text-[#6a5a99] italic mt-0.5">Every touch button and the move stick — bigger for confident thumbs, smaller to clear the arena</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 py-1.5">
+              <span className="text-[#b9aee0] shrink-0"><UiIcon name="wave" size={16} /></span>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-baseline justify-between">
+                  <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-[#c9bdf0]">Control opacity</span>
+                  <span className="text-[12px] font-black tabular-nums text-[#ffe9ad]">{Math.round((s.touchOpacity ?? 1) * 100)}%</span>
+                </div>
+                <input
+                  type="range"
+                  min={40}
+                  max={100}
+                  step={5}
+                  value={Math.round((s.touchOpacity ?? 1) * 100)}
+                  aria-label="Touch control opacity"
+                  onChange={(e) => { sfx.click(); patchSettings({ touchOpacity: Number(e.target.value) / 100 }); }}
+                  className="settings-slider"
+                />
+                <div className="text-[10.5px] text-[#6a5a99] italic mt-0.5">Fade the whole control layer — see more rift, same inputs</div>
+              </div>
+            </div>
+            <div className="flex items-center justify-between gap-3 py-1.5">
+              <div>
+                <div className="text-[12px] font-bold uppercase tracking-[0.18em] text-[#c9bdf0]">Movement stick</div>
+                <div className="text-[10.5px] text-[#6a5a99] italic">Floating spawns the stick under your finger — exact directional control anywhere; Docked anchors it to the corner</div>
+              </div>
+              <div className="flex shrink-0" role="group" aria-label="Movement stick mode">
+                {(["floating", "docked"] as const).map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => { sfx.click(); patchSettings({ stickMode: m }); }}
+                    aria-pressed={(s.stickMode ?? "floating") === m}
+                    className={`aim-seg ${(s.stickMode ?? "floating") === m ? "on" : ""}`}
+                  >
+                    {m === "floating" ? "FLOATING" : "DOCKED"}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="flex items-center justify-between gap-3 py-1.5">
+              <div>
+                <div className="text-[12px] font-bold uppercase tracking-[0.18em] text-[#c9bdf0]">Control side</div>
+                <div className="text-[10.5px] text-[#6a5a99] italic">Mirrors the thumb zones — move stick and action arc swap corners for left-handed play</div>
+              </div>
+              <div className="flex shrink-0" role="group" aria-label="Control side">
+                {(["right", "left"] as const).map((h) => (
+                  <button
+                    key={h}
+                    onClick={() => { sfx.click(); patchSettings({ handSide: h }); }}
+                    aria-pressed={(s.handSide ?? "right") === h}
+                    className={`aim-seg ${(s.handSide ?? "right") === h ? "on" : ""}`}
+                  >
+                    {h === "right" ? "RIGHT-HAND" : "LEFT-HAND"}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="text-[10.5px] text-[#6a5a99] italic border-t border-[rgba(154,123,255,0.22)] pt-2 mt-1">
+              Touch layer: move stick · DASH · VOLLEY · SPELL · FIRE · SURGE · the spell strip — all live-adjustable.
             </div>
           </div>
         </div>

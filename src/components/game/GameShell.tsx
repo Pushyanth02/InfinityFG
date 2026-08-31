@@ -65,6 +65,12 @@ export default function GameShell() {
   const hudZoom = Math.max(0.75, Math.min(1.5, meta.settings.hudScale || 0.9));
   const textZoom = Math.max(0.75, Math.min(1.5, meta.settings.textScale || 1));
   const highContrast = !!meta.settings.highContrast;
+  /* V1.1 — customizable touch layer (Settings → Touch controls), applied
+     live: size, opacity, movement-stick model and the left-handed mirror. */
+  const tcScale = Math.max(0.75, Math.min(1.4, meta.settings.touchScale || 1));
+  const tcOpacity = Math.max(0.4, Math.min(1, meta.settings.touchOpacity ?? 1));
+  const stickMode = meta.settings.stickMode === "docked" ? "docked" : "floating";
+  const handSide = meta.settings.handSide === "left" ? "left" : "right";
 
   const metaRef = useRef(meta);
   useEffect(() => { metaRef.current = meta; }, [meta]);
@@ -103,6 +109,11 @@ export default function GameShell() {
   const weaveLabel = useRef<HTMLSpanElement | null>(null);
   const threatSegs = useRef<(HTMLSpanElement | null)[]>([]);
   const lastActName = useRef("");
+  /* V1.1 AUDIT (perf) — change-detection scratch for the 30 Hz HUD path:
+     the equipped-set signature (rebuilt only when the loadout actually
+     changes) and the one-shot boss-bar hide flag. */
+  const equippedSig = useRef("");
+  const bossHideScheduled = useRef(false);
 
   /* touch detection — drives whether the virtual twin-stick layer renders */
   const isTouch = useIsTouchDevice();
@@ -154,6 +165,24 @@ export default function GameShell() {
       const s = Math.floor(h.timeSec % 60).toString().padStart(2, "0");
       timeText.current.textContent = `${m}:${s}`;
     }
+    /* V1.1 AUDIT FIX (perf) — equipped-set change detection hoisted OUT of
+       the per-slot loop: the old code dispatched 4–6 setState updaters per
+       HUD tick (120–180/sec), each allocating a fresh mapped array, even
+       though the set changes only on pickups/merges. A cheap length+id
+       signature short-circuits the mapping in the common no-change case. */
+    let sig = "";
+    for (let i = 0; i < h.spells.length; i++) {
+      const sp = h.spells[i];
+      sig += sp.empty ? "e" : sp.merged ? "m" + sp.merged.join("+") : sp.id;
+    }
+    if (sig !== equippedSig.current) {
+      equippedSig.current = sig;
+      setEquippedIds(h.spells.map((s) => {
+        if (s.empty) return null;
+        if (s.merged && s.merged.length >= 2) return { merged: s.merged };
+        return s.id;
+      }));
+    }
     for (let i = 0; i < h.spells.length; i++) {
       const sp = h.spells[i];
       const root = slotRoots.current[i];
@@ -161,24 +190,6 @@ export default function GameShell() {
       const cost = slotCosts.current[i];
       const evo = slotEvos.current[i];
       const def = SPELLS[sp.id];
-      /* detect equipped-set changes (drop pickup / replace / merge) and
-         refresh the React spell-bar so icons + costs reflect the new spells. */
-      setEquippedIds((prev) => {
-        const next = h.spells.map((s) => {
-          if (s.empty) return null;
-          if (s.merged && s.merged.length >= 2) return { merged: s.merged };
-          return s.id;
-        });
-        if (prev.length === next.length && prev.every((p, j) => {
-          const q = next[j];
-          if (p === q) return true;
-          if (p && q && typeof p !== "string" && typeof q !== "string" && p.merged && q.merged) {
-            return p.merged.length === q.merged.length && p.merged.every((m, k) => m === q.merged[k]);
-          }
-          return false;
-        })) return prev;
-        return next;
-      });
       if (cd) {
         cd.style.height = `${sp.cdFrac * 100}%`;
         cd.style.opacity = sp.cdFrac > 0.01 ? "1" : "0";
@@ -238,9 +249,16 @@ export default function GameShell() {
         bossWrap.current.style.opacity = "1";
         bossFill.current.style.width = `${h.boss.frac * 100}%`;
         if (bossLabel.current) bossLabel.current.textContent = h.boss.name;
-      } else {
+        bossHideScheduled.current = false;
+      } else if (!bossHideScheduled.current) {
+        /* V1.1 AUDIT FIX (perf) — schedule the hide fade ONCE per boss death;
+        the old code allocated a fresh setTimeout on every 30 Hz tick of
+        every bossless wave (~30 timers/sec). */
+        bossHideScheduled.current = true;
         bossWrap.current.style.opacity = "0";
-        window.setTimeout(() => { if (bossWrap.current) bossWrap.current.style.display = "none"; }, 320);
+        window.setTimeout(() => {
+          if (bossWrap.current && bossHideScheduled.current) bossWrap.current.style.display = "none";
+        }, 320);
       }
     }
     if (weaveFill.current && weaveLabel.current) {
@@ -825,8 +843,10 @@ export default function GameShell() {
         </>
       )}
 
-      {/* touch control layer — only while a run is live (Patch 9.0 layout:
-          MOVE stick + FIRE button + SPELL cycle + right-edge actions) */}
+      {/* touch control layer — only while a run is live (V1.1 "True
+          Direction" layout: floating MOVE stick, DASH middle-right above
+          Weave, VOLLEY beside Weave above SPELL/FIRE, plus the full
+          customization suite from Settings → Touch controls) */}
       {isTouch && phase === "running" && (
         <TouchControls
           engineRef={engineRef}
@@ -842,6 +862,10 @@ export default function GameShell() {
           onToggleAuto={onToggleAuto}
           equippedIds={equippedIds}
           selectedSlot={selectedSlot}
+          tcScale={tcScale}
+          tcOpacity={tcOpacity}
+          stickMode={stickMode}
+          handSide={handSide}
         />
       )}
 

@@ -619,16 +619,30 @@ canvas {
    the side panels alone would overflow a narrow viewport at the current
    HUD scale, shrinking them just enough that everything stays on-screen. */
 
-/* Touch control layer — full-screen surface, never scrolls */
-.touch-zone {
+/* V1.1 — THE TOUCH LAYER ROOT: one positioned wrapper carrying the
+   customizable-UI custom properties from Settings → Touch controls.
+   --tc-scale sizes every control; --tc-opacity dims the whole layer.
+   z-index 15 keeps it below the HUD row (20) and banner (30); the layer
+   itself is transparent to pointers and each control re-enables them. */
+.touch-layer {
   position: absolute;
   inset: 0;
   z-index: 15;
+  pointer-events: none;
+  opacity: var(--tc-opacity, 1);
   touch-action: none;
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;
   overscroll-behavior: contain;
+}
+/* full-screen touch surface — never scrolls; drives the move stick */
+.touch-zone {
+  position: absolute;
+  inset: 0;
+  z-index: 15;
+  pointer-events: auto;
+  touch-action: none;
 }
 
 /* Patch 9.0 — FORCED-LANDSCAPE rotate guard: covers everything whenever a
@@ -680,13 +694,14 @@ canvas {
   82%, 100%     { transform: rotate(0deg); }
 }
 
-/* Patch 8.0 — FIXED twin-stick housings (bottom corners). The old floating
-   joysticks spawned wherever you touched; these are docked, always visible
-   at rest, slide with long drags (is-active), and spring home on release. */
+/* Movement stick housing — docked at the bottom-left corner as the resting
+   affordance. V1.1: while a drag is live the housing tracks the gesture
+   origin (floating mode: wherever the finger landed; docked mode: the corner)
+   and springs home on release. Scales with --tc-scale. */
 .stick-home {
   position: absolute;
-  width: 128px;
-  height: 128px;
+  width: calc(var(--tc-scale, 1) * 128px);
+  height: calc(var(--tc-scale, 1) * 128px);
   border-radius: 50%;
   border: 2px solid rgba(154, 123, 255, 0.45);
   background: radial-gradient(circle at 50% 50%, rgba(30, 20, 54, 0.5), rgba(8, 5, 16, 0.66));
@@ -741,11 +756,14 @@ canvas {
   transition: transform 0.04s linear;
 }
 
-/* Patch 10.0 — ATTACK ARC (bottom-right): a compact thumb grid —
-   FIRE (84px) at the thumb home, SPELL (60px) to its left, SURGE (60px)
-   stacked above FIRE. Total footprint ≤160×160px anchored to the corner,
-   so on even the shortest landscape phone (~390px) it can never reach the
-   top-right utility row (which ends at ~104px). Zero overlap, by geometry. */
+/* V1.1 — ATTACK ARC (bottom-right): a compact three-row thumb grid —
+     DASH  spans the top row, right-aligned (middle-right of the screen,
+           directly above Weave)
+     VOLLEY (left) + SURGE/Weave (right) above SPELL/FIRE
+     FIRE  at the thumb home.
+   Total footprint stays ≤240px tall anchored to the corner, so on even the
+   shortest landscape phone (~390px) it cannot reach the top-right utility
+   row (which ends at ~104px). Zero overlap, by geometry. */
 .attack-cluster {
   position: absolute;
   right: calc(env(safe-area-inset-right) + 14px);
@@ -754,8 +772,9 @@ canvas {
   display: grid;
   grid-template-columns: auto auto;
   grid-template-areas:
-    ".     surge"
-    "spell fire";
+    "dash   dash"
+    "volley surge"
+    "spell  fire";
   gap: 12px;
   align-items: end;
   justify-items: end;
@@ -765,18 +784,31 @@ canvas {
 .attack-cluster .fire-btn  { grid-area: fire; }
 .attack-cluster .spell-btn { grid-area: spell; }
 .attack-cluster .atk-surge { grid-area: surge; }
-/* DASH — docked right of the move stick (left-thumb zone), vertically
-   centered with the housing. Anatomically distinct from the attack arc. */
-.dash-dock {
-  position: absolute;
-  left: calc(env(safe-area-inset-left) + 162px);
-  bottom: calc(env(safe-area-inset-bottom) + 154px);
-  z-index: 22;
+.attack-cluster .volley    { grid-area: volley; justify-self: end; }
+.attack-cluster .atk-dash  { grid-area: dash; justify-self: end; }
+
+/* V1.1 — LEFT-HANDED MIRROR: the thumb zones swap sides (attack arc to the
+   bottom-left corner, move stick to the bottom-right); the utility row and
+   spell strip stay put (they never collide with either thumb). */
+.tc-left .attack-cluster {
+  right: auto;
+  left: calc(env(safe-area-inset-left) + 14px);
+  justify-items: start;
+  grid-template-areas:
+    "dash   dash"
+    "surge  volley"
+    "fire   spell";
+}
+.tc-left .attack-cluster .volley   { justify-self: start; }
+.tc-left .attack-cluster .atk-dash { justify-self: start; }
+.tc-left .stick-home.move {
+  left: auto;
+  right: calc(env(safe-area-inset-right) + 20px);
 }
 
 .touch-btn.fire-btn {
-  width: 88px;
-  height: 88px;
+  width: calc(var(--tc-scale, 1) * 88px);
+  height: calc(var(--tc-scale, 1) * 88px);
   color: #ffe9ad;
   border-color: rgba(255, 138, 92, 0.75);
   background:
@@ -798,10 +830,40 @@ canvas {
 }
 
 .touch-btn.spell-btn {
-  width: 62px;
-  height: 62px;
+  width: calc(var(--tc-scale, 1) * 62px);
+  height: calc(var(--tc-scale, 1) * 62px);
   color: #f5e3b3;
   border-color: rgba(154, 123, 255, 0.6);
+}
+
+/* V1.1 — VOLLEY: arcane weave-bolt stream (hold). Violet/arcane palette,
+   a firing pulse while held, and it dims with the is-auto veil. */
+.touch-btn.volley {
+  width: calc(var(--tc-scale, 1) * 62px);
+  height: calc(var(--tc-scale, 1) * 62px);
+  color: #b9aee0;
+  border-color: rgba(124, 92, 255, 0.65);
+  background:
+    radial-gradient(circle at 50% 38%, rgba(124, 92, 255, 0.3), rgba(18, 11, 36, 0.96) 70%),
+    linear-gradient(180deg, rgba(30, 20, 54, 0.95), rgba(14, 8, 28, 0.96));
+}
+.touch-btn.volley.firing {
+  border-color: #8f7bff;
+  color: #e6defc;
+  box-shadow: 0 0 26px rgba(143, 123, 255, 0.75), inset 0 0 14px rgba(143, 123, 255, 0.4);
+  animation: volleyHeld 0.45s ease-in-out infinite;
+}
+.touch-btn.volley.is-auto { opacity: 0.35; }
+@keyframes volleyHeld {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(0.93); }
+}
+
+/* V1.1 — in-cluster DASH (middle-right, above Weave): sized with the layer
+   scale; keeps its cooldown veil + READY glow. */
+.touch-btn.atk-dash {
+  width: calc(var(--tc-scale, 1) * 62px);
+  height: calc(var(--tc-scale, 1) * 62px);
 }
 .touch-btn.spell-btn.is-auto,
 .touch-btn.atk-surge.is-auto { opacity: 0.35; }
@@ -821,12 +883,12 @@ canvas {
   pointer-events: none;
 }
 .touch-actions > * { pointer-events: auto; }
-.touch-btn.sm { width: 48px; height: 48px; }
-.touch-btn.sm .touch-btn-label { font-size: 8.5px; letter-spacing: 0.08em; }
+.touch-btn.sm { width: calc(var(--tc-scale, 1) * 48px); height: calc(var(--tc-scale, 1) * 48px); }
+.touch-btn.sm .touch-btn-label { font-size: 9px; letter-spacing: 0.08em; }
 
 .touch-btn {
-  width: 60px;
-  height: 60px;
+  width: calc(var(--tc-scale, 1) * 60px);
+  height: calc(var(--tc-scale, 1) * 60px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -902,8 +964,8 @@ canvas {
 
 .touch-spell {
   position: relative;
-  width: 44px;
-  height: 44px;
+  width: calc(var(--tc-scale, 1) * 44px);
+  height: calc(var(--tc-scale, 1) * 44px);
   display: grid;
   place-items: center;
   border: 1px solid rgba(154, 123, 255, 0.32);
@@ -924,7 +986,7 @@ canvas {
   position: absolute;
   top: 1px;
   left: 3px;
-  font-size: 8px;
+  font-size: 9px;
   font-weight: 800;
   color: #8f7bff;
   letter-spacing: 0.06em;
@@ -933,11 +995,10 @@ canvas {
 /* Narrow landscape phones (≤480px tall): shrink the whole control layer —
    the geometry (utility row top / attack arc bottom) never changes. */
 @media (max-width: 380px) {
-  .touch-spell { width: 38px; height: 38px; }
-  .touch-btn { width: 52px; height: 52px; }
-  .touch-btn.fire-btn { width: 76px; height: 76px; }
+  .touch-spell { width: calc(var(--tc-scale, 1) * 38px); height: calc(var(--tc-scale, 1) * 38px); }
+  .touch-btn { width: calc(var(--tc-scale, 1) * 52px); height: calc(var(--tc-scale, 1) * 52px); }
+  .touch-btn.fire-btn { width: calc(var(--tc-scale, 1) * 76px); height: calc(var(--tc-scale, 1) * 76px); }
   .attack-cluster { gap: 10px; }
-  .dash-dock { left: calc(env(safe-area-inset-left) + 146px); bottom: calc(env(safe-area-inset-bottom) + 138px); }
 }
 
 /* Hide the cursor crosshair on touch devices — there's no cursor anyway */
@@ -950,6 +1011,7 @@ canvas {
 @media (prefers-reduced-motion: reduce) {
   .anim-fade-up, .anim-fade-up-1, .anim-fade-up-2, .anim-fade-up-3,
   .anim-shake, .touch-btn.surge[data-ready="1"], .touch-btn.archmage.on,
+  .touch-btn.volley.firing, .touch-btn.fire-btn.firing,
   .stick-home, .auto-chip {
     animation: none !important;
     transition: none !important;
@@ -960,20 +1022,21 @@ canvas {
    viewport: smaller sticks/buttons, tucked spell strip, scaled-down panels. */
 @media (max-height: 480px) and (orientation: landscape) {
   .touch-actions { top: calc(env(safe-area-inset-top) + 62px); gap: 8px; }
-  .touch-btn { width: 52px; height: 52px; }
-  .touch-btn.sm { width: 44px; height: 44px; }
-  .touch-btn.fire-btn { width: 76px; height: 76px; }
-  .touch-btn.spell-btn { width: 54px; height: 54px; }
+  .touch-btn { width: calc(var(--tc-scale, 1) * 52px); height: calc(var(--tc-scale, 1) * 52px); }
+  .touch-btn.sm { width: calc(var(--tc-scale, 1) * 44px); height: calc(var(--tc-scale, 1) * 44px); }
+  .touch-btn.fire-btn { width: calc(var(--tc-scale, 1) * 76px); height: calc(var(--tc-scale, 1) * 76px); }
+  .touch-btn.spell-btn { width: calc(var(--tc-scale, 1) * 54px); height: calc(var(--tc-scale, 1) * 54px); }
+  .touch-btn.volley { width: calc(var(--tc-scale, 1) * 54px); height: calc(var(--tc-scale, 1) * 54px); }
+  .touch-btn.atk-dash { width: calc(var(--tc-scale, 1) * 54px); height: calc(var(--tc-scale, 1) * 54px); }
   .attack-cluster { gap: 9px; }
   .touch-spell-strip { bottom: calc(env(safe-area-inset-bottom) + 6px); }
-  .touch-spell { width: 38px; height: 38px; }
+  .touch-spell { width: calc(var(--tc-scale, 1) * 38px); height: calc(var(--tc-scale, 1) * 38px); }
   .stick-home {
-    width: 104px;
-    height: 104px;
+    width: calc(var(--tc-scale, 1) * 104px);
+    height: calc(var(--tc-scale, 1) * 104px);
     bottom: calc(env(safe-area-inset-bottom) + 76px) !important;
   }
-  .stick-inner { width: 46px; height: 46px; margin-left: -23px; margin-top: -23px; }
-  .dash-dock { left: calc(env(safe-area-inset-left) + 134px); bottom: calc(env(safe-area-inset-bottom) + 118px); }
+  .stick-inner { width: calc(var(--tc-scale, 1) * 46px); height: calc(var(--tc-scale, 1) * 46px); margin-left: calc(var(--tc-scale, 1) * -23px); margin-top: calc(var(--tc-scale, 1) * -23px); }
   /* compact vitals + wave plate so nothing crowds the short screen
      (V1.0.1: zoom multipliers — layout-aware, so the flex row sees the
      real panel sizes instead of reserving unscaled space) */

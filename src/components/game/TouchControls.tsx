@@ -6,18 +6,35 @@ import { SLOT_KEYS, SPELLS, STARTER_SPELLS, ElementId, COMBOS, comboKey } from "
 import { SpellIcon, UiIcon } from "./icons";
 
 /* ============================================================================
-   TouchControls — Patch 10.0 "The Sealed Rift" thumb-zone layout.
+   TouchControls — V1.1 "True Direction" thumb-zone layout.
    ----------------------------------------------------------------------------
-   The Patch 9.0 layout stacked a 2×2 action grid (top-right) directly above
-   the attack cluster (bottom-right) — on short landscape phones the two
-   collided, exactly as the reference screenshot showed. The 10.0 layout
-   separates every zone so NOTHING vertical-stacks against the attack arc:
-   - MOVE joystick: fixed housing docked bottom-left (whole surface drags).
-   - DASH: docked right of the move stick — left-thumb zone.
-   - ATTACK ARC (bottom-right): FIRE (84px) at the thumb home, SPELL to its
-     left, SURGE stacked above — one compact grid, ≤160px tall.
-   - UTILITY ROW (top-right, below shards): compact ARCHMAGE + PAUSE.
-   - Spell strip: bottom-center quick-select, unchanged.
+   MOVEMENT FIX (the "locked to one direction" bug):
+   The old stick measured the finger against the DOCKED housing at the screen's
+   bottom-left corner. Any touch far from that corner clamped its X axis to ±1
+   (per-axis clamp bug in the initial lean), and the follow-drag then preserved
+   that quantized direction — so touching the middle of the screen pinned the
+   mage to a single direction no matter how the finger moved. The stick now
+   spawns WHERE YOU TOUCH (floating origin, the industry-standard pattern):
+   direction is always finger-relative-to-touch-point with a true radial
+   clamp, giving 1:1 analog control in all 360° from any contact point.
+   Players who prefer the corner-docked stick can restore it in Settings.
+
+   LAYOUT (V1.1):
+   - MOVE joystick: floating origin; docked housing at bottom-left is the
+     resting affordance and springs home on release.
+   - ATTACK ARC (bottom-right) — one compact thumb grid, three rows:
+       DASH  (spans, right-aligned — middle-right, above Weave)
+       VOLLEY (left)  SURGE (right — the Weave button)
+       SPELL (left)   FIRE  (right, at the thumb home)
+   - UTILITY ROW (top-right): compact ARCHMAGE + PAUSE.
+   - Spell strip: bottom-center quick-select.
+
+   CUSTOMIZABLE UI (Settings → Touch controls):
+   - touchScale   75–140% — every control's size, via the --tc-scale var
+   - touchOpacity 40–100% — the whole layer, via --tc-opacity
+   - stickMode    floating (default) | docked — the movement model
+   - handSide     right (default) | left — mirrors the thumb zones
+
    ARCHMAGE MODE: the autopilot takes over movement, targeting, spell choice,
    dodges, weave bolts and surge. Touching a stick mid-auto pauses the pilot
    (human wins). All touches use `touch-action: none` to prevent hijack. */
@@ -43,25 +60,38 @@ interface Props {
       indicators and the dash-cooldown ring at a calm 10 Hz, ref-polled so
       the 30 Hz HUD path never re-renders this tree). */
   hudRef: React.MutableRefObject<HudData | null>;
+  /** V1.1 — customizable UI (Settings → Touch controls), all live. */
+  tcScale: number;                 // 0.75..1.4 size multiplier
+  tcOpacity: number;               // 0.4..1 layer opacity
+  stickMode: "floating" | "docked"; // movement origin model
+  handSide: "right" | "left";      // mirror the thumb zones
 }
 
 interface StickState {
   /** touch identifier (so we can track across move/end) */
   id: number;
-  /** current housing center in shell coordinates */
+  /** current origin center in shell coordinates (floating: the anchored
+      contact point; docked: the housing center, sliding with follow-drag) */
   ox: number; oy: number;
+  /** movement model captured at gesture start (floating | docked) */
+  mode: "floating" | "docked";
+  /** live ring radius (px) — derived from the rendered housing size so the
+      control scale setting + responsive bands stay in sync with the math */
+  ring: number;
+  /** live housing size (px) for the draw pass */
+  housing: number;
 }
 
 interface StickDraw {
   /** housing top-left (px) while active */
   x: number; y: number;
-  /** knob offset from housing center (px, clamped to RING_R) */
+  /** knob offset from housing center (px, clamped to the ring) */
   kx: number; ky: number;
 }
 
-const HOUSING = 128;          // CSS size of the stick housing (px)
-const RING_R = 46;            // max knob travel from housing center (px)
-const DEAD_ZONE = 0.14;       // ignore tiny stick movements
+const HOUSING_BASE = 128;    // CSS size of the stick housing at scale 1
+const RING_RATIO = 46 / 128; // knob travel as a fraction of the housing
+const DEAD_ZONE = 0.14;      // ignore tiny stick movements (fraction of ring)
 
 function clampLen(x: number, y: number, max: number): { x: number; y: number; mag: number } {
   const len = Math.hypot(x, y);
@@ -77,12 +107,18 @@ export function TouchControls({
   equippedIds = STARTER_SPELLS as ElementId[],
   selectedSlot = 0,
   hudRef,
+  tcScale = 1,
+  tcOpacity = 1,
+  stickMode = "floating",
+  handSide = "right",
 }: Props) {
   const moveStick = useRef<StickState | null>(null);
   const moveHomeRef = useRef<HTMLDivElement | null>(null);
   const [moveDraw, setMoveDraw] = useState<StickDraw | null>(null);
   /* Patch 9.0 — fire button hold state (visual feedback while auto-firing) */
   const [firing, setFiring] = useState(false);
+  /* V1.1 — volley hold state (visual feedback while bolts stream) */
+  const [volleying, setVolleying] = useState(false);
   /* local weave/surge mirror — written by a 10Hz poll effect that reads the
      parent's refs. Keeping these as state (not ref reads in render) lets the
      surge button reflect readiness without violating react-hooks/refs. */
@@ -96,44 +132,72 @@ export function TouchControls({
   const stripRoots = useRef<(HTMLButtonElement | null)[]>([]);
   const dashCdFill = useRef<HTMLDivElement | null>(null);
   const spellBtnCd = useRef<HTMLDivElement | null>(null);
+  const volleyRoot = useRef<HTMLButtonElement | null>(null);
+
+  /* live geometry: the actual rendered housing size (respects the control
+     scale setting + every responsive band) — read fresh on each gesture */
+  const housingSize = useCallback((): { housing: number; ring: number } => {
+    const el = moveHomeRef.current;
+    const w = el ? el.getBoundingClientRect().width : HOUSING_BASE * tcScale;
+    const housing = Math.max(64, w);
+    return { housing, ring: housing * RING_RATIO };
+  }, [tcScale]);
 
   /* ------------------------------ move stick ------------------------------ */
   const beginMove = useCallback((id: number, clientX: number, clientY: number) => {
-    const el = moveHomeRef.current;
-    const home = el
-      ? { x: el.getBoundingClientRect().left + el.offsetWidth / 2, y: el.getBoundingClientRect().top + el.offsetHeight / 2 }
-      : { x: clientX, y: clientY };
-    moveStick.current = { id, ox: home.x, oy: home.y };
-    setMoveDraw({ x: home.x - HOUSING / 2, y: home.y - HOUSING / 2, kx: 0, ky: 0 });
-    /* treat the initial press as a drag from home so a tap far from the
-       housing immediately leans the stick toward the finger */
-    const dx = clientX - home.x, dy = clientY - home.y;
-    if (Math.hypot(dx, dy) > RING_R) {
-      engineRef.current?.setMoveAxis(
-        Math.max(-1, Math.min(1, dx / RING_R)),
-        Math.max(-1, Math.min(1, dy / RING_R)),
-      );
+    const { housing, ring } = housingSize();
+    let ox: number, oy: number;
+    if (stickMode === "docked" && moveHomeRef.current) {
+      /* docked model — the corner housing IS the origin (legacy feel) */
+      const r = moveHomeRef.current.getBoundingClientRect();
+      ox = r.left + r.width / 2;
+      oy = r.top + r.height / 2;
+    } else {
+      /* floating model — the origin is WHERE YOU TOUCHED. Direction is
+         always finger-relative-to-contact: 1:1, all 360°, any screen area.
+         Bias the origin inward so edge-touches keep their full ring. */
+      ox = Math.max(ring * 0.55, Math.min(window.innerWidth - ring * 0.55, clientX));
+      oy = Math.max(ring * 0.55, Math.min(window.innerHeight - ring * 0.55, clientY));
     }
-  }, [engineRef]);
+    moveStick.current = { id, ox, oy, mode: stickMode, ring, housing };
+    setMoveDraw({ x: ox - housing / 2, y: oy - housing / 2, kx: 0, ky: 0 });
+    /* docked model only: treat the initial press as a drag from home so a
+     tap far from the housing immediately leans the stick toward the finger.
+     V1.1 FIX — radial clamp (direction-preserving); the old per-axis clamp
+     quantized far touches into pinned diagonals (the "locked direction"). */
+    if (stickMode === "docked") {
+      const dx = clientX - ox, dy = clientY - oy;
+      const c = clampLen(dx, dy, ring);
+      if (c.mag > 0.05) engineRef.current?.setMoveAxis(c.x / ring, c.y / ring);
+    } else {
+      engineRef.current?.setMoveAxis(0, 0);
+    }
+  }, [engineRef, housingSize, stickMode]);
 
   const updateMove = useCallback((clientX: number, clientY: number) => {
     const s = moveStick.current;
     if (!s) return;
     let dx = clientX - s.ox, dy = clientY - s.oy;
     const len = Math.hypot(dx, dy);
-    /* follow-drag: beyond the ring the housing slides with the finger so the
-       knob never feels "stuck" on long swipes */
-    if (len > RING_R) {
-      const slide = len - RING_R;
+    /* FLOATING: the origin is ANCHORED at the contact point — direction is
+       a pure 1:1 map of finger-position-relative-to-touch with the knob
+       clamped at the ring edge (console-stick feel). No origin chase: a
+       moving reference would bleed the old direction into new ones (that
+       was the "locked to one direction" failure mode).
+       DOCKED: follow-drag keeps the legacy feel — beyond the ring the
+       housing slides with the finger so the knob never feels stuck on
+       long corner-anchored swipes. */
+    if (s.mode === "docked" && len > s.ring) {
+      const slide = len - s.ring;
       s.ox += (dx / len) * slide;
       s.oy += (dy / len) * slide;
-      dx = (dx / len) * RING_R;
-      dy = (dy / len) * RING_R;
+      dx = (dx / len) * s.ring;
+      dy = (dy / len) * s.ring;
     }
-    const c = clampLen(dx, dy, RING_R);
+    const c = clampLen(dx, dy, s.ring);
     if (c.mag < DEAD_ZONE) engineRef.current?.setMoveAxis(0, 0);
-    else engineRef.current?.setMoveAxis(c.x / RING_R, c.y / RING_R);
-    setMoveDraw({ x: s.ox - HOUSING / 2, y: s.oy - HOUSING / 2, kx: c.x, ky: c.y });
+    else engineRef.current?.setMoveAxis(c.x / s.ring, c.y / s.ring);
+    setMoveDraw({ x: s.ox - s.housing / 2, y: s.oy - s.housing / 2, kx: c.x, ky: c.y });
   }, [engineRef]);
 
   const endMove = useCallback(() => {
@@ -144,17 +208,18 @@ export function TouchControls({
     const el = moveHomeRef.current;
     if (el) {
       const r = el.getBoundingClientRect();
-      setMoveDraw({ x: r.left + r.width / 2 - HOUSING / 2, y: r.top + r.height / 2 - HOUSING / 2, kx: 0, ky: 0 });
+      const { housing } = housingSize();
+      setMoveDraw({ x: r.left + r.width / 2 - housing / 2, y: r.top + r.height / 2 - housing / 2, kx: 0, ky: 0 });
     }
     window.setTimeout(() => { if (!moveStick.current) setMoveDraw(null); }, 300);
     engineRef.current?.setMoveAxis(0, 0);
-  }, [engineRef]);
+  }, [engineRef, housingSize]);
 
   /* ---------------------------- touch routing ----------------------------- */
   /* A single onTouchStart/onTouchMove/onTouchEnd on the full-screen overlay.
-     Patch 9.0: with the fire joystick gone, EVERY free touch drives the move
-     stick — the whole play surface is movement territory. Buttons render
-     above the zone and stop propagation, so they never reach this layer. */
+     Every free touch drives the move stick — the whole play surface is
+     movement territory. Buttons render above the zone (higher z-index) and
+     are separate elements, so their touches never route here. */
   const onTouchStart = useCallback((e: React.TouchEvent) => {
     if (paused) return;
     for (let i = 0; i < e.changedTouches.length; i++) {
@@ -195,6 +260,21 @@ export function TouchControls({
     engineRef.current?.setFireHeld(false);
   }, [engineRef]);
 
+  /* V1.1 — VOLLEY: hold to stream arcane weave bolts at the nearest foe
+     (the right-mouse-button action). Release stops. Same hold semantics as
+     FIRE so a sliding thumb never latches it. */
+  const volleyDown = useCallback((e: React.PointerEvent) => {
+    e.preventDefault();
+    if (paused) return;
+    setVolleying(true);
+    engineRef.current?.setVolleyHeld(true);
+  }, [engineRef, paused]);
+
+  const volleyUp = useCallback(() => {
+    setVolleying(false);
+    engineRef.current?.setVolleyHeld(false);
+  }, [engineRef]);
+
   /* SPELL: one tap cycles to the next non-empty slot. */
   const cycleSpell = useCallback((e: React.PointerEvent) => {
     e.preventDefault();
@@ -202,16 +282,12 @@ export function TouchControls({
     engineRef.current?.cycleSlot();
   }, [engineRef, paused]);
 
-  /* If the engine pauses (overlay open), release held inputs so the player
-     doesn't re-fire the moment we resume. NB: TouchControls only mounts while
-     phase==="running" (see GameShell), so when the engine pauses we unmount
-     entirely and React clears our state for us. */
-
   /* HUD mirror poll — copy the parent's refs into local state at ~10Hz so
      the surge button can light up when the weave meter is full.
      Patch 11.0 — the same poll also drives the spell togglers' cooldown
      veils + mana badges and the dash cooldown ring straight through refs
-     (no re-renders; the buttons themselves stay static React nodes). */
+     (no re-renders; the buttons themselves stay static React nodes).
+     V1.1 — it also dims the VOLLEY button when aether can't afford bolts. */
   useEffect(() => {
     const id = window.setInterval(() => {
       setWeaveLocal(weaveRef.current);
@@ -253,15 +329,21 @@ export function TouchControls({
         dashCdFill.current.style.height = `${Math.min(1, h.dashFrac) * 100}%`;
         dashCdFill.current.style.opacity = h.dashFrac > 0.01 ? "1" : "0";
       }
+      /* volley affordability (bolts cost 3 aether; free during a surge) */
+      if (volleyRoot.current) {
+        const afford = h.surge !== null || h.mana >= 3;
+        volleyRoot.current.style.opacity = afford ? "" : "0.55";
+      }
     }, 100);
     return () => window.clearInterval(id);
   }, [weaveRef, surgeActiveRef, hudRef]);
 
   /* Patch 9.0 — unmount safety: if the engine pauses (or the run ends) while
-     FIRE is held, this layer unmounts WITHOUT a pointerup — release every
-     held input here so the mage doesn't resume mid-autofire. */
+     FIRE/VOLLEY is held, this layer unmounts WITHOUT a pointerup — release
+     every held input here so the mage doesn't resume mid-autofire. */
   useEffect(() => () => {
     engineRef.current?.setFireHeld(false);
+    engineRef.current?.setVolleyHeld(false);
     engineRef.current?.setMoveAxis(0, 0);
   }, [engineRef]);
 
@@ -277,9 +359,12 @@ export function TouchControls({
   const selEntry = equippedIds[selectedSlot] ?? null;
 
   return (
-    <>
+    <div
+      className={`touch-layer${handSide === "left" ? " tc-left" : ""}`}
+      style={{ "--tc-scale": tcScale, "--tc-opacity": tcOpacity } as React.CSSProperties}
+    >
       {/* full-screen touch surface — every free touch drives the move stick.
-          pointer-events-auto, but buttons above it stop propagation. */}
+          pointer-events auto, but buttons above it stop propagation. */}
       <div
         className="touch-zone"
         onTouchStart={onTouchStart}
@@ -289,7 +374,10 @@ export function TouchControls({
         aria-hidden="true"
       />
 
-      {/* ---- fixed movement joystick (bottom-left) ---- */}
+      {/* ---- movement joystick — docked housing is the resting affordance;
+               while active the housing tracks the live origin (floating:
+               wherever you touched; docked: the corner, sliding with drags)
+               and springs home on release. ---- */}
       <div
         ref={moveHomeRef}
         className={`stick-home move${moveDraw ? " is-active" : ""}${autoMode ? " is-auto" : ""}`}
@@ -300,26 +388,39 @@ export function TouchControls({
         <div className="stick-inner" style={knobStyle(moveDraw)} />
       </div>
 
-      {/* ---- DASH — docked right of the move stick (left-thumb zone).
-               Patch 11.0: a draining cooldown veil + READY glow tell the
-               player exactly when the next blink is live. ---- */}
-      <button
-        type="button"
-        className="touch-btn dash dash-dock touch-btn-cd"
-        onPointerDown={(e) => { e.preventDefault(); onDash(); }}
-        aria-label="Blink step"
-      >
-        <UiIcon name="bolt" size={22} />
-        <span className="touch-btn-label">DASH</span>
-        <div ref={dashCdFill} className="cd-veil" style={{ height: "0%", opacity: "0" }} aria-hidden />
-        <span className="cd-ready" aria-hidden />
-      </button>
-
-      {/* ---- attack zone (bottom-right): FIRE at the thumb home, SPELL to
-           its left, SURGE stacked above FIRE — one compact thumb arc with
-           guaranteed clearance from the top-right utility row (Patch 10.0
-           overlap fix: nothing vertical-stacks against this cluster). ---- */}
+      {/* ---- attack zone (bottom-right) — V1.1 three-row thumb grid:
+               DASH spans the top (right-aligned — middle-right, above Weave),
+               VOLLEY sits beside SURGE (the Weave button) above SPELL/FIRE,
+               FIRE at the thumb home. One compact arc with guaranteed
+               clearance from the top-right utility row. ---- */}
       <div className="attack-cluster">
+        <button
+          type="button"
+          className="touch-btn dash atk-dash touch-btn-cd"
+          onPointerDown={(e) => { e.preventDefault(); onDash(); }}
+          aria-label="Blink step"
+        >
+          <UiIcon name="bolt" size={22} />
+          <span className="touch-btn-label">DASH</span>
+          <div ref={dashCdFill} className="cd-veil" style={{ height: "0%", opacity: "0" }} aria-hidden />
+          <span className="cd-ready" aria-hidden />
+        </button>
+
+        <button
+          type="button"
+          className={`touch-btn volley${volleying ? " firing" : ""}${autoMode ? " is-auto" : ""}`}
+          ref={volleyRoot}
+          onPointerDown={volleyDown}
+          onPointerUp={volleyUp}
+          onPointerLeave={volleyUp}
+          onPointerCancel={volleyUp}
+          aria-label="Arcane volley — hold to loose bolts at the nearest foe"
+          aria-pressed={volleying}
+        >
+          <UiIcon name="wave" size={24} />
+          <span className="touch-btn-label">VOLLEY</span>
+        </button>
+
         <button
           type="button"
           className={`touch-btn surge atk-surge${autoMode ? " is-auto" : ""}`}
@@ -334,6 +435,7 @@ export function TouchControls({
             {surgeReady ? "SURGE" : `${Math.round(weaveLocal * 100)}%`}
           </span>
         </button>
+
         <button
           type="button"
           className={`touch-btn spell-btn touch-btn-cd${autoMode ? " is-auto" : ""}`}
@@ -353,6 +455,7 @@ export function TouchControls({
           <span className="touch-btn-label">SPELL</span>
           <div ref={spellBtnCd} className="cd-veil" style={{ height: "0%", opacity: "0" }} aria-hidden />
         </button>
+
         <button
           type="button"
           className={`touch-btn fire-btn${firing ? " firing" : ""}${autoMode ? " is-auto" : ""}`}
@@ -470,6 +573,6 @@ export function TouchControls({
           );
         })}
       </div>
-    </>
+    </div>
   );
 }

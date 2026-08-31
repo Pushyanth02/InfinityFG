@@ -763,7 +763,7 @@ export function poolBias(seed: string): Record<EnemyType, number> {
 export const WORLD_W = 2560;
 export const WORLD_H = 1600;
 
-export interface ArenaRect { x: number; y: number; w: number; h: number }   // world px
+export interface ArenaRect { x: number; y: number; w: number; h: number; grad?: CanvasGradient | null }   // world px (grad: V1.1 cached body fill)
 export interface ArenaCircle { x: number; y: number; r: number; grad?: CanvasGradient | null }  // world px
 export interface Fountain { x: number; y: number; kind: "health" | "mana"; used: boolean; grad?: CanvasGradient | null }
 
@@ -969,6 +969,17 @@ export interface GameSettings {
   textScale: number;      // 0.75..1.5 announcement text scale multiplier
   reduceFlash: boolean;   // dampen the red damage vignette / hit flashes
   highContrast: boolean;  // high-contrast HUD panels + banner text
+  /* V1.1 — TOUCH CONTROL CUSTOMIZATION (Settings → Touch controls; every
+     option applies live to the in-run touch layer and persists):
+     touchScale sizes every control; touchOpacity dims the whole layer;
+     stickMode picks the movement model (floating: the stick spawns under
+     your finger — 1:1 directional control anywhere on screen; docked: the
+     classic corner-anchored stick); handSide mirrors the thumb zones for
+     left-handed players. */
+  touchScale: number;               // 0.75..1.4 control size multiplier
+  touchOpacity: number;             // 0.4..1 control layer opacity
+  stickMode: "floating" | "docked"; // movement stick origin model
+  handSide: "right" | "left";       // thumb-zone mirror for left-handed play
 }
 
 export const DEFAULT_SETTINGS: GameSettings = {
@@ -985,6 +996,12 @@ export const DEFAULT_SETTINGS: GameSettings = {
   textScale: 1,
   reduceFlash: false,
   highContrast: false,
+  /* V1.1 — touch customization defaults: full size, full opacity, the
+     floating stick (the directional-control fix), right-handed layout. */
+  touchScale: 1,
+  touchOpacity: 1,
+  stickMode: "floating",
+  handSide: "right",
 };
 
 export interface MetaSave {
