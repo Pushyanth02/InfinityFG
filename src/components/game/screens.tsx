@@ -280,11 +280,11 @@ export function MenuScreen({ chapter, chapterSubtitle, onStart }: MenuProps) {
         </button>
       </div>
 
-      <div className="relative z-10 flex flex-col items-center text-center px-6 max-h-full overflow-y-auto py-8">
+      <div className="relative z-10 w-full flex flex-col items-center text-center px-6 max-h-full overflow-y-auto py-8">
         <div className="anim-fade-up flex items-center gap-3 text-[#9a7bff]">
-          <span className="h-px w-16 bg-gradient-to-r from-transparent to-[#9a7bff]" />
+          <span className="h-px w-16 bg-linear-to-r from-transparent to-[#9a7bff]" />
           <span className="text-[12px] font-bold uppercase tracking-[0.42em]">Rift Survivor</span>
-          <span className="h-px w-16 bg-gradient-to-l from-transparent to-[#9a7bff]" />
+          <span className="h-px w-16 bg-linear-to-l from-transparent to-[#9a7bff]" />
         </div>
 
         <h1 className="anim-fade-up-1 font-display title-glow text-[#f5e3b3] font-black leading-none mt-4 text-[clamp(52px,9vw,110px)] tracking-[0.08em]">
@@ -506,7 +506,8 @@ export function ReliquaryScreen() {
     <div className="absolute inset-0 flex items-center justify-center">
       <MenuBackdrop />
       <div className="rune-frame absolute inset-0 pointer-events-none"><Corners /></div>
-      <div className="relative z-10 w-full max-w-4xl px-4 sm:px-6 max-h-full overflow-y-auto py-6 sm:py-8">
+      <div className="relative z-10 w-full h-full overflow-y-auto py-6 sm:py-8 flex flex-col items-center">
+        <div className="w-full max-w-4xl px-4 sm:px-6 my-auto">
         <div className="flex items-end justify-between anim-fade-up">
           <div>
             <div className="text-[11px] font-bold uppercase tracking-[0.34em] text-[#9a7bff]">Between trials</div>
@@ -561,6 +562,7 @@ export function ReliquaryScreen() {
 
         <div className="mt-6 sm:mt-7 flex justify-center anim-fade-up-3">
           <button onClick={onBack} className="btn-ghost px-8 py-3">Return to the Gate</button>
+        </div>
         </div>
       </div>
     </div>
@@ -913,8 +915,8 @@ export function RewardOverlay({ rewards, tiers, wave, onPick }: {
   onPick: (id: string) => void;
 }) {
   return (
-    <div className="absolute inset-0 z-30 flex items-center justify-center px-4" style={{ background: "rgba(6,4,14,0.82)" }}>
-      <div className="text-center w-full max-w-3xl max-h-full overflow-y-auto py-6">
+    <div className="absolute inset-0 z-30 flex flex-col items-center overflow-y-auto px-4" style={{ background: "rgba(6,4,14,0.82)" }}>
+      <div className="text-center w-full max-w-3xl py-6 my-auto">
         <div className="anim-fade-up text-[11px] font-bold uppercase tracking-[0.38em] text-[#6bf0c2]">Wave {wave} cleared — the rift owes you</div>
         <h2 className="anim-fade-up font-display text-4xl md:text-5xl font-black text-[#f5e3b3] tracking-wide mt-1" style={{ textShadow: "0 0 30px rgba(107,240,194,0.35)" }}>
           CLAIM YOUR TRIBUTE

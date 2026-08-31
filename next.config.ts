@@ -23,8 +23,6 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   reactStrictMode: false,
-  /* allow the sandbox preview proxy to fetch dev assets without warnings */
-  allowedDevOrigins: ["space-z.ai", "*.space-z.ai"],
 };
 
 export default nextConfig;

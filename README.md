@@ -1,10 +1,10 @@
 <div align="center">
 
-<img src="public/art/banner.png" alt="Archmage — Rift Survivor key art banner: an archmage facing a gold-and-violet rift portal" width="880" />
+<img src="public/art/banner.png" alt="Archmage — Rift Survivor: an archmage facing a gold-and-violet rift portal" width="880" />
 
 # ⚔️ ARCHMAGE
 
-### *Rift Survivor — Version 1.1 “True Direction”*
+### *Rift Survivor — Version 1.1 "True Direction"*
 
 A **pure arcade roguelike** that runs entirely in the browser.
 No accounts · no servers · no loading screens — every spell, resonance,
@@ -13,7 +13,6 @@ monster and note of the score is generated at runtime.
 [![Version](https://img.shields.io/badge/version-1.1_%E2%80%9CTrue_Direction%E2%80%9D-f5c96b?style=for-the-badge)](./CHANGELOG.md)
 [![Engine](https://img.shields.io/badge/engine-Canvas%202D%20%C2%B7%2060%20fps-9a7bff?style=for-the-badge)](#%EF%B8%8F-tech-stack)
 [![Audio](https://img.shields.io/badge/audio-Web%20Audio%20%C2%B7%20fully%20synthesized-43e8d8?style=for-the-badge)](#-the-score)
-[![Assets](https://img.shields.io/badge/brand-icons%20%C2%B7%20banners%20%C2%B7%20one%20command-7ed957?style=for-the-badge)](#%EF%B8%8F-design-notes)
 [![License](https://img.shields.io/badge/license-MIT-ff4d6b?style=for-the-badge)](./LICENSE)
 
 **🜂 13 elements · 🜛 78 resonances · 👑 5 shuffled tyrants · 🌊 50 waves + endless**
@@ -42,18 +41,16 @@ no cutscenes, no story, no filler.
 | 📈 **The attunement curve** | *Your magic grows with the rift* — spell power compounds ×1.055 per wave against a softened enemy curve. Nothing is a bullet sponge; difficulty comes from pressure, not HP walls. |
 | 🎯 **The weave hunts the marked** | Elite foes (Blazing / Swift / Bulwark / Leech) take **+35 % spell damage** and read gold on impact — marked prey, never walls. |
 | 👑 **Tyrants that scale with the act** | Boss HP rides the same curve as your power, so every tenth-wave duel holds its hit-count wherever the shuffle places it. Five genuinely distinct minds: stampede charger, shockwave juggernaut, blade dancer, blink fortress, apex storm. |
-| 💎 **Strict one-drop-per-wave** | Each wave fields **exactly one** drop type — a spell tear, a heart (25 % mend), a resonance orb, or the every-5-wave tribute gate. Unclaimed orbs dissolve at wave end. Scheduled tears carry a flat 19 % reabsorb chance. |
-| 🧭 **Loadout-aware loot pools** | The drop economy **reads your equipped inventory live**. Standard loadout (3 base spells): resonances, boons, new spells and transmutations all stay in the pool. **Apex loadout** (2 resonance spells bound): resonances and spell upgrades are removed instantly — only new base spells and boons remain. |
-| 🎲 **Fair-cycling RNG** | Spell tears draw from a seeded **shuffle-bag** (every eligible element tears once per cycle before any repeat); tribute boons and transmutations draft with `1/(1+n)` recency weights so every eligible card surfaces. Strict drop *rates* untouched — only the drafts got fair. |
+| 💎 **Strict one-drop-per-wave** | Each wave fields **exactly one** drop type — a spell tear, a heart (25 % mend), a resonance orb, or the every-5-wave tribute gate. |
+| 🎲 **Fair-cycling RNG** | Spell tears draw from a seeded **shuffle-bag**; tribute boons and transmutations draft with `1/(1+n)` recency weights so every eligible card surfaces. |
 | 🜂 **The sacrifice merge** | Resonance orbs demand a tithe: sacrifice **exactly two** bound spells; they fuse into one merged slot that casts both in succession. |
-| ✨ **Aether glyphs** | Foes shed glyphs — every pickup registers on the live HUD counter (`+N` beside your bank) and pays out post-game at 25 % conversion. |
-| 🏛️ **The Reliquary** | Spend glyphs on four permanent tracks — Vitality / Power / Focus / Swiftness — six levels each. Every boost applies live from your next run's first breath. |
-| 📖 **The Arcanum** | Spellbook, 78-resonance codex, **first-kill bestiary**, tyrant gallery and lifetime records — behind rerollable procedural cover sigils. |
-| ⚖️ **Rift Mercy** | Opt-in per-death assist ladder (Hades-style dignity): tiers bank with every fall, clear on triumph; manual tier selection in Settings with a live HUD readout. |
-| 🧠 **The Fateweaver** | Archmage Mode autopilot: line-of-sight-disciplined casting, resonance hunting, surge discipline, context-aware boon picks. Press `T` and watch a clean run. |
-| 📢 **Compact centered announcements** | Every in-game call — wave plates, spawn whispers, boss alerts, rift events — renders through one small plate at the **exact center** of the screen. Non-intrusive by design on every device; resize it in Settings. |
-| ♿ **Accessibility suite** | UI size (75–150 %), announcement text size (75–150 %), reduce flashes (dampens the red damage vignette), high-contrast HUD, screen-shake toggle, damage-number toggle, three-level aim assist, Rift Mercy assist ladder, and full `prefers-reduced-motion` respect — all live, no restart. |
-| 🎼 **The score** | Fully synthesized (Web Audio API) and **mixed loud** through a master compressor — an act-tinted drone with plucks that calms in the menu, sharpens in combat, and the instant a tyrant enters: sting → driving ostinato → tritone war-drone at half health → instant collapse on the kill. |
+| ✨ **Aether glyphs** | Foes shed glyphs — every pickup registers on the live HUD counter and pays out post-game at 25 % conversion. |
+| 🏛️ **The Reliquary** | Spend glyphs on four permanent tracks — Vitality / Power / Focus / Swiftness — six levels each. |
+| 📖 **The Arcanum** | Spellbook, 78-resonance codex, **first-kill bestiary**, tyrant gallery and lifetime records. |
+| ⚖️ **Rift Mercy** | Opt-in per-death assist ladder (Hades-style dignity): tiers bank with every fall, clear on triumph. |
+| 🧠 **The Fateweaver** | Archmage Mode autopilot: line-of-sight-disciplined casting, resonance hunting, surge discipline. Press `T` and watch a clean run. |
+| ♿ **Accessibility suite** | UI size, announcement text size, reduce flashes, high-contrast HUD, screen-shake toggle, damage-number toggle, aim assist, full `prefers-reduced-motion` respect — all live, no restart. |
+| 🎼 **The score** | Fully synthesized (Web Audio API) — an act-tinted drone with plucks that calms in the menu, sharpens in combat, and the instant a tyrant enters: sting → driving ostinato → tritone war-drone at half health → instant collapse on the kill. |
 
 ## 🎮 Controls
 
@@ -69,80 +66,52 @@ no cutscenes, no story, no filler.
 | `P` / `Esc` | Pause |
 | `M` | Mute |
 
-📱 Touch devices get a **twin-thumb layer with a floating analog stick**
-(drag anywhere — the stick anchors at your fingertip and maps it 1:1, every
-angle, docked mode selectable), a hold-to-FIRE button with auto-targeting,
-a hold-to-VOLLEY button (homing bolts), SPELL cycle, DASH and SURGE —
-**every button carries live cooldown veils and aether-cost badges**, and the
-whole layer is customizable in Settings: control size (75–140 %), opacity,
-stick model and left/right handedness. Portrait phones get a rotate guard;
-the landing page carries a **fullscreen icon in the top-right corner** that
-works on any device.
+📱 Touch devices get a **twin-thumb layer with a floating analog stick**,
+hold-to-FIRE, hold-to-VOLLEY, SPELL cycle, DASH and SURGE — all with live
+cooldown veils and aether-cost badges, customizable in Settings.
 
-## ✨ Game Feel & Animation
+## ⚙️ Tech Stack
 
-The game is tuned like an action game, not a spreadsheet:
-
-- **Per-element projectile silhouettes** — Pyroclasm flies as a layered comet
-  with a streaming flame tail, Gravefrost as a faceted sliver with a
-  refracted core line, Null Rift as a black heart wrapped in rotating
-  accretion arms, Crimson Requiem as a barbed javelin trailing blood mist.
-- **Resonance detonations bloom** — triple expanding rings in both element
-  colors plus the white seam, a 34-particle two-color storm, hit-stop and a
-  screen kick. The weave *sings* when two elements kiss.
-- **Cinematic impact feedback** — hit-stop on crits and boss kills, eased
-  camera shake, gold crit floaters, **gold-and-larger elite-marked damage
-  numbers**, and enrage moments carried purely by audio + light (no message
-  boxes ever interrupt combat).
-- **Fluid UI motion** — eased cubic-bezier HUD bars, staggered fade-up
-  panels, pulsing weave meters, drifting menu motes, rotating sigil rings.
-  All of it respects `prefers-reduced-motion`.
-- **Announcements that never block the eye** — every call (wave start, spawn
-  whisper, boss alert, shrine, surge) pops at the exact viewport center in a
-  compact plate with a short 3 % overshoot and a whisper-quiet fade, sized
-  by the Accessibility text-scale slider.
-- **A living arena** — bobbing foes with velocity lean, footstep dust, rift
-  shifts that rearrange the entire floor plan every five waves, ambient motes
-  tinted by the act.
-
-## ⚙️ Tech stack
-
-- **Next.js 16** (App Router) + **TypeScript 5** + **Tailwind CSS 4**
-- **Canvas 2D engine** (~5,600 lines): fixed-timestep simulation, dead-flag
-  entities with in-place compaction (zero per-frame allocation), squared-
-  distance hot paths, cached gradients, flow-field pathfinding, and a
-  throttled 30 Hz DOM-ref HUD (no React re-render on the hot path)
-- **Zustand** for UI state, **Web Audio API** for all sound
-- **localStorage** persistence — no database, no backend, no telemetry
+| Layer | Technology |
+| --- | --- |
+| **Framework** | Next.js 16 (App Router) + TypeScript 5 |
+| **Styling** | Tailwind CSS 4 |
+| **Game engine** | Canvas 2D (~5,600 lines): fixed-timestep simulation, dead-flag entities with in-place compaction, squared-distance hot paths, cached gradients, flow-field pathfinding |
+| **HUD** | Throttled 30 Hz DOM-ref layer (no React re-render on the hot path) |
+| **State** | Zustand for UI state |
+| **Audio** | Web Audio API — fully synthesized, zero audio files |
+| **Persistence** | localStorage — no database, no backend, no telemetry |
 
 ```
 src/
   game/
-    content.ts     # spells, resonances, enemies, bosses, biomes, meta save,
-                   #   the attunement + elite + tyrant scaling curves
+    content.ts     # spells, resonances, enemies, bosses, biomes, scaling curves
     engine.ts      # the simulation: waves, casts, merges, bosses, juice
     audio.ts       # procedural synth: adaptive score + every SFX voice
     evolutions.ts  # 22 spell transmutations, filtered to equipped spells
+    autopick.ts    # Fateweaver AI logic
     store.ts       # Zustand store (meta / settings / overlays)
   components/game/
-    GameShell.tsx  # HUD + canvas host + overlay wiring
-    screens.tsx    # menu, Reliquary, Arcanum, settings, pause, game over
-    overlays.tsx   # evolution / spell offer / sacrifice merge / end credits
+    GameShell.tsx   # HUD + canvas host + overlay wiring
+    screens.tsx     # menu, Reliquary, Arcanum, settings, pause, game over
+    overlays.tsx    # evolution / spell offer / sacrifice merge / end credits
     TouchControls.tsx, icons.tsx, GameErrorBoundary.tsx
+  lib/
+    utils.ts       # cn() — clsx + tailwind-merge utility
   app/
-    page.tsx       # the single route (client-only game shell)
-    layout.tsx     # icons, favicons, OG/Twitter cards, web manifest
-    globals.css    # the design system
+    page.tsx        # the single route (client-only game shell)
+    layout.tsx      # icons, favicons, OG/Twitter cards, web manifest
+    globals.css     # the design system
 scripts/
-    build-brand.mjs  # regenerates the whole icon/banner suite (bun run brand)
+    build-brand.mjs # regenerates the whole icon/banner suite (bun run brand)
 public/
     favicon.ico / favicon.svg / favicon-{16,32}.png / apple-touch-icon.png
     icon-{192,512}.png / maskable-icon.png / site.webmanifest / logo.svg
-    art/  # cover.png (menu backdrop) + og-image / twitter-card /
-          #   banner / preview + src/ (the two committed source paintings)
+    art/  # cover.png (menu backdrop), og-image, twitter-card,
+          #   banner, preview + src/ (source paintings)
 ```
 
-## 🚀 Getting started (VS Code friendly)
+## 🚀 Getting Started
 
 Requires [Bun](https://bun.sh) ≥ 1.1 (or npm/node — swap the commands
 accordingly).
@@ -152,40 +121,38 @@ bun install       # install dependencies
 bun run dev       # dev server on http://localhost:3000
 ```
 
-Recommended VS Code extensions are suggested automatically (ESLint, Tailwind
-IntelliSense, Prettier) — see `.vscode/extensions.json`. Format-on-save,
-ESLint auto-fix, LF endings and final-newline are preconfigured in
-`.vscode/settings.json`; `.vscode/tasks.json` adds the `dev` (background
-server), `lint`, `typecheck`, `brand` and `gates` tasks, and
-`.vscode/launch.json` debugs the game in Chrome against `localhost:3000`.
-
-### Quality gates
+### Quality Gates
 
 ```bash
 bun run lint        # ESLint (Next.js + TypeScript rules)
 bun run typecheck   # tsc --noEmit
 ```
 
+### Regenerate Brand Assets
+
+```bash
+bun run brand   # rebuilds every icon, favicon and banner from source art
+```
+
 ## 🌐 Deploy to GitHub Pages
 
-The repo ships a ready workflow (`.github/workflows/deploy.yml`):
+The repo ships two GitHub Actions workflows:
 
-1. Push this repo to GitHub (branch `main` — the workflow filter).
+### CI (`.github/workflows/ci.yml`)
+Runs on every push and pull request: lint → typecheck.
+
+### Deploy (`.github/workflows/deploy.yml`)
+Builds and deploys the static export to GitHub Pages:
+
+1. Push to `main` (or run the workflow manually).
 2. Repo **Settings → Pages → Source: GitHub Actions**.
-3. Push (or run the workflow manually). It installs, lints, type-checks,
-   builds the static export, **verifies `.nojekyll` and the brand suite**
-   landed in `out/`, and deploys — your game lands at
-   `https://<user>.github.io/<repo>/`.
+3. The workflow installs, lints, type-checks, builds the static export,
+   **verifies the brand suite and `.nojekyll`** landed in `out/`, and deploys —
+   your game lands at `https://<user>.github.io/<repo>/`.
 
-`public/.nojekyll` is committed on purpose: GitHub Pages would otherwise
-run Jekyll and starve the exported `_next/` directory. The workflow fails
-loudly if it ever goes missing.
+`public/.nojekyll` prevents Jekyll from starving the `_next/` directory.
 
-The static build runs in export mode with a base path matching your repo name
-(`BUILD_MODE=pages`, `BASE_PATH=/<repo>`); local dev and the standalone server
-build are unaffected.
-
-### Manual static build
+### Manual Static Build
 
 ```bash
 BUILD_MODE=pages BASE_PATH=/my-repo NEXT_PUBLIC_BASE_PATH=/my-repo \
@@ -207,32 +174,21 @@ bun run start
 Every sound is an oscillator — **zero audio files**. An act-tinted drone and
 plucked ladder calm down in the menu and sharpen with combat intensity; boss
 fights get their own three-arc theme (entry sting → enrage war-drone at half
-health → collapse on the kill), all summed through a master compressor so the
-mix reads loud and dramatic at any volume setting.
+health → collapse on the kill), all summed through a master compressor.
 
-## 🛠️ Design notes
+## 🛠️ Design Notes
 
 - **Two source paintings, then procedural.** The menu cover and the key-art
-  banners are the only committed raster art; everything else that wants
-  art — boss sigils, Arcanum covers — is seeded, deterministic SVG generated
-  at runtime. Same seed, same art; reroll for a new one.
-- **The brand suite is one command.** `bun run brand` (scripts/build-brand.mjs)
-  regenerates the favicon.ico (16/32/48), SVG favicon, apple-touch icon, PWA
-  icons (192/512/maskable), web manifest, Open Graph / Twitter / GitHub
-  banners and the menu cover from `public/art/src/` — sharp renders the
-  rift-gate sigil from parameterized SVG so every size stays pixel-crisp.
+  banners are the only committed raster art; everything else — boss sigils,
+  Arcanum covers — is seeded, deterministic SVG generated at runtime.
+- **The brand suite is one command.** `bun run brand` regenerates the favicon.ico,
+  SVG favicon, apple-touch icon, PWA icons, web manifest, Open Graph / Twitter /
+  GitHub banners and the menu cover from `public/art/src/`.
 - **Matched curves, not walls.** Player power and enemy HP ride curves of the
   same family; elites trade raw HP for a damage-taken bonus; bosses anchor to
-  your own growth. The result: magic always feels powerful, and death always
-  feels earned.
-- **Mandatory tributes, optional everything else.** The every-5-wave tribute
-  gate must be claimed (by design), but spell offers can be skipped and
-  merges preview before you commit.
+  your own growth.
 - **Bosses gain attacks, never just speed.** Phase two adds a new pattern or
   arm to every tyrant — the Dead Cells rule.
-- **Difficulty is visible.** An act threat meter fills the wave plate as the
-  tyrant approaches, and Rift Mercy's current value is always on the HUD
-  when enabled.
 
 ## 📜 License
 

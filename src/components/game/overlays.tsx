@@ -91,7 +91,7 @@ export function BossSigil({ boss, size = 120, animate = true }: { boss: BossDef;
 /* ============================================================================
    EvolutionOverlay — spell transmutation choice (act clear / rift shrine). */
 
-export function EvolutionOverlay({ choices, onPick }: { choices: EvolutionDef[]; onPick: (id: string) => void }) {
+export function EvolutionOverlay({ choices, onPickAction }: { choices: EvolutionDef[]; onPickAction: (id: string) => void }) {
   return (
     <div className="absolute inset-0 z-30 flex items-center justify-center px-4" style={{ background: "rgba(6,4,14,0.72)" }}>
       <div className="text-center w-full max-w-3xl">
@@ -104,7 +104,7 @@ export function EvolutionOverlay({ choices, onPick }: { choices: EvolutionDef[];
           {choices.map((evo, i) => {
             const base = SPELLS[evo.base];
             return (
-              <button key={evo.id} onClick={() => onPick(evo.id)} className={`boon-card evo-card p-5 text-left anim-fade-up-${i + 1}`}>
+              <button key={evo.id} onClick={() => onPickAction(evo.id)} className={`boon-card evo-card p-5 text-left anim-fade-up-${i + 1}`}>
                 <div className="flex items-center justify-between">
                   <span className="w-11 h-11 grid place-items-center border" style={{ color: base.color, borderColor: base.color + "55", background: base.color + "12" }}>
                     <SpellIcon id={evo.base} size={24} />
@@ -170,7 +170,7 @@ function EquippedSlotBadge({ entry, slot }: { entry: ElementId | { merged: Eleme
       <span className="text-[10px] font-black opacity-70">{slot + 1}</span>
       <span className="relative inline-flex">
         <span style={{ color: a.color }}><SpellIcon id={ids[0]} size={18} /></span>
-        <span className="ml-[-6px]" style={{ color: b.color }}><SpellIcon id={ids[1]} size={18} /></span>
+        <span className="-ml-1.5" style={{ color: b.color }}><SpellIcon id={ids[1]} size={18} /></span>
       </span>
       <span className="text-[12px] font-bold tracking-wide" style={{ color: "#ffe9ad" }}>
         {COMBOS[comboKey(ids[0], ids[1])]?.name ?? `${a.name}+${b.name}`}
@@ -181,15 +181,15 @@ function EquippedSlotBadge({ entry, slot }: { entry: ElementId | { merged: Eleme
 
 export interface SpellOfferOverlayProps {
   offer: SpellOfferState;
-  onPick: (slot: number, spellId: ElementId) => void;
-  onSkip: () => void;
+  onPickAction: (slot: number, spellId: ElementId) => void;
+  onSkipAction: () => void;
 }
 
-export function SpellOfferOverlay({ offer, onPick, onSkip }: SpellOfferOverlayProps) {
+export function SpellOfferOverlay({ offer, onPickAction, onSkipAction }: SpellOfferOverlayProps) {
   const [targetSlot, setTargetSlot] = useState(0);
   return (
-    <div className="absolute inset-0 z-30 flex items-center justify-center px-4" style={{ background: "rgba(6,4,14,0.78)" }}>
-      <div className="text-center w-full max-w-3xl max-h-full overflow-y-auto py-6">
+    <div className="absolute inset-0 z-30 flex flex-col items-center overflow-y-auto px-4" style={{ background: "rgba(6,4,14,0.78)" }}>
+      <div className="text-center w-full max-w-3xl py-6 my-auto">
         <div className="anim-fade-up text-[11px] font-bold uppercase tracking-[0.38em] text-[#7ed957]">A spell tear falls</div>
         <h2 className="anim-fade-up font-display text-4xl md:text-5xl font-black text-[#f5e3b3] tracking-wide mt-1" style={{ textShadow: "0 0 30px rgba(126,217,87,0.35)" }}>
           CLAIM A SPELL
@@ -224,7 +224,7 @@ export function SpellOfferOverlay({ offer, onPick, onSkip }: SpellOfferOverlayPr
             return (
               <button
                 key={id + i}
-                onClick={() => onPick(targetSlot, id)}
+                onClick={() => onPickAction(targetSlot, id)}
                 className={`boon-card evo-card p-5 text-left anim-fade-up-${i + 1}`}
                 style={isDrop ? { borderColor: sp.color + "aa" } : undefined}
               >
@@ -249,7 +249,7 @@ export function SpellOfferOverlay({ offer, onPick, onSkip }: SpellOfferOverlayPr
         </div>
         <div className="anim-fade-up-2 mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
           <button
-            onClick={onSkip}
+            onClick={onSkipAction}
             className="btn-ghost px-6 py-2.5 flex items-center gap-2 text-sm"
             title="Keep your current spells — the heal is already yours"
           >
@@ -280,7 +280,7 @@ export interface MergeOfferState {
   equipped: (ElementId | { merged: ElementId[] } | null)[];
 }
 
-export function MergeOverlay({ offer, onMerge }: { offer: MergeOfferState; onMerge: (slotA: number, slotB: number) => void }) {
+export function MergeOverlay({ offer, onMergeAction }: { offer: MergeOfferState; onMergeAction: (slotA: number, slotB: number) => void }) {
   const [picked, setPicked] = useState<number[]>([]);
   const toggle = (i: number) => {
     if (!offer.slots.includes(i)) return;
@@ -301,8 +301,8 @@ export function MergeOverlay({ offer, onMerge }: { offer: MergeOfferState; onMer
     }
   }
   return (
-    <div className="absolute inset-0 z-30 flex items-center justify-center px-4" style={{ background: "rgba(6,4,14,0.78)" }}>
-      <div className="text-center w-full max-w-3xl max-h-full overflow-y-auto py-6">
+    <div className="absolute inset-0 z-30 flex flex-col items-center overflow-y-auto px-4" style={{ background: "rgba(6,4,14,0.78)" }}>
+      <div className="text-center w-full max-w-3xl py-6 my-auto">
         <div className="anim-fade-up text-[11px] font-bold uppercase tracking-[0.38em] text-[#ffe9ad]">The resonance demands its tithe</div>
         <h2 className="anim-fade-up font-display text-4xl md:text-5xl font-black text-[#f5e3b3] tracking-wide mt-1" style={{ textShadow: "0 0 30px rgba(245,201,107,0.4)" }}>
           SACRIFICE TWO SPELLS
@@ -333,7 +333,7 @@ export function MergeOverlay({ offer, onMerge }: { offer: MergeOfferState; onMer
                         ? <UiIcon name="hourglass" size={20} />
                         : <span className="flex">
                             <SpellIcon id={entry.merged[0]} size={18} />
-                            <span className="ml-[-4px]"><SpellIcon id={entry.merged[1]} size={18} /></span>
+                            <span className="-ml-1.5"><SpellIcon id={entry.merged[1]} size={18} /></span>
                           </span>}
                   </span>
                   <span className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: mergeable ? "#7ed957" : "#6a5a99" }}>
@@ -364,7 +364,7 @@ export function MergeOverlay({ offer, onMerge }: { offer: MergeOfferState; onMer
         </div>
         <div className="mt-4">
           <button
-            onClick={() => picked.length === 2 && onMerge(picked[0], picked[1])}
+            onClick={() => picked.length === 2 && onMergeAction(picked[0], picked[1])}
             disabled={picked.length !== 2}
             className={`btn-gold px-8 py-3 ${picked.length !== 2 ? "opacity-40 cursor-not-allowed" : ""}`}
           >

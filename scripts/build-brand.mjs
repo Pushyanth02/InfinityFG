@@ -23,7 +23,7 @@
    ============================================================================ */
 
 import sharp from "sharp";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, writeFile, readFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -41,49 +41,10 @@ const GOLD_D = "#c98a2e";
 const VIOLET = "#9a7bff";
 
 /* ----------------------------------------------------------------- sigil --- */
-/* The Archmage mark: a rift gate (elongated diamond) torn by a gold bolt.
-     pad     — inset fraction (0.10 standard, 0.24 maskable safe zone)
-     stroke  — gate outline weight in the 512 viewBox
-     bg      — background rect ("none" = transparent)
-     corner  — background corner radius (0 = square full-bleed)             */
-function sigilSvg({ pad = 0.1, stroke = 30, bg = NIGHT, corner = 112, embers = true } = {}) {
-  const inset = 512 * pad;
-  const s = (512 - inset * 2) / 512; // content scale for this padding
-  const cx = 256, cy = 256;
-  const P = (x, y) => {
-    const px = cx + (x - cx) * s, py = cy + (y - cy) * s;
-    return [px.toFixed(1), py.toFixed(1)];
-  };
-  const [gx1, gy1] = P(256, 78), [gx2, gy2] = P(410, 256), [gx3, gy3] = P(256, 434), [gx4, gy4] = P(102, 256);
-  const [kx1, ky1] = P(256, 128), [kx2, ky2] = P(356, 256), [kx3, ky3] = P(256, 384), [kx4, ky4] = P(156, 256);
-  const [b1x, b1y] = P(265, 121), [b2x, b2y] = P(129, 275), [b3x] = P(220, 275), [b4x, b4y] = P(224, 384), [b5x, b5y] = P(386, 234), [b6x] = P(265, 234), [b7x, b7y] = P(283, 121);
-  const [e1x, e1y] = P(122, 118), [e2x, e2y] = P(396, 152), [e3x, e3y] = P(384, 396);
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-<defs>
-<linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
-<stop offset="0" stop-color="${GOLD_L}"/><stop offset="0.55" stop-color="${GOLD}"/><stop offset="1" stop-color="${GOLD_D}"/>
-</linearGradient>
-<linearGradient id="r" x1="0" y1="0" x2="0" y2="1">
-<stop offset="0" stop-color="${VIOLET}"/><stop offset="1" stop-color="#5a3fae"/>
-</linearGradient>
-<radialGradient id="halo" cx="0.5" cy="0.5" r="0.5">
-<stop offset="0" stop-color="${VIOLET}" stop-opacity="0.5"/><stop offset="0.75" stop-color="${VIOLET}" stop-opacity="0.12"/><stop offset="1" stop-color="${VIOLET}" stop-opacity="0"/>
-</radialGradient>
-</defs>
-${bg !== "none" ? `<rect width="512" height="512" rx="${corner}" fill="${bg}"/>` : ""}
-<circle cx="256" cy="256" r="${(230 * s + inset * 0.35).toFixed(1)}" fill="url(#halo)"/>
-<path d="M${gx1} ${gy1} L${gx2} ${gy2} L${gx3} ${gy3} L${gx4} ${gy4} Z" fill="none" stroke="url(#g)" stroke-width="${(stroke * s).toFixed(1)}" stroke-linejoin="miter" stroke-miterlimit="16"/>
-<path d="M${kx1} ${ky1} L${kx2} ${ky2} L${kx3} ${ky3} L${kx4} ${ky4} Z" fill="url(#r)" opacity="0.55"/>
-<path d="M${b1x} ${b1y} L${b2x} ${b2y} H${b3x} L${b4x} ${b4y} L${b5x} ${b5y} H${b6x} L${b7x} ${b7y} Z" fill="url(#g)"/>
-${embers ? `
-<circle cx="${e1x}" cy="${e1y}" r="${(7 * s).toFixed(1)}" fill="${GOLD_L}" opacity="0.9"/>
-<circle cx="${e2x}" cy="${e2y}" r="${(5 * s).toFixed(1)}" fill="${GOLD}" opacity="0.85"/>
-<circle cx="${e3x}" cy="${e3y}" r="${(6 * s).toFixed(1)}" fill="${VIOLET}" opacity="0.95"/>` : ""}
-</svg>`;
-}
+// Sigil is now provided via an external raster image (logo.png)
 
-async function renderSvg(svg, out, size) {
-  await sharp(Buffer.from(svg), { density: 300 })
+async function renderImage(buf, out, size) {
+  await sharp(buf)
     .resize(size, size, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
     .png({ compressionLevel: 9, palette: size <= 512 })
     .toFile(out);
@@ -95,7 +56,7 @@ async function renderSvg(svg, out, size) {
 async function buildIco(frames, out) {
   const pngs = [];
   for (const [size, buf] of frames) {
-    const png = await sharp(Buffer.from(buf), { density: 300 })
+    const png = await sharp(buf)
       .resize(size, size, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
       .png().toBuffer();
     pngs.push({ size, png });
@@ -119,48 +80,48 @@ async function buildIco(frames, out) {
 
 /* ------------------------------------------------------------- banners ----- */
 /* Title lockup composited over the AI key art with a night scrim so the
-   rasterized text is crisp and crawler-safe (no font dependency in the
-   raster). DejaVu Serif Bold ≈ the in-game Cinzel display voice. */
-function bannerOverlaySvg(w, h, { titleSize, subSize, chip = true, tagline = true } = {}) {
+   rasterized text is crisp and crawler-safe. We use an upgraded layout and
+   typography to match the new dynamic brand identity. */
+function bannerOverlaySvg(w, h, { titleSize, subSize, chip = true } = {}) {
   const cx = w / 2;
-  const titleY = Math.round(h * 0.30);
-  const subY = Math.round(h * 0.30 + titleSize * 0.52);
-  const tagY = h - 42;
+  const titleY = Math.round(h * 0.35);
+  const subY = Math.round(h * 0.35 + titleSize * 0.55);
+  const tagY = h - 48;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">
 <defs>
 <linearGradient id="scrim" x1="0" y1="0" x2="0" y2="1">
-<stop offset="0" stop-color="${NIGHT}" stop-opacity="0.92"/>
-<stop offset="0.45" stop-color="${NIGHT}" stop-opacity="0.30"/>
-<stop offset="1" stop-color="${NIGHT}" stop-opacity="0.78"/>
+<stop offset="0" stop-color="${NIGHT}" stop-opacity="0.85"/>
+<stop offset="0.5" stop-color="${NIGHT}" stop-opacity="0.2"/>
+<stop offset="1" stop-color="${NIGHT}" stop-opacity="0.95"/>
 </linearGradient>
 <linearGradient id="gline" x1="0" y1="0" x2="1" y2="0">
-<stop offset="0" stop-color="${GOLD}" stop-opacity="0"/><stop offset="0.5" stop-color="${GOLD}" stop-opacity="0.9"/><stop offset="1" stop-color="${GOLD}" stop-opacity="0"/>
+<stop offset="0" stop-color="${VIOLET}" stop-opacity="0"/><stop offset="0.3" stop-color="${VIOLET}" stop-opacity="0.8"/><stop offset="0.5" stop-color="${GOLD}" stop-opacity="1"/><stop offset="0.7" stop-color="${VIOLET}" stop-opacity="0.8"/><stop offset="1" stop-color="${VIOLET}" stop-opacity="0"/>
 </linearGradient>
 <filter id="glow" x="-25%" y="-25%" width="150%" height="150%">
-<feGaussianBlur stdDeviation="${(titleSize * 0.07).toFixed(1)}" result="b"/>
+<feGaussianBlur stdDeviation="${(titleSize * 0.08).toFixed(1)}" result="b"/>
 <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+</filter>
+<filter id="glowSub" x="-20%" y="-20%" width="140%" height="140%">
+<feGaussianBlur stdDeviation="${(subSize * 0.15).toFixed(1)}" result="b"/>
+<feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
 </filter>
 </defs>
 <rect width="${w}" height="${h}" fill="url(#scrim)"/>
-<text x="${cx}" y="${titleY}" text-anchor="middle" font-family="DejaVu Serif" font-weight="bold"
- font-size="${titleSize}" letter-spacing="${Math.round(titleSize * 0.16)}" fill="#f5e3b3" filter="url(#glow)">ARCHMAGE</text>
-<rect x="${cx - w * 0.26}" y="${subY - 4}" width="${w * 0.52}" height="2" fill="url(#gline)"/>
-<text x="${cx}" y="${subY + subSize + 2}" text-anchor="middle" font-family="DejaVu Sans" font-weight="bold"
- font-size="${subSize}" letter-spacing="${Math.round(subSize * 0.55)}" fill="#c9bdf0">RIFT SURVIVOR</text>
-${tagline ? `<text x="${cx}" y="${tagY}" text-anchor="middle" font-family="DejaVu Sans" font-weight="bold"
- font-size="${Math.max(16, Math.round(h * 0.032))}" letter-spacing="2" fill="#9a7bff">13 dark arts · 78 resonances · 5 shuffled tyrants · one rift</text>` : ""}
+<text x="${cx}" y="${titleY}" text-anchor="middle" font-family="'Pixel Demon', 'Courier New', monospace" font-weight="900"
+ font-size="${Math.round(titleSize * 0.95)}" letter-spacing="${Math.round(titleSize * 0.08)}" fill="#ff8a00" filter="url(#glow)">ARCHMAGE</text>
+<rect x="${cx - w * 0.4}" y="${subY - 8}" width="${w * 0.8}" height="2" fill="url(#gline)"/>
+<text x="${cx}" y="${subY + subSize}" text-anchor="middle" font-family="'Pixel Demon', 'Courier New', monospace" font-weight="900"
+ font-size="${Math.round(subSize * 0.9)}" letter-spacing="${Math.round(subSize * 0.4)}" fill="#ffc857" filter="url(#glowSub)">RIFT SURVIVOR</text>
 ${chip ? `
-<rect x="${cx - 132}" y="${tagY - 62}" width="264" height="36" rx="18" fill="rgba(245,201,107,0.12)" stroke="rgba(245,201,107,0.65)" stroke-width="1.5"/>
-<text x="${cx}" y="${tagY - 38}" text-anchor="middle" font-family="DejaVu Sans" font-weight="bold"
- font-size="15" letter-spacing="3" fill="${GOLD}">V 1 . 1 · TRUE DIRECTION</text>` : ""}
+<rect x="${cx - 160}" y="${tagY - 70}" width="320" height="40" rx="20" fill="rgba(255,138,0,0.15)" stroke="rgba(255,138,0,0.8)" stroke-width="2"/>
+<text x="${cx}" y="${tagY - 44}" text-anchor="middle" font-family="'Pixel Demon', 'Courier New', monospace" font-weight="bold"
+ font-size="14" letter-spacing="3" fill="#ff8a00">V 1 . 1 · TRUE DIRECTION</text>` : ""}
 </svg>`;
 }
 
-async function banner(src, out, w, h, opts = {}) {
-  const overlay = Buffer.from(bannerOverlaySvg(w, h, opts));
+async function banner(src, out, w, h) {
   await sharp(src)
-    .resize(w, h, { fit: "cover", position: sharp.strategy.attention })
-    .composite([{ input: overlay }])
+    .resize(w, h, { fit: "inside" })
     .png({ compressionLevel: 9, palette: true, quality: 90 })
     .toFile(out);
 }
@@ -168,32 +129,35 @@ async function banner(src, out, w, h, opts = {}) {
 /* --------------------------------------------------------------- build ----- */
 const keyart = path.join(SRC, "keyart.png");
 const coverSrc = path.join(SRC, "cover.png");
-if (!existsSync(keyart) || !existsSync(coverSrc)) {
-  console.error("Missing source art — expected public/art/src/{keyart,cover}.png");
+const posterSrc = path.join(SRC, "poster.jpg");
+const logoSrc = path.join(SRC, "logo.png");
+if (!existsSync(keyart) || !existsSync(coverSrc) || !existsSync(logoSrc)) {
+  console.error("Missing source art — expected public/art/src/{keyart,cover,logo}.png");
   process.exit(1);
 }
 
 const log = (k) => console.log("  ✓", k);
 
-/* icons — standard padding, rounded night chip */
-const std = Buffer.from(sigilSvg({}));
-const tiny = Buffer.from(sigilSvg({ pad: 0.08, stroke: 38, embers: false })); // bolder for ≤48px
-await writeFile(path.join(PUB, "favicon.svg"), sigilSvg({ pad: 0.06, corner: 96 }));
-await writeFile(path.join(PUB, "logo.svg"), sigilSvg({ bg: "none", corner: 0, pad: 0.04 }));
-log("favicon.svg / logo.svg");
+/* icons — using uploaded logo */
+const std = await readFile(logoSrc);
+const tiny = std;
 
-await renderSvg(tiny, path.join(PUB, "favicon-16x16.png"), 16);
-await renderSvg(tiny, path.join(PUB, "favicon-32x32.png"), 32);
+const b64 = std.toString("base64");
+const svgWrap = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><image href="data:image/png;base64,${b64}" width="512" height="512"/></svg>`;
+await writeFile(path.join(PUB, "favicon.svg"), svgWrap);
+await writeFile(path.join(PUB, "logo.svg"), svgWrap);
+await writeFile(path.join(PUB, "logo.png"), std);
+log("favicon.svg / logo.svg / logo.png");
+
+await renderImage(tiny, path.join(PUB, "favicon-16x16.png"), 16);
+await renderImage(tiny, path.join(PUB, "favicon-32x32.png"), 32);
 await buildIco([[16, tiny], [32, tiny], [48, std]], path.join(PUB, "favicon.ico"));
 log("favicon-16x16.png / favicon-32x32.png / favicon.ico (16/32/48)");
 
-await renderSvg(std, path.join(PUB, "apple-touch-icon.png"), 180);
-await renderSvg(std, path.join(PUB, "icon-192.png"), 192);
-await renderSvg(std, path.join(PUB, "icon-512.png"), 512);
-await renderSvg(
-  Buffer.from(sigilSvg({ pad: 0.24, corner: 0, embers: false })), // 80%-safe-zone, full-bleed
-  path.join(PUB, "maskable-icon.png"), 512,
-);
+await renderImage(std, path.join(PUB, "apple-touch-icon.png"), 180);
+await renderImage(std, path.join(PUB, "icon-192.png"), 192);
+await renderImage(std, path.join(PUB, "icon-512.png"), 512);
+await renderImage(std, path.join(PUB, "maskable-icon.png"), 512);
 log("apple-touch-icon (180) / icon-192 / icon-512 / maskable-512");
 
 await writeFile(path.join(PUB, "site.webmanifest"), JSON.stringify({
@@ -215,13 +179,13 @@ await writeFile(path.join(PUB, "site.webmanifest"), JSON.stringify({
 log("site.webmanifest");
 
 /* banners — every social/preview shape the game ships */
-await banner(keyart, path.join(ART, "og-image.png"), 1200, 630, { titleSize: 108, subSize: 30 });
+await banner(posterSrc, path.join(ART, "og-image.png"), 1200, 630);
 log("art/og-image.png (1200×630)");
-await banner(keyart, path.join(ART, "twitter-card.png"), 1200, 600, { titleSize: 100, subSize: 28 });
+await banner(posterSrc, path.join(ART, "twitter-card.png"), 1200, 600);
 log("art/twitter-card.png (1200×600)");
-await banner(keyart, path.join(ART, "banner.png"), 1280, 640, { titleSize: 104, subSize: 29, tagline: false });
+await banner(posterSrc, path.join(ART, "banner.png"), 1280, 640);
 log("art/banner.png (1280×640 — GitHub social preview)");
-await banner(keyart, path.join(ART, "preview.png"), 1600, 900, { titleSize: 128, subSize: 36 });
+await banner(posterSrc, path.join(ART, "preview.png"), 1600, 900);
 log("art/preview.png (1600×900)");
 
 /* cover — the ONE menu backdrop; true PNG, darkened to sit behind the menu */

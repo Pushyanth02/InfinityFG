@@ -639,7 +639,7 @@ export default function GameShell() {
           >
           {/* vitals — scaled by the HUD-scale setting (default 0.9) */}
           <div className="hud-side hud-side-l flex justify-start">
-            <div className="hud-vitals rune-panel px-4 py-3 w-[248px] pointer-events-none">
+            <div className="hud-vitals rune-panel px-4 py-3 w-62 pointer-events-none">
             <div className="flex items-baseline justify-between">
               <span className="hud-vitals-title font-display font-bold text-[15px] tracking-[0.18em] text-[#f5e3b3]">ARCHMAGE</span>
               <span ref={timeText} className="text-[12px] font-bold text-[#8f7bff] tabular-nums">0:00</span>
@@ -702,7 +702,7 @@ export default function GameShell() {
             </div>
             <div ref={bossWrap} className="mt-2 w-full transition-opacity duration-300" style={{ opacity: 0, display: "none" }}>
               <div ref={bossLabel} className="text-[11px] font-display font-bold tracking-[0.3em] text-[#ff8ba0] uppercase">Rift Tyrant</div>
-              <div className="bar mx-auto mt-1 h-[10px] w-[320px] max-w-full border-[rgba(255,77,107,0.5)]">
+              <div className="bar mx-auto mt-1 h-2.5 w-[320px] max-w-full border-[rgba(255,77,107,0.5)]">
                 <div ref={bossFill} className="bar-fill" style={{ width: "100%", background: "linear-gradient(90deg, #7a1028, #ff4d6b)", boxShadow: "0 0 12px rgba(255,77,107,0.6)" }} />
               </div>
             </div>
@@ -781,7 +781,7 @@ export default function GameShell() {
                         <span ref={(el) => { slotEvos.current[i] = el; }} className="slot-evo" title="Merged">⧉</span>
                         <span className="spell-icon flex items-center">
                           <span style={{ color: a.color }}><SpellIcon id={ids[0]} size={18} /></span>
-                          <span className="ml-[-4px]" style={{ color: b.color }}><SpellIcon id={ids[1]} size={18} /></span>
+                          <span className="-ml-1" style={{ color: b.color }}><SpellIcon id={ids[1]} size={18} /></span>
                         </span>
                         <span ref={(el) => { slotCosts.current[i] = el; }} className="absolute bottom-0.5 left-1/2 -translate-x-1/2 text-[9.5px] font-black tabular-nums text-[#ffe9ad]">{totalCost}</span>
                         <div ref={(el) => { slotCds.current[i] = el; }} className="cd-overlay" />
@@ -922,13 +922,13 @@ export default function GameShell() {
         />
       )}
       {phase === "evolution" && evolutions && (
-        <EvolutionOverlay choices={evolutions} onPick={chooseEvolution} />
+        <EvolutionOverlay choices={evolutions} onPickAction={chooseEvolution} />
       )}
       {phase === "spelloffer" && spellOffer && (
-        <SpellOfferOverlay offer={spellOffer} onPick={chooseSpellOffer} onSkip={skipSpellOffer} />
+        <SpellOfferOverlay offer={spellOffer} onPickAction={chooseSpellOffer} onSkipAction={skipSpellOffer} />
       )}
       {phase === "mergeoffer" && mergeOffer && (
-        <MergeOverlay offer={mergeOffer} onMerge={chooseMerge} />
+        <MergeOverlay offer={mergeOffer} onMergeAction={chooseMerge} />
       )}
       {phase === "paused" && !settingsOpen && (
         <PauseOverlay
